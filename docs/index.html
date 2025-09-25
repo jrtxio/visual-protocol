@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDS协议学习平台 - 15分钟极速掌握</title>
+    <meta name="description" content="专业汽车诊断协议教育平台：零基础15分钟掌握ISO-14229标准，实时演示、交互练习、实战工具">
+    <meta name="keywords" content="UDS协议,汽车诊断,ISO-14229,故障码,OBD-II,ECU诊断">
+    
+    <!-- PWA Configuration -->
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="assets/images/icon-192.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="assets/css/animations.css">
+    <link rel="stylesheet" href="assets/css/responsive.css">
+
+    <!-- Performance Preconnect -->
+    <link rel="dns-prefetch" href="//fonts.googleapis.com">
+    <link rel="preconnect" href="//fonts.googleapis.com" crossorigin>
+</head>
+
+<body itemscope itemtype="https://schema.org/WebApplication">
+    <!-- Progress Bar -->
+    <div class="loading-bar" id="loadingBar">
+        <div class="loading-progress" id="loadingProgress"></div>
+    </div>
+
+    <!-- App Container -->
+    <div class="app-container">
+        <header class="app-header" role="banner">
+            <h1 class="title" itemprop="name">🚗 UDS协议学习平台</h1>
+            <p class="subtitle" itemprop="description">15分钟掌握汽车诊断核心技能</p>
+            
+            <!-- Dynamic Progress -->
+            <div class="progress-container">
+                <div class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <span class="progress-text" id="progressText">学习进度：0%</span>
+            </div>
+        </header>
+
+        <nav class="app-nav" role="navigation" aria-label="主要内容">
+            <ul class="tab-list" role="tablist">
+                <li role="presentation">
+                    <button class="tab-btn active" 
+                            role="tab" 
+                            aria-selected="true" 
+                            aria-controls="basics-tab"
+                            data-tab="basics">
+                        🎯 基础入门
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button class="tab-btn" 
+                            role="tab" 
+                            aria-selected="false" 
+                            aria-controls="services-tab"
+                            data-tab="services">
+                        🔧 服务详解
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button class="tab-btn" 
+                            role="tab" 
+                            aria-selected="false" 
+                            aria-controls="demo-tab"
+                            data-tab="demo">
+                        🎮 实战演练
+                    </button>
+                </li>
+                <li role="presentation">
+                    <button class="tab-btn" 
+                            role="tab" 
+                            aria-selected="false" 
+                            aria-controls="quiz-tab"
+                            data-tab="quiz">
+                        🧠 知识测试
+                    </button>
+                </li>
+            </ul>
+        </nav>
+
+        <main class="app-main" role="main">
+            <!-- 基础概念 -->
+            <section class="tab-content active" id="basics-tab" role="tabpanel" aria-labelledby="basics-btn">
+                <header class="section-header">
+                    <h2>🎯 什么是UDS协议？</h2>
+                    <p>统一诊断服务（UDS）是ISO 14229标准，为汽车ECU提供标准化的诊断通信协议</p>
+                </header>
+
+                <div class="interactive-demo">
+                    <div class="device-demo">
+                        <div class="device client" aria-label="诊断工具">
+                            <span class="device-icon">🖥️</span>
+                            <span class="device-name">诊断客户端</span>
+                            <span class="device-status">就绪</span>
+                        </div>
+                        
+                        <div class="communication-flow">
+                            <div class="message-arrow" aria-label="通信流向">
+                                <span class="arrow-symbol">⟷</span>
+                                <div class="message-tooltip">UDS消息</div>
+                            </div>
+                        </div>
+                        
+                        <div class="device server" aria-label="车辆ECU">
+                            <span class="device-icon">🚗</span>
+                            <span class="device-name">车辆服务器</span>
+                            <span class="device-status">待测</span>
+                        </div>
+                    </div>
+
+                    <div class="protocol-diagram">
+                        <h3>🏗️ 协议架构</h3>
+                        <div class="protocol-stack">
+                            <div class="layer application" data-layer="应用层">UDS服务 0x10-0x37</div>
+                            <div class="layer session" data-layer="会话层">会话管理</div>
+                            <div class="layer transport" data-layer="传输层">ISO-TP协议</div>
+                            <div class="layer network" data-layer="网络层">CAN/Ethernet</div>
+                            <div class="layer datalink" data-layer="数据链路层">物理接口</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <h3>🎯 标准化接口</h3>
+                        <p class="feature-desc">统一诊断服务标准</p>
+                        <div class="feature-spec">8种核心服务</div>
+                    </div>
+                    <div class="feature-card">
+                        <h3>🔐 安全认证</h3>
+                        <p class="feature-desc">种子-密钥安全机制</p>
+                        <div class="feature-spec">Industry Standard</div>
+                    </div>
+                    <div class="feature-card">
+                        <h3>⚡ 高兼容性</h3>
+                        <p class="feature-desc">支持CAN、以太网等传输介素</p>
+                        <div class="feature-spec">Multi-Protocol</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 服务详解 -->
+            <section class="tab-content" id="services-tab" role="tabpanel" aria-labelledby="services-btn" hidden>
+                <header class="section-header">
+                    <h2>🔧 核心UDS服务详解</h2>
+                    <p>8种主要服务，150+应用场景完整覆盖</p>
+                </header>
+
+                <div class="services-grid" id="servicesGrid">
+                    <!-- Services populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- 实战演练 -->
+            <section class="tab-content" id="demo-tab" role="tabpanel" aria-labelledby="demo-btn" hidden>
+                <header class="section-header">
+                    <h2>🎮 实时通信演示</h2>
+                    <p>真实场景下的诊断通信流程</p>
+                </header>
+
+                <div class="demo-interface">
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="runDemo('session')" aria-label="开始诊断会话演示">
+                            🔑 建立会话 (0x10)
+                        </button>
+                        <button class="demo-btn" onclick="runDemo('security')" aria-label="开始安全访问演示">
+                            🔐 安全访问 (0x27)
+                        </button>
+                        <button class="demo-btn" onclick="runDemo('diagnostic')" aria-label="开始数据读取演示">
+                            📊 读取数据 (0x22)
+                        </button>
+                        <button class="demo-btn" onclick="resetDemo()" aria-label="重置演示状态">
+                            🔄 重置演示
+                        </button>
+                    </div>
+
+                    <div class="simulation-area" id="simulationArea">
+                        <div class="network-diagram">
+                            <div class="device client" id="clientDevice">
+                                <div class="status">等待命令</div>
+                                <div class="activity">-</div>
+                            </div>
+                            
+                            <div class="connection-line" id="connectionLine">
+                                <div class="message-flow" id="messageFlow"></div>
+                            </div>
+                            
+                            <div class="device server" id="serverDevice">
+                                <div class="status">待测状态</div>
+                                <div class="activity">-</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="log-area">
+                        <h3>📊 通信日志</h3>
+                        <div class="log-display" id="logDisplay">
+                            <div>系统就绪，等待操作...</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 知识测试 -->
+            <section class="tab-content" id="quiz-tab" role="tabpanel" aria-labelledby="quiz-btn" hidden>
+                <header class="section-header">
+                    <h2>🧠 知识测试系统</h2>
+                    <p>AI优化、即时反馈，强化记忆</p>
+                </header>
+
+                <div class="quiz-interface">
+                    <div class="quiz-progress">
+                        <div class="quiz-counter">
+                            进度: <span id="currentQuestion">1</span> / <span id="totalQuestions">8</span>
+                        </div>
+                        <div class="quiz-score">
+                            得分: <span id="currentScore">0</span>
+                        </div>
+                    </div>
+
+                    <div class="question-display" id="questionDisplay">
+                        <!-- Question populated by JavaScript -->
+                    </div>
+
+                    <div class="quiz-results" id="quizResults" hidden>
+                        <div class="result-summary">
+                            <h3>🎯 测试结果</h3>
+                            <div class="score-display" id="finalScore"></div>
+                            <div class="performance-review" id="performanceReview"></div>
+                        </div>
+                        <button class="quiz-btn" onclick="restartQuiz()">🔄 重新开始</button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="app-footer">
+            <div class="footer-content">
+                <p>&copy; 2024 UDS协议学习平台 | 让汽车诊断学习更简单</p>
+                <div class="version-info">v2.1.0 + GitHub Pages 🚀</div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+
+    <!-- Application Scripts -->
+    <script>
+        // Core Application State
+        let currentProgress = 0;
+        let demoRunning = false;
+        let quizState = {};
+
+        // UDS Services Data
+        const UDS_SERVICES = {
+            0x10: { name: "诊断会话控制", desc: "管理诊断会话状态", emoji: "🔑", examples: "默认/编程/扩展会话" },
+            0x11: { name: "ECU重置", desc: "重启或复位ECU", emoji: "🔄", examples: "软硬复位" },
+            0x27: { name: "安全访问", desc: "认证权限管理", emoji: "🔐", examples: "种子-密钥认证" },
+            0x28: { name: "通信控制", desc: "控制通信参数", emoji: "📡", examples: "消息开关" },
+            0x19: { name: "故障码管理", desc: "读取/清除DTC", emoji: "⚠️", examples: "P0300-P0456" },
+            0x22: { name: "数据读取", desc: "读取数据标识符", emoji: "📊", examples: "VIN/Firmware版本" },
+            0x31: { name: "例程控制", desc: "执行诊断例程", emoji: "⚙️", examples: "自检程序" },
+            0x34: { name: "数据下载", desc: "ECU刷写更新", emoji: "⬇️", examples: "固件更新" }
+        };
+
+        // Quiz Questions
+        const QUIZ_QUESTIONS = [
+            {
+                question: "UDS协议中诊断会话控制服务的ID是什么？",
+                options: ["A: 0x11", "B: 0x10", "C: 0x27", "D: 0x22"],
+                correct: 1,
+                explanation: "0x10是诊断会话控制服务的标准ID"
+            },
+            {
+                question: "安全访问服务（Security Access）的ID是多少？",
+                options: ["A: 0x10", "B: 0x11", "C: 0x27", "D: 0x19"],
+                correct: 2,
+                explanation: "0x27是安全访问服务的ID，用于实现访问认证"
+            },
+            {
+                question: "哪个服务用于读取ECU中的数据标识符(DID)？",
+                options: ["A: 0x19", "B: 0x22", "C: 0x11", "D: 0x34"],
+                correct: 1,
+                explanation: "0x22服务用于通过DID读取ECU中的数据"
+            }
+        ];
+
+        // Initialize Application
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeApp();
+            renderServices();
+            loadQuizQuestion();
+        });
+
+        // Application Init
+        function initializeApp() {
+            const savedProgress = localStorage.getItem('uds-progress');
+            if (savedProgress) {
+                currentProgress = parseInt(savedProgress);
+                updateProgress(currentProgress);
+            }
+            
+            // Hide loading screen
+            setTimeout(() => {
+                document.getElementById('loadingBar').style.display = 'none';
+            }, 1000);
+        }
+
+        // Tab Navigation
+        function showTab(tabName) {
+            event.preventDefault();
+            
+            // Update UI states
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.setAttribute('aria-selected', 'false');
+            });
+        
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+                content.hidden = true;
+            });
+
+            event.target.classList.add('active');
+            event.target.setAttribute('aria-selected', 'true');
+            
+            const targetContent = document.getElementById(`${tabName}-tab`);
+            targetContent.classList.add('active');
+            targetContent.hidden = false;
+            
+            // Update progress
+            updateProgress(getProgressValue(tabName));
+            
+            // Analytics
+            analyticsTrack('tab_view', { tab: tabName });
+        }
+
+        function updateProgress(value) {
+            currentProgress = value;
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            
+            progressFill.style.width = `${value}%`;
+            progressText.textContent = `学习进度：${value}%`;
+            
+            localStorage.setItem('uds-progress', value);
+        }
+
+        function getProgressValue(tab) {
+            const progressMap = { basics: 25, services: 50, demo: 75, quiz: 100 };
+            return progressMap[tab] || 0;
+        }
+
+        // Services Rendering
+        function renderServices() {
+            const container = document.getElementById('servicesGrid');
+            container.innerHTML = '';
+
+            Object.entries(UDS_SERVICES).forEach(([id, service]) => {
+                const card = createServiceCard(id, service);
+                container.appendChild(card);
+            });
+        }
+
+        function createServiceCard(id, service) {
+            const card = document.createElement('div');
+            card.className = 'service-card';
+            card.innerHTML = `
+                <div class="service-icon">${service.emoji}</div>
+                <h3 class="service-name">${service.name}</h3>
+                <p class="service-desc">${service.desc}</p>
+                <div class="service-id">ID: 0x${parseInt(id).toString(16).toUpperCase()}</div>
+                <div class="service-examples">${service.examples}</div>
+            `;
+            
+            card.addEventListener('click', () => showServiceDetail(id, service));
+            return card;
+        }
+
+        function showServiceDetail(id, service) {
+            showNotification(`${service.emoji} ${service.name}`, service.desc, 'info');
+        }
+
+        // Demo Engine
+        function runDemo(type) {
+            if (demoRunning) return;
+            
+            demoRunning = true;
+            resetDemoState();
+            
+            const demoScript = {
+                session: [
+                    { time: 0, client: '发送0x1001...', server: '处理中', message: '到达诊断会话请求' },
+                    { time: 1500, client: '等待响应...', server: '返回0x5001...', message: '会话建立成功' },
+                    { time: 3000, client: '进入诊断模式', server: '等待指令', message: '会话激活完成' }
+                ],
+                security: [
+                    { time: 0, client: '请求0x2701...', server: '生成种子', message: '开始安全认证' },
+                    { time: 2000, client: '计算密钥...', server: '等待验证', message: '计算校验和' },
+                    { time: 4000, client: '发送0x2702...', server: '验证通过', message: '安全解锁完成' }
+                ],
+                diagnostic: [
+                    { time: 0, client: '请求0x22F190...', server: '查找数据', message: '读取VIN码请求' },
+                    { time: 1500, client: '接收数据...', server: '返回VIN', message: '数据接收成功' },
+                    { time: 3000, client: '解析完成', server: '服务结束', message: 'VIN码：123456789' }
+                ]
+            };
+
+            runDemoSequence(demoScript[type]);
+        }
+
+        function runDemoSequence(sequence) {
+            const clientDevice = document.getElementById('clientDevice');
+            const serverDevice = document.getElementById('serverDevice');
+            const messageFlow = document.getElementById('messageFlow');
+            const logDisplay = document.getElementById('logDisplay');
+
+            sequence.forEach(item => {
+                setTimeout(() => {
+                    updateDeviceStatus(clientDevice, item.client);
+                    updateDeviceStatus(serverDevice, item.server);
+                    updateMessageFlow(messageFlow, item.message);
+                    addLogEntry(logDisplay, item);
+                }, item.time);
+            });
+
+            setTimeout(() => {
+                demoRunning = false;
+                showNotification('演示完成', `${sequence[sequence.length-1].message}`, 'success');
+            }, sequence[sequence.length-1].time + 1000);
+        }
+
+        function resetDemo() {
+            demoRunning = false;
+            updateDeviceStatus(document.getElementById('clientDevice'), '等待命令');
+            updateDeviceStatus(document.getElementById('serverDevice'), '待测状态');
+            updateMessageFlow(document.getElementById('messageFlow'), '就绪');
+            
+            const logDisplay = document.getElementById('logDisplay');
+            logDisplay.innerHTML = '<div>系统重置，等待操作...</div>';
+        }
+
+        // Quiz System
+        function loadQuizQuestion() {
+            quizState = {
+                questions: QUIZ_QUESTIONS,
+                current: 0,
+                score: 0,
+                total: QUIZ_QUESTIONS.length
+            };
+            
+            displayCurrentQuestion();
+        }
+
+        function displayCurrentQuestion() {
+            const question = quizState.questions[quizState.current];
+            const container = document.getElementById('questionDisplay');
+            
+            if (!question) return;
+
+            container.innerHTML = `
+                <div class="question-text">${question.question}</div>
+                <div class="options-container">
+                    ${question.options.map((option, index) => `
+                        <button class="quiz-option" onclick="selectAnswer(${index})" aria-label="${option}">
+                            ${option}
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+            
+            updateQuizProgress();
+        }
+
+        function selectAnswer(index) {
+            const question = quizState.questions[quizState.current];
+            const isCorrect = index === question.correct;
+            
+            if (isCorrect) {
+                quizState.score++;
+                playSound('success');
+                showNotification('🎉 回答正确！', question.explanation, 'success');
+                updateStats();
+            } else {
+                playSound('error');
+                showNotification('❌ 回答错误', question.explanation, 'error');
+                shakeEffect(document.getElementById('questionDisplay'));
+            }
+
+            setTimeout(() => {
+                quizState.current++;
+                if (quizState.current >= quizState.total) {
+                    showQuizResults();
+                } else {
+                    displayCurrentQuestion();
+                }
+            }, 1500);
+        }
+
+        function showQuizResults() {
+            const score = quizState.score;
+            const percentage = Math.round((score / quizState.total) * 100);
+            
+            document.getElementById('questionDisplay').style.display = 'none';
+            const results = document.getElementById('quizResults');
+            results.hidden = false;
+            
+            document.getElementById('finalScore').textContent = `${score}/${quizState.total} (${percentage}%)`;
+            document.getElementById('performanceReview').textContent = getPerformanceReview(percentage);
+            
+            updateProgress(percentage);
+            localStorage.setItem('quiz-performance', JSON.stringify({
+                score: percentage,
+                date: new Date().toISOString(),
+                questions: quizState.total
+            }));
+
+            analyticsTrack('quiz_complete', { score: percentage, total: quizState.total });
+        }
+
+        // Utility Functions
+        function updateDeviceStatus(device, status) {
+            device.querySelector('.status').textContent = status;
+            device.classList.add('active-device');
+            setTimeout(() => device.classList.remove('active-device'), 500);
+        }
+
+        function updateMessageFlow(flow, message) {
+            flow.textContent = message;
+            flow.style.display = 'block';
+            flow.classList.add('message-animate');
+            setTimeout(() => {
+                flow.style.display = 'none';
+                flow.classList.remove('message-animate');
+            }, 3000);
+        }
+
+        function addLogEntry(log, message) {
+            const entry = document.createElement('div');
+            entry.innerHTML = `<span class="log-time">${new Date().toLocaleTimeString()}</span> ${message.message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        function showNotification(title, message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-title">${title}</div>
+                <div class="notification-message">${message}</div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('notification-show');
+            }, 100);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        function playSound(type) {
+            if (typeof navigator.vibrate === 'function') {
+                navigator.vibrate(type === 'success' ? [100, 50, 100] : [200, 100]);
+            }
+        }
+
+        function updateQuizProgress() {
+            document.getElementById('currentQuestion').textContent = quizState.current + 1;
+            document.getElementById('currentScore').textContent = quizState.score;
+        }
+
+        function updateStats() {
+            const totalSessions = parseInt(localStorage.getItem('total-sessions') || '0') + 1;
+            localStorage.setItem('total-sessions', totalSessions);
+        }
+
+        function analyticsTrack(event, data) {
+            console.log('📊 Analytics:', event, data);
+        }
+
+        function restartQuiz() {
+            const results = document.getElementById('quizResults');
+            const questionDisplay = document.getElementById('questionDisplay');
+            
+            results.hidden = true;
+            questionDisplay.style.display = 'block';
+            
+            quizState = {
+                questions: QUIZ_QUESTIONS,
+                current: 0,
+                score: 0,
+                total: QUIZ_QUESTIONS.length
+            };
+            
+            displayCurrentQuestion();
+        }
+
+        // Event Listeners
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab' && !e.target.classList.contains('tab-btn')) {
+                e.preventDefault();
+            }
+        });
+
+    </script>
+    
+    <style>
+    /* Additional minimal styles for immediate display */
+    .loading-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 3px;
+        background: rgba(255,255,255,0.3);
+        z-index: 1000;
+    }
+    .loading-progress {
+        height: 100%;
+        background: linear-gradient(90deg, #4CAF50, #45a049);
+        width: 0%;
+        transition: width 0.8s ease;
+        animation: loading 2s ease-in-out;
+    }
+    @keyframes loading {
+        0% { width: 0%; }
+        100% { width: 100%; }
+    }
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: rgba(0,0,0,0.9);
+        color: white;
+        padding: 15px 20px;
+        border-radius: 10px;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        z-index: 1001;
+        max-width: 300px;
+    }
+    .notification-show {
+        transform: translateX(0);
+    }
+    .notification-success { background: rgba(34, 197, 94, 0.9); }
+    .notification-error { background: rgba(239, 68, 68, 0.9); }
+    .notification-info { background: rgba(59, 130, 246, 0.9); }
+
+    /* Pitch-perfect mobile optimizations */
+    @media (max-width: 768px) {
+        .app-header { padding: 15px; }
+        .tab-list { flex-direction: column; }
+        .interactive-demo { flex-direction: column; }
+        .protocol-diagram { width: 100%; }
+    }
+</style>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"\nconst fs = require(''fs'');\nconst html = fs.readFileSync(''index.html'', ''utf8'');\nconsole.log(''HTML文件大小:'', (html.length / 1024).toFixed(1), ''KB'');\nconsole.log(''包含错误数:'', (html.match(/<script>.*<\\/script>/gs) || []).length, ''个script标签'');\nconsole.log(''包含style标签数:'', (html.match(/<style>.*<\\/style>/gs) || []).length, ''个style标签'');\n\")"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
