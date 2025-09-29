@@ -130,7 +130,7 @@ visual-protocol/
 
 **Visual Protocol Team**
 
-- 项目网站: [https://jrtxio.github.io/visual-uds](https://jrtxio.github.io/visual-uds)
+- 项目网站: [https://jrtxio.github.io/visual-protocol](https://jrtxio.github.io/visual-protocol)
 - GitHub: [@jrtxio](https://github.com/jrtxio)
 
 ## 🙏 致谢

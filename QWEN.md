@@ -15,7 +15,7 @@ Visual UDS 是一个交互式汽车诊断协议学习网站，旨在通过可视
 ## 项目结构
 
 ```
-visual-uds/
+visual-protocol/
 ├── index.html              # 主页面（初始版本）
 ├── docs/                   # GitHub Pages部署目录
 │   ├── index.html          # 主页面（生产版本）

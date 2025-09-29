@@ -3,7 +3,7 @@
 ## 📁 当前项目结构
 
 ```
-visual-uds/
+visual-protocol/
 ├── build.js                # 构建脚本
 ├── package.json            # NPM包配置
 ├── README.md               # 项目说明文档
