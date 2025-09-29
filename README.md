@@ -45,6 +45,7 @@
 
 ### 部署方式
 - **GitHub Pages**: 静态托管部署
+- **GitHub Actions**: 自动化构建和部署
 - **PWA支持**: 离线访问和安装支持
 - **零服务器依赖**: 纯静态文件部署
 
@@ -52,7 +53,7 @@
 
 ```bash
 # 克隆项目
-git clone https://github.com/yourusername/visual-protocol.git
+git clone https://github.com/jrtxio/visual-protocol.git
 
 # 进入项目目录
 cd visual-protocol
@@ -78,15 +79,17 @@ visual-protocol/
 │   │   ├── js/           # JavaScript文件
 │   │   └── images/       # 图像资源
 │   ├── protocols/         # 协议特定内容
-│   │   ├── uds.html      # UDS协议页面
-│   │   ├── doip.html     # DoIP协议页面 (待开发)
-│   │   ├── someip.html   # SOME/IP协议页面 (待开发)
-│   │   └── can.html      # CAN协议页面 (待开发)
+│   │   ├── uds/          # UDS协议页面
+│   │   ├── doip/         # DoIP协议页面 (待开发)
+│   │   ├── someip/       # SOME/IP协议页面 (待开发)
+│   │   └── can/          # CAN协议页面 (待开发)
 │   └── components/       # 可复用组件
-├── dist/                  # 构建输出目录
-├── docs/                  # GitHub Pages部署目录
+├── docs/                  # GitHub Pages部署目录 (构建后)
+├── .github/               # GitHub Actions配置
+│   └── workflows/
+│       └── deploy.yml     # 自动部署工作流
 ├── package.json           # Node.js配置文件
-├── build.js              # 构建脚本
+├── build.js               # 构建脚本
 ├── README.md             # 项目说明文档
 ├── LICENSE               # Apache 2.0许可证
 └── .gitignore            # Git忽略文件
@@ -127,6 +130,8 @@ visual-protocol/
 本项目采用 Apache 2.0 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
 
 ## 👥 作者
+
+**Visual Protocol Team**
 
 - 项目网站: [https://jrtxio.github.io/visual-protocol](https://jrtxio.github.io/visual-protocol)
 - GitHub: [@jrtxio](https://github.com/jrtxio)

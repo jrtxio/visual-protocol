@@ -1,57 +1,101 @@
-# Visual UDS - UDS协议学习平台
+# Visual Protocol - 交互式汽车协议学习平台
 
 ## 项目概述
 
-Visual UDS 是一个交互式汽车诊断协议学习网站，旨在通过可视化动画和交互式演示帮助初学者学习UDS（统一诊断服务，ISO 14229）协议。这是一个基于GitHub Pages部署的前端项目，采用纯HTML5/CSS3/JavaScript技术栈，无需任何框架依赖。
+**Visual Protocol** 是一个交互式汽车协议学习平台，旨在通过可视化动画和演示帮助工程师和技术人员学习各种汽车通信协议。该项目通过将复杂的汽车通信协议以直观的方式展现，降低学习门槛。
 
 ### 主要特点
-- **教育导向**：专为汽车诊断协议学习设计，让复杂的UDS协议变得直观易懂
-- **交互式演示**：提供实时UDS通信流程的可视化演示
-- **多模式学习**：包含基础知识讲解、交互演示、知识测试等多个模块
-- **响应式设计**：支持桌面、平板、手机等多设备访问
-- **深色/浅色主题**：支持主题切换，提供良好的用户体验
-- **PWA支持**：支持离线访问，安装为本地应用
+- **交互式演示**：通过动画演示协议通信流程
+- **实时可视化**：协议栈各层交互的实时演示
+- **多协议支持**：支持 UDS、DoIP、SOME/IP、CAN 等多种汽车协议
+- **响应式设计**：适配桌面、平板、手机等多设备访问
+- **深色/浅色主题**：提供护眼的深色模式
+- **PWA支持**：支持离线访问和安装为本地应用
+- **零框架依赖**：使用纯 HTML5/CSS3/JavaScript，无外部框架依赖
+
+### 当前支持的协议
+- **UDS协议** (统一诊断服务, ISO 14229) - 已完整实现
+
+### 计划支持的协议
+- **DoIP协议** (基于IP的诊断, ISO 13400)
+- **SOME/IP协议** (面向服务的中间件)
+- **CAN协议** (控制器局域网络, ISO 11898)
+
+## 技术架构
+
+### 前端技术
+- **纯HTML5/CSS3/JavaScript**：零外部框架依赖
+- **现代化CSS**：Flexbox/Grid, 自定义属性, 响应式设计
+- **ES6+特性**：模块化、箭头函数、模板字符串
+- **无障碍访问**：ARIA标签, 键盘导航支持
+
+### 部署方式
+- **GitHub Pages**：静态托管部署
+- **GitHub Actions**：自动化构建和部署
+- **零服务器依赖**：纯静态文件部署
 
 ## 项目结构
 
 ```
 visual-protocol/
-├── index.html              # 主页面（初始版本）
-├── docs/                   # GitHub Pages部署目录
-│   ├── index.html          # 主页面（生产版本）
-│   ├── manifest.json       # PWA配置文件
-│   ├── sw.js              # Service Worker（离线支持）
+├── src/                    # 源代码目录
+│   ├── index.html         # 主页面
 │   ├── assets/            # 静态资源
-│   │   ├── css/           # 样式文件
-│   │   │   └── main.css   # 主样式表
-│   │   ├── images/        # 图片资源
-│   │   └── js/           # JavaScript文件
-│   └── js/               # JavaScript模块
-│       ├── data/         # 数据文件
-│       └── modules/      # 功能模块
-├── CLAUDE.md              # Claude开发指导文档
-├── Prompt.md              # 项目开发需求文档
+│   │   ├── css/          # 样式文件
+│   │   ├── js/           # JavaScript文件
+│   │   └── images/       # 图像资源
+│   ├── protocols/         # 协议特定内容
+│   │   ├── uds/          # UDS协议页面
+│   │   ├── doip/         # DoIP协议页面 (待开发)
+│   │   ├── someip/       # SOME/IP协议页面 (待开发)
+│   │   └── can/          # CAN协议页面 (待开发)
+│   └── components/        # 可复用组件
+├── docs/                  # GitHub Pages部署目录 (构建后)
+├── .github/               # GitHub Actions配置
+│   └── workflows/
+│       └── deploy.yml     # 自动部署工作流
+├── package.json           # Node.js配置文件
+├── build.js               # 构建脚本
+├── README.md              # 项目说明文档
 ├── LICENSE                # Apache 2.0许可证
-└── QWEN.md               # 当前文档
+└── .gitignore             # Git忽略文件
 ```
 
-## 技术规格
+## 构建和运行
 
-### 前端技术
-- **HTML5**：语义化结构，支持PWA和可访问性
-- **CSS3**：现代化设计风格，渐变背景、毛玻璃效果、响应式布局
-- **JavaScript**：零外部依赖，实现所有交互逻辑
+### 开发环境设置
+```bash
+# 克隆项目
+git clone https://github.com/jrtxio/visual-protocol.git
 
-### 设计风格
-- **色彩方案**：蓝紫渐变主色调（#667eea → #764ba2），绿色强调色（#4CAF50）
-- **UI组件**：卡片式设计，圆角边框，阴影效果，渐变背景
-- **动画效果**：平滑过渡，微交互，悬停效果
+# 进入项目目录
+cd visual-protocol
 
-### 功能模块
-1. **基础概念**：UDS协议概述和客户端-服务器模型
-2. **服务详解**：8种核心UDS服务的详细介绍（0x10-0x37）
-3. **交互演示**：诊断会话、安全访问、数据读写等流程模拟
-4. **知识测试**：多选题测试系统，即时反馈和得分统计
+# 安装依赖
+npm install
+```
+
+### 开发服务器
+```bash
+# 启动开发服务器
+npm start
+```
+或者使用 Python:
+```bash
+python -m http.server 8000
+```
+
+### 构建项目
+```bash
+# 构建部署文件到 docs 目录
+npm run build
+```
+
+### 部署
+项目使用 GitHub Actions 自动部署到 GitHub Pages：
+1. 当代码推送到 main 分支时，GitHub Actions 会自动运行
+2. 构建脚本会将 src 目录复制到 docs 目录
+3. GitHub Pages 从 docs 目录提供服务
 
 ## 开发约定
 
@@ -62,72 +106,74 @@ visual-protocol/
 - 代码中服务ID使用十六进制格式（如"0x10"）
 
 ### 文件组织
-- `docs/index.html`：主应用入口（生产版本）
-- `docs/js/`：JavaScript模块化代码
-- `docs/assets/css/`：样式文件
-- `docs/assets/images/`：图像资源
+- `src/`：源代码，开发时编辑此目录
+- `docs/`：部署目录，由构建脚本自动生成
+- `src/protocols/`：协议特定页面
 
 ### 可访问性
 - 支持屏幕阅读器，包含ARIA标签
 - 键盘导航支持
 - 语义化HTML结构
 
-## 开发与部署
+## 样式指南
 
-### 本地开发
-```bash
-# 启动本地服务器
-python -m http.server 8000
-# 或使用其他静态文件服务器
-npx serve .
-```
+### 色彩方案
+- **主色调**：蓝紫渐变 (#667eea → #764ba2)
+- **客户端颜色**：#4CAF50
+- **服务器颜色**：#2196F3
+- **成功状态**：#4CAF50
+- **错误状态**：#f44336
+- **警告状态**：#ff9800
+- **信息状态**：#2196F3
 
-### 部署方式
-项目通过GitHub Pages进行部署，源码位于主分支，发布内容在`docs/`目录下。
+### UI组件
+- 卡片式设计，圆角边框，阴影效果
+- 渐变背景，毛玻璃效果
+- 平滑过渡，微交互，悬停效果
 
-### 测试要求
-- 移动设备兼容性（320px-768px）
-- 桌面浏览器兼容性（Chrome, Firefox, Safari, Edge）
-- 动画性能保持60fps
-- 无JavaScript错误
-- 中文字符正确显示
+## 贡献指南
 
-## 核心功能
+欢迎任何形式的贡献！
 
-### 交互演示功能
-- 诊断会话建立流程动画
-- 安全访问（种子密钥）演示
-- 数据读写过程可视化
-- 实时消息日志显示
+1. Fork 项目
+2. 创建功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
+4. 推送到分支 (`git push origin feature/AmazingFeature`)
+5. 开启 Pull Request
 
-### 学习功能
-- 知识测试系统（多选题、即时反馈、得分统计）
-- UDS服务详情展示
-- 进度跟踪和本地存储
+在提交代码前，请确保：
+- 代码符合项目风格指南
+- 组件在多种设备上正确显示
+- 交互逻辑运行正常
+- 变更已正确构建并可部署
 
-### 实用工具
-- UDS消息解析器（计划功能）
-- 十六进制数据转换工具（计划功能）
-- 服务ID快速查询（计划功能）
+## 部署配置
 
-## 关键依赖和限制
+### GitHub Pages
+- 源：`main` 分支，`/docs` 文件夹
+- 访问地址：https://jrtxio.github.io/visual-protocol
 
-### 约束条件
-- **纯静态内容**：仅支持GitHub Pages部署，不允许服务器端代码
-- **零外部依赖**：禁止使用外部库或框架
-- **中文界面**：所有用户界面保持中文
+### GitHub Actions
+- 自动构建和部署工作流
+- 权限设置：允许 GitHub Actions 具有读/写权限
+- 监听 main 分支的推送事件
 
-### 浏览器兼容性
+## 浏览器兼容性
+
 - Chrome 60+
 - Firefox 55+
 - Safari 12+
 - Edge（最新版本）
 
-## 重要文件说明
+## 维护者信息
 
-- `CLAUDE.md`：为Claude AI提供的项目开发指导
-- `Prompt.md`：项目原始需求和开发规范
-- `index.html`：项目初始版本（与docs/index.html内容不同）
-- `docs/index.html`：当前生产版本（完全实现的版本）
+- 项目负责人：Visual Protocol Team
+- 项目网站：https://jrtxio.github.io/visual-protocol
+- GitHub：@jrtxio
 
-该项目已经部署为PWA，支持离线访问和快速加载，主要目标用户为汽车诊断工程师、嵌入式开发者和学习UDS协议的学生。
+## 许可证
+
+本项目采用 Apache 2.0 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情
+
+---
+*项目目标：让汽车通信协议学习变得更简单*
