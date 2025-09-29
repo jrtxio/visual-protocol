@@ -128,15 +128,12 @@ visual-protocol/
 
 ## 👥 作者
 
-**Visual Protocol Team**
-
 - 项目网站: [https://jrtxio.github.io/visual-protocol](https://jrtxio.github.io/visual-protocol)
 - GitHub: [@jrtxio](https://github.com/jrtxio)
 
 ## 🙏 致谢
 
 - 感谢所有开源社区的贡献者
-- 特别感谢Vector Informatik等公司的技术文档
 - 感谢汽车电子行业的所有标准制定者
 
 ---
