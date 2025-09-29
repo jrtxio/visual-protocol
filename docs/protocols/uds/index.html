@@ -1,0 +1,3206 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔧 UDS协议学习平台 - Visual Protocol</title>
+    <meta name="description" content="交互式UDS协议学习平台 - 15分钟极速掌握统一诊断服务协议">
+    <meta name="keywords" content="UDS协议, 汽车诊断, ISO 14229, ECU诊断, 车载网络">
+    <meta name="author" content="Visual Protocol Team">
+    
+    <!-- SEO and Social Media -->
+    <meta property="og:title" content="Visual Protocol - UDS协议学习平台">
+    <meta property="og:description" content="交互式UDS协议学习平台 - 15分钟极速掌握统一诊断服务协议">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-uds/protocols/uds/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔧</text></svg>">
+    
+    <style>
+        :root {
+            /* Color system */
+            --primary-gradient-start: #667eea;
+            --primary-gradient-end: #764ba2;
+            --client-color: #4CAF50;
+            --server-color: #2196F3;
+            --success-color: #4CAF50;
+            --success-hover: #45a049;
+            --error-color: #f44336;
+            --warning-color: #ff9800;
+            --info-color: #2196F3;
+            --bg-light: #f8f9fa;
+            --bg-card-light: #ffffff;
+            --border-light: #dee2e6;
+            --text-light-main: #333;
+            --text-light-secondary: #666;
+            --shadow-light: rgba(0,0,0,0.1);
+            --bg-dark: #1a1a1a;
+            --bg-card-dark: #2d2d2d;
+            --text-dark-main: #f0f0f0;
+            --text-dark-secondary: #ccc;
+            --border-dark: #555;
+            --shadow-dark: rgba(0,0,0,0.4);
+            
+            /* Layout */
+            --container-max-width: 1200px;
+            --border-radius: 12px;
+            --spacing-xxs: 4px;
+            --spacing-xs: 8px;
+            --spacing-sm: 12px;
+            --spacing-md: 16px;
+            --spacing-lg: 24px;
+            --spacing-xl: 32px;
+            --spacing-xxl: 48px;
+            
+            /* Typography */
+            --font-family-primary: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-xxl: 1.5rem;
+            --font-size-xxxl: 2rem;
+            --font-weight-normal: 400;
+            --font-weight-medium: 500;
+            --font-weight-bold: 600;
+            --font-weight-extra-bold: 700;
+            
+            /* Animation */
+            --transition-fast: 0.15s ease;
+            --transition-normal: 0.3s ease;
+            --transition-slow: 0.5s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            transition: background-color var(--transition-normal), 
+                        color var(--transition-normal), 
+                        border-color var(--transition-normal);
+        }
+
+        body {
+            font-family: var(--font-family-primary);
+            background: var(--bg-light);
+            color: var(--text-light-main);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        body[data-theme="dark"] {
+            background: var(--bg-dark);
+            color: var(--text-dark-main);
+        }
+
+        .container {
+            max-width: var(--container-max-width);
+            margin: 0 auto;
+            padding: var(--spacing-md);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: var(--spacing-xl);
+            padding: var(--spacing-lg) 0;
+        }
+
+        .header h1 {
+            font-size: var(--font-size-xxxl);
+            margin-bottom: var(--spacing-sm);
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header p {
+            font-size: var(--font-size-lg);
+            color: var(--text-light-secondary);
+        }
+
+        body[data-theme="dark"] .header p {
+            color: var(--text-dark-secondary);
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-sm);
+            margin: var(--spacing-xl) 0;
+            flex-wrap: wrap;
+            background: rgba(102, 126, 234, 0.1);
+            padding: var(--spacing-md);
+            border-radius: 30px;
+            backdrop-filter: blur(10px);
+        }
+
+        body[data-theme="dark"] .nav-tabs {
+            background: rgba(0,0,0,0.2);
+        }
+
+        .tab-button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-base);
+            min-width: 120px;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .tab-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+        }
+
+        .tab-button.active {
+            background: white;
+            color: var(--primary-gradient-start);
+        }
+
+        body[data-theme="dark"] .tab-button {
+            background: linear-gradient(135deg, #667eea80, #764ba280);
+        }
+
+        body[data-theme="dark"] .tab-button.active {
+            background: var(--primary-gradient-start);
+            color: white;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+            background: var(--bg-card-light);
+            color: var(--text-light-main);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xl);
+            margin: var(--spacing-lg) 0;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-light);
+        }
+
+        body[data-theme="dark"] .content-section {
+            background: var(--bg-card-dark);
+            color: var(--text-dark-main);
+            border-color: var(--border-dark);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn var(--transition-normal);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-title {
+            font-size: var(--font-size-xxl);
+            margin-bottom: var(--spacing-lg);
+            color: var(--primary-gradient-start);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        body[data-theme="dark"] .section-title {
+            color: #8a9bff;
+        }
+
+        /* Device Communication */
+        .device-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--spacing-xxl);
+            margin: var(--spacing-xxl) 0;
+            flex-wrap: wrap;
+        }
+
+        .device {
+            width: 120px;
+            height: 80px;
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: var(--font-weight-bold);
+            transition: all var(--transition-normal);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .device-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            padding: 0 5px;
+        }
+
+        .device-icon {
+            font-size: 1.5rem;
+            margin-bottom: var(--spacing-xs);
+            line-height: 1;
+        }
+
+        .device-name {
+            font-size: 0.8rem;
+            margin-bottom: var(--spacing-xs);
+            line-height: 1.2;
+        }
+
+        .device-status {
+            font-size: 0.7rem;
+            opacity: 0.9;
+            line-height: 1.2;
+        }
+
+        .client {
+            background: linear-gradient(135deg, var(--client-color), #45a049);
+        }
+
+        .server {
+            background: linear-gradient(135deg, var(--server-color), #1976D2);
+        }
+
+        .connection-line {
+            font-size: 3rem;
+            color: #ccc;
+            position: relative;
+        }
+
+        .connection-line::before {
+            content: '⟷';
+        }
+
+        /* Service Grid */
+        .service-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: var(--spacing-lg);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .service-card {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white;
+            padding: var(--spacing-md);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: transform var(--transition-normal);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body[data-theme="dark"] .service-card {
+            background: linear-gradient(135deg, #667eea80, #764ba280);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px) scale(1.02);
+        }
+
+        .service-card h3 {
+            margin-bottom: var(--spacing-sm);
+            font-size: var(--font-size-base);
+        }
+
+        .service-card p {
+            font-size: var(--font-size-xs);
+            margin-bottom: var(--spacing-xs);
+            opacity: 0.9;
+        }
+
+        .service-id {
+            font-family: monospace;
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-sm);
+            background: rgba(0,0,0,0.2);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 6px;
+            margin-top: var(--spacing-xs);
+            align-self: flex-start;
+        }
+
+        /* Demo Controls */
+        .demo-controls {
+            display: flex;
+            gap: var(--spacing-md);
+            justify-content: center;
+            margin: var(--spacing-xl) 0;
+            flex-wrap: wrap;
+        }
+
+        .demo-button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: linear-gradient(135deg, var(--success-color), var(--success-hover));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-bold);
+            transition: transform var(--transition-fast);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .demo-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .demo-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        body[data-theme="dark"] .demo-button {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        /* Log Display */
+        .log {
+            background: #111;
+            color: #0f0;
+            padding: var(--spacing-lg);
+            border-radius: var(--border-radius);
+            font-family: 'Courier New', monospace;
+            text-align: left;
+            max-width: 100%;
+            margin: var(--spacing-lg) auto;
+            min-height: 150px;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #333;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            font-size: var(--font-size-sm);
+        }
+
+        body[data-theme="dark"] .log {
+            background: #000;
+            border-color: #444;
+        }
+
+        .log-entry {
+            margin-bottom: var(--spacing-xs);
+            line-height: 1.4;
+        }
+
+        .log-timestamp {
+            color: #aaa;
+            margin-right: var(--spacing-xs);
+        }
+
+        .log-info {
+            color: #0f0;
+        }
+
+        .log-warning {
+            color: #ff9800;
+        }
+
+        .log-error {
+            color: #f44336;
+        }
+
+        /* Protocol Stack Visualization */
+        .protocol-stack-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: var(--spacing-md) 0;
+            background: var(--bg-light);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+        }
+
+        body[data-theme="dark"] .protocol-stack-container {
+            background: var(--bg-card-dark);
+        }
+
+        .protocol-stack {
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            width: 200px;
+        }
+
+        .protocol-layer {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white;
+            padding: var(--spacing-sm);
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: var(--spacing-xs);
+        }
+
+        .protocol-layer.application { background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); }
+        .protocol-layer.session { background: linear-gradient(135deg, #2196F3, #1976D2); }
+        .protocol-layer.transport { background: linear-gradient(135deg, #FF9800, #F57C00); }
+        .protocol-layer.network { background: linear-gradient(135deg, #9C27B0, #7B1FA2); }
+        .protocol-layer.datalink { background: linear-gradient(135deg, #607D8B, #455A64); }
+
+        .layer-name {
+            font-weight: var(--font-weight-bold);
+            font-size: var(--font-size-base);
+        }
+
+        .layer-desc {
+            font-size: var(--font-size-sm);
+            opacity: 0.9;
+        }
+
+        /* Tools Container */
+        .tools-container {
+            display: grid;
+            gap: var(--spacing-xl);
+            margin: var(--spacing-xl) 0;
+        }
+
+        .tool-card {
+            background: var(--bg-card-light);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-xl);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        body[data-theme="dark"] .tool-card {
+            background: var(--bg-card-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark-main);
+        }
+
+        .tool-title {
+            font-size: var(--font-size-lg);
+            margin-bottom: var(--spacing-md);
+            color: var(--primary-gradient-start);
+        }
+
+        body[data-theme="dark"] .tool-title {
+            color: #8a9bff;
+        }
+
+        .tool-controls {
+            display: flex;
+            gap: var(--spacing-sm);
+            flex-wrap: wrap;
+            margin: var(--spacing-md) 0;
+        }
+
+        .tool-input {
+            flex: 1;
+            min-width: 200px;
+            padding: var(--spacing-sm);
+            border: 1px solid var(--border-light);
+            border-radius: var(--border-radius);
+            font-family: var(--font-family-primary);
+            background: var(--bg-light);
+            color: var(--text-light-main);
+        }
+
+        body[data-theme="dark"] .tool-input {
+            background: var(--bg-card-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark-main);
+        }
+
+        .tool-button {
+            padding: var(--spacing-sm) var(--spacing-md);
+            background: var(--primary-gradient-start);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: var(--font-weight-bold);
+        }
+
+        body[data-theme="dark"] .tool-button {
+            background: var(--primary-gradient-start);
+        }
+
+        /* Quiz System */
+        .quiz-container {
+            margin: var(--spacing-xl) 0;
+        }
+
+        .quiz-question {
+            margin-bottom: var(--spacing-xl);
+        }
+
+        .quiz-title {
+            font-size: var(--font-size-xl);
+            margin-bottom: var(--spacing-md);
+            font-weight: var(--font-weight-bold);
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: var(--spacing-sm);
+        }
+
+        .quiz-option {
+            background: var(--bg-card-light);
+            border: 2px solid var(--border-light);
+            border-radius: var(--border-radius);
+            padding: var(--spacing-lg);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+            font-size: var(--font-size-base);
+            position: relative;
+        }
+
+        body[data-theme="dark"] .quiz-option {
+            background: var(--bg-card-dark);
+            border-color: var(--border-dark);
+            color: var(--text-dark-main);
+        }
+
+        .quiz-option:hover {
+            background: #e3f2fd;
+            transform: translateY(-1px);
+        }
+
+        body[data-theme="dark"] .quiz-option:hover {
+            background: #404040;
+        }
+
+        .quiz-option.correct {
+            background: #d4edda !important;
+            color: #155724 !important;
+            border-color: #28a745 !important;
+        }
+
+        .quiz-option.wrong {
+            background: #f8d7da !important;
+            color: #721c24 !important;
+            border-color: #dc3545 !important;
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary-gradient-start) !important;
+            box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+        }
+
+        .quiz-option.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .quiz-results {
+            text-align: center;
+            margin-top: var(--spacing-xxl);
+        }
+
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white;
+            padding: var(--spacing-xl);
+            border-radius: var(--border-radius);
+            margin: var(--spacing-lg) 0;
+            font-size: var(--font-size-lg);
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+
+        .modal-content {
+            background: var(--bg-card-light);
+            color: var(--text-light-main);
+            border-radius: var(--border-radius);
+            padding: 0;
+            max-width: 90%;
+            max-height: 80vh;
+            width: 650px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            border: 1px solid var(--border-light);
+            display: flex;
+            flex-direction: column;
+        }
+
+        body[data-theme="dark"] .modal-content {
+            background: var(--bg-card-dark);
+            color: var(--text-dark-main);
+            border-color: var(--border-dark);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: var(--spacing-lg) var(--spacing-lg) var(--spacing-md);
+            border-bottom: 1px solid var(--border-light);
+        }
+
+        body[data-theme="dark"] .modal-header {
+            border-bottom-color: var(--border-dark);
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: var(--primary-gradient-start);
+            font-size: var(--font-size-xl);
+            font-weight: var(--font-weight-bold);
+        }
+
+        body[data-theme="dark"] .modal-header h3 {
+            color: #8a9bff;
+        }
+
+        .modal-close {
+            background: rgba(0,0,0,0.1);
+            border: none;
+            font-size: var(--font-size-lg);
+            cursor: pointer;
+            color: var(--text-light-secondary);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: var(--border-radius);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .modal-close:hover {
+            background: rgba(0,0,0,0.2);
+            color: var(--text-light-main);
+            transform: scale(1.1);
+        }
+
+        body[data-theme="dark"] .modal-close {
+            background: rgba(255,255,255,0.1);
+            color: var(--text-dark-secondary);
+        }
+
+        body[data-theme="dark"] .modal-close:hover {
+            background: rgba(255,255,255,0.2);
+            color: var(--text-dark-main);
+        }
+
+        .modal-body {
+            padding: var(--spacing-lg);
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-content-formatted {
+            line-height: 1.6;
+        }
+
+        .modal-service-title {
+            margin: 0 0 var(--spacing-md) 0;
+            color: var(--primary-gradient-start);
+            font-size: var(--font-size-lg);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+        }
+
+        body[data-theme="dark"] .modal-service-title {
+            color: #8a9bff;
+        }
+
+        .modal-sid {
+            background: rgba(102, 126, 234, 0.15);
+            color: var(--primary-gradient-start);
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: var(--font-size-sm);
+        }
+
+        body[data-theme="dark"] .modal-sid {
+            background: rgba(138, 155, 255, 0.2);
+            color: #8a9bff;
+        }
+
+        .modal-field {
+            margin-bottom: var(--spacing-sm);
+            padding: var(--spacing-xs) 0;
+        }
+
+        .modal-field strong {
+            display: inline-block;
+            width: 100px;
+            color: var(--primary-gradient-start);
+        }
+
+        body[data-theme="dark"] .modal-field strong {
+            color: #8a9bff;
+        }
+
+        .field-value {
+            color: var(--text-light-main);
+        }
+
+        body[data-theme="dark"] .field-value {
+            color: var(--text-dark-main);
+        }
+
+        .value-yes {
+            color: #4CAF50;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .value-no {
+            color: #f44336;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .modal-section-title {
+            margin: var(--spacing-lg) 0 var(--spacing-sm) 0;
+            padding-bottom: var(--spacing-xs);
+            border-bottom: 1px solid var(--border-light);
+            color: var(--primary-gradient-start);
+            font-size: var(--font-size-base);
+            font-weight: var(--font-weight-bold);
+        }
+
+        body[data-theme="dark"] .modal-section-title {
+            border-bottom-color: var(--border-dark);
+            color: #8a9bff;
+        }
+
+        .modal-list {
+            margin: 0 0 var(--spacing-md) 0;
+            padding-left: var(--spacing-lg);
+        }
+
+        .modal-list-item {
+            margin-bottom: var(--spacing-xs);
+            line-height: 1.5;
+        }
+
+        .modal-paragraph {
+            margin: var(--spacing-sm) 0;
+            line-height: 1.6;
+        }
+
+        .modal-footer {
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-top: 1px solid var(--border-light);
+            text-align: right;
+            background: var(--bg-light);
+        }
+
+        body[data-theme="dark"] .modal-footer {
+            border-top-color: var(--border-dark);
+            background: var(--bg-dark);
+        }
+
+        body[data-theme="dark"] .modal-footer {
+            border-top-color: var(--border-dark);
+            background: var(--bg-dark);
+        }
+
+        .modal-footer .demo-button {
+            padding: var(--spacing-sm) var(--spacing-lg);
+            font-size: var(--font-size-base);
+        }
+
+        /* Theme Toggle */
+        .theme-toggle {
+            position: fixed;
+            top: var(--spacing-lg);
+            right: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: var(--spacing-md) var(--spacing-lg);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-weight: var(--font-weight-bold);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        body[data-theme="dark"] .theme-toggle {
+            background: rgba(0,0,0,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        body[data-theme="dark"] .theme-toggle:hover {
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* Back Button */
+        .back-button {
+            position: fixed;
+            top: var(--spacing-lg);
+            left: var(--spacing-lg);
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: var(--spacing-md) var(--spacing-lg);
+            cursor: pointer;
+            transition: all var(--transition-normal);
+            font-weight: var(--font-weight-bold);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        body[data-theme="dark"] .back-button {
+            background: rgba(0,0,0,0.2);
+            color: white;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+
+        body[data-theme="dark"] .back-button:hover {
+            background: rgba(0,0,0,0.3);
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: var(--spacing-sm);
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+                align-items: center;
+                padding: var(--spacing-sm);
+                border-radius: var(--border-radius);
+            }
+
+            .tab-button {
+                width: 100%;
+                max-width: 250px;
+                margin: var(--spacing-xs) 0;
+                font-size: var(--font-size-sm);
+            }
+
+            .service-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .device-container {
+                flex-direction: column;
+                gap: var(--spacing-xl);
+            }
+
+            .demo-controls {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .demo-button {
+                min-width: 200px;
+            }
+
+            .content-section {
+                padding: var(--spacing-lg);
+            }
+
+            .header h1 {
+                font-size: var(--font-size-xxl);
+            }
+
+            .section-title {
+                font-size: var(--font-size-xl);
+            }
+
+            .device {
+                width: 100px;
+                height: 80px;
+            }
+
+            .device-icon {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .header h1 {
+                font-size: var(--font-size-xl);
+            }
+
+            .tab-button {
+                padding: var(--spacing-sm) var(--spacing-md);
+                min-width: 100px;
+                font-size: var(--font-size-sm);
+            }
+
+            .device {
+                width: 100px;
+                height: 80px;
+            }
+
+            .device-icon {
+                font-size: 1.5rem;
+            }
+
+            .log {
+                min-height: 120px;
+                max-height: 200px;
+                font-size: var(--font-size-xs);
+            }
+        }
+
+        /* Animations */
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .device.pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        .device.blink {
+            animation: blink 0.5s infinite;
+        }
+        
+        /* Protocol Layer Animations */
+        @keyframes layerPulse {
+            0% { transform: scale(1.05); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1.05); }
+        }
+        
+        .protocol-layer.active {
+            animation: layerPulse 0.8s ease-in-out;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.6) !important;
+        }
+        
+        /* Connection Line Animation */
+        @keyframes connectionPulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+        
+        .connection-line.animated {
+            animation: connectionPulse 1s infinite;
+        }
+
+        /* Accessibility */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* Focus styles */
+        button:focus,
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: 2px solid #4CAF50;
+            outline-offset: 2px;
+        }
+
+        /* Print styles */
+        @media print {
+            .theme-toggle,
+            .back-button,
+            .nav-tabs,
+            .demo-controls {
+                display: none;
+            }
+            
+            .content-section {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="theme-toggle" id="themeToggle" aria-label="切换深色主题">🌙 深色模式</button>
+    <button class="back-button" onclick="goBack()" aria-label="返回主页">🏠 返回主页</button>
+    
+    <div class="container">
+        <header class="header" role="banner">
+            <h1>🔧 UDS协议学习平台</h1>
+            <p>统一诊断服务协议 - 15分钟极速掌握</p>
+        </header>
+
+        <nav class="nav-tabs" role="tablist" aria-label="主要内容导航">
+            <button class="tab-button active" role="tab" aria-selected="true" aria-controls="basics-tab" data-tab="basics">
+                🎯 基础概念
+            </button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="services-tab" data-tab="services">
+                🔧 服务详解
+            </button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="demo-tab" data-tab="demo">
+                🎮 交互演示
+            </button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="tools-tab" data-tab="tools">
+                🛠️ 实用工具
+            </button>
+            <button class="tab-button" role="tab" aria-selected="false" aria-controls="quiz-tab" data-tab="quiz">
+                🧠 知识测试
+            </button>
+        </nav>
+
+        <!-- 基础概念标签 -->
+        <section id="basics-tab" class="content-section active" role="tabpanel">
+            <h2 class="section-title">🎯 UDS协议基础概念</h2>
+            <p>UDS（统一诊断服务，Unified Diagnostic Services）是ISO 14229标准定义的汽车诊断协议，允许诊断工具与汽车电子控制单元(ECU)进行双向通信。UDS协议提供了一套标准化的诊断服务，使不同制造商的诊断工具能够与各种ECU进行通信。</p>
+
+            <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-lg); background: var(--bg-card-light); border-radius: var(--border-radius); border: 1px solid var(--border-light);">
+                <h3 style="color: var(--primary-gradient-start); margin-bottom: var(--spacing-md);">协议核心概念详解</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-md);">
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🌐</span> 客户端-服务器模型
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议采用经典的客户端-服务器架构。诊断设备（如诊断仪、测试设备）作为客户端，车辆ECU作为服务器。客户端主动发起诊断请求，服务器接收请求后处理并返回响应。这种模式确保了通信的方向性和控制性。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔧</span> 服务导向架构
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议定义了一组标准化的诊断服务，每个服务由唯一的服务ID（SID）标识。每个服务执行特定功能，如读取数据、执行例程、控制会话等。服务ID通常为一个字节，例如0x10表示诊断会话控制，0x27表示安全访问。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔒</span> 分层安全机制
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议实现了多层安全保护机制。会话控制管理ECU的工作状态，安全访问通过种子-密钥机制认证用户权限，通信控制可以暂时关闭ECU的通信功能。这些机制共同保障了ECU的安全。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>📈</span> 诊断数据管理
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议提供全面的诊断数据管理功能，包括故障码（DTC）管理、数据读写、例程控制等。故障码用于记录车辆故障，数据读写用于获取或修改ECU参数，例程控制用于执行特定的诊断程序。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔄</span> 诊断会话管理
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议定义了不同的诊断会话级别（默认会话、编程会话、扩展会话等）。会话决定了ECU响应哪些诊断服务以及可用的功能。会话管理是UDS通信的第一步。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔑</span> 安全访问机制
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS通过安全访问服务（0x27）实现多级安全认证。采用种子-密钥算法，诊断工具需获取种子并计算正确密钥才能完成认证，访问受保护的功能，如ECU刷写。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>📊</span> 故障码管理系统（DTC）
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS提供完整的故障码管理功能，包括故障码的存储、读取、清除等。故障码按照标准格式定义，包含故障类型、系统和具体代码信息，便于故障诊断和维修。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔄</span> 例行程序控制
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS支持在ECU上执行特定的诊断例行程序，如执行器测试、传感器校验、系统初始化等。例行程序控制允许诊断工具触发ECU执行预定义的诊断功能。</p>
+                    </div>
+                </div>
+                
+                <h4 style="color: var(--primary-gradient-start); margin: var(--spacing-lg) 0 var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                    <span>🔄</span> 协议栈结构
+                </h4>
+                <p style="margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">UDS协议遵循ISO标准的通信模型，分为应用层、会话层、传输层、网络层和数据链路层。各层协同工作，确保诊断消息从客户端可靠传输到服务器。传输层通过ISO-TP协议处理超过8字节的长消息分段传输。</p>
+                
+                <!-- Static Protocol Stack Visualization -->
+                <div style="display: flex; justify-content: center; align-items: center; margin: var(--spacing-md) 0; background: var(--bg-light); border-radius: var(--border-radius); padding: var(--spacing-lg);">
+                    <div style="display: flex; flex-direction: column; align-items: stretch; width: 200px;">
+                        <div style="background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">应用层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">UDS服务</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #2196F3, #1976D2); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">会话层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">会话管理</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">传输层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">ISO-TP</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">网络层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">CAN/Eth</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center;">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">数据链路</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">物理接口</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: var(--spacing-md); padding: var(--spacing-md); background: rgba(102, 126, 234, 0.05); border-radius: var(--border-radius);">
+                    <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0;">UDS协议关键特点</h4>
+                    <ul style="margin: 0 0 0 var(--spacing-lg); padding: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                        <li>标准化：遵循ISO 14229国际标准，确保不同厂商设备间的互操作性</li>
+                        <li>可扩展：支持OEM特定的扩展服务和数据标识符</li>
+                        <li>安全性：通过分层安全机制保护ECU免受未授权访问</li>
+                        <li>兼容性：支持CAN、以太网等多种传输介质</li>
+                        <li>实用性：覆盖完整的车辆诊断和维修需求</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 服务详解标签 -->
+        <section id="services-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🔧 8大核心UDS服务详解</h2>
+            <p>覆盖汽车诊断的完整功能集，从会话管理到固件更新</p>
+
+            <div id="servicesGrid">
+                <!-- 服务详细介绍将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <!-- 交互演示标签 -->
+        <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🎮 交互演示：实时UDS通信</h2>
+            <p>通过可视化动画，观察UDS协议在诊断工具和车辆ECU之间的完整通信流程。</p>
+
+            <div class="demo-controls">
+                    <button class="demo-button" onclick="startDemo('session')" title="演示诊断会话建立流程">
+                        🔄 会话建立演示
+                    </button>
+                    <button class="demo-button" onclick="startDemo('security')" title="演示安全访问流程">
+                        🔐 安全访问演示
+                    </button>
+                    <button class="demo-button" onclick="startDemo('read')" title="演示数据读取流程">
+                        📊 数据读取演示
+                    </button>
+                    <button class="demo-button" onclick="startDemo('dtc')" title="演示故障码读取流程">
+                        ⚠️ 故障码演示
+                    </button>
+                    <button class="demo-button" onclick="animateProtocolFlow()" title="演示协议栈中数据处理流程">
+                        📹 协议栈流演示
+                    </button>
+                    <button class="demo-button" onclick="showProtocolMessageFlow()" title="展示消息在协议栈中的流向">
+                        🔄 消息流向演示
+                    </button>
+                    <button class="demo-button" onclick="showRequestResponseFlow()" title="展示请求和响应的完整流程">
+                        🔄 请求-响应流程
+                    </button>
+                    <button class="demo-button" onclick="resetDemo()" aria-label="重置演示" title="重置演示状态">
+                        🔄 重置
+                    </button>
+                </div>
+
+            <div class="device-container">
+                <div class="device client" id="clientDevice">
+                    <div class="device-content">
+                        <div class="device-icon">🖥️</div>
+                        <div class="device-name">诊断工具</div>
+                        <div class="device-status" id="clientStatus">就绪</div>
+                    </div>
+                </div>
+                <div class="connection-line" id="connectionLine" aria-hidden="true"></div>
+                <div class="device server" id="serverDevice">
+                    <div class="device-content">
+                        <div class="device-icon">🚗</div>
+                        <div class="device-name">车辆ECU</div>
+                        <div class="device-status" id="serverStatus">待机</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="communicationLog" class="log">
+                <div class="log-entry">
+                    <span class="log-timestamp">[12:00:00]</span>
+                    <span class="log-info">💡 点击上方任意按钮开始实时演示...</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">[12:00:00]</span>
+                    <span class="log-info">🗣️ 系统会模拟完整的UDS通信流程</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实用工具标签 -->
+        <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🛠️ 实用工具集</h2>
+            <p>为UDS协议开发和调试提供专业工具支持</p>
+
+            <div class="tools-container">
+                <div class="tool-card">
+                    <h3 class="tool-title">📊 UDS消息解析器</h3>
+                    <p>解析十六进制格式的UDS消息，显示各字段含义</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="messageInput" placeholder="输入十六进制消息 (如: 10 03 FF 00 00)" aria-label="UDS消息输入">
+                        <button class="tool-button" onclick="parseUDSMessage()">解析</button>
+                    </div>
+                    <div id="parseResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">🔢 十进制转换器</h3>
+                    <p>在十六进制、十进制、二进制之间进行转换</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="hexInput" placeholder="输入数值" aria-label="数值输入">
+                        <button class="tool-button" onclick="convertNumber()">转换</button>
+                    </div>
+                    <div id="convertResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">🔧 服务ID查询</h3>
+                    <p>快速查找UDS服务ID对应的功能描述</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="serviceIdInput" placeholder="输入服务ID (如: 0x10)" aria-label="服务ID输入">
+                        <button class="tool-button" onclick="lookupServiceId()">查询</button>
+                    </div>
+                    <div id="serviceResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">📊 DID (数据标识符) 查询</h3>
+                    <p>查找DID对应的车辆数据信息</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="didInput" placeholder="输入DID (如: 0xF190)" aria-label="DID输入">
+                        <button class="tool-button" onclick="lookupDID()">查询</button>
+                    </div>
+                    <div id="didResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">🔄 例程ID查询</h3>
+                    <p>查找例程ID对应的功能描述</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="routineIdInput" placeholder="输入例程ID (如: 0xFF00)" aria-label="例程ID输入">
+                        <button class="tool-button" onclick="lookupRoutineId()">查询</button>
+                    </div>
+                    <div id="routineResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 知识测试标签 -->
+        <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🧠 知识测试：UDS协议专家认证</h2>
+            
+            <div class="quiz-container" id="quizContainer">
+                <div id="questionArea">
+                    <!-- 问题将通过JavaScript动态生成 -->
+                </div>
+                
+                <div id="quizResults" class="quiz-results" style="display: none;">
+                    <div class="results-box">
+                        <h3>🎯 测试完成！</h3>
+                        <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">0</span></div>
+                        <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                    </div>
+                    <button class="demo-button" onclick="restartQuiz()">🔄 重新测试</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // ======================
+        // 应用状态管理
+        // ======================
+        let currentTab = 'basics';
+        let quizState = {
+            currentQuestion: 0,
+            score: 0,
+            answered: false
+        };
+        let demoActive = false;
+        let progress = 0;
+
+        // ======================
+        // UDS服务数据
+        // ======================
+        const UDS_SERVICES = {
+            0x10: {
+                name: "诊断会话控制",
+                description: "建立和管理不同级别的诊断会话",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 默认会话 (Default Session)",
+                    "• 0x02 - 编程会话 (Programming Session)", 
+                    "• 0x03 - 扩展诊断会话 (Extended Diagnostic Session)",
+                    "• 0x04-0xFF - OEM特定会话 (OEM Specific Sessions)"
+                ],
+                examples: [
+                    "请求: 0x10 0x03 (进入扩展会话)",
+                    "响应: 0x50 0x03 (会话建立成功)",
+                    "请求: 0x10 0x01 (进入默认会话)",
+                    "响应: 0x50 0x01 (会话切换确认)"
+                ],
+                useCase: "在进行任何诊断操作前，必须先建立诊断会话。默认会话权限最低，功能受限；扩展会话权限最高，可访问所有功能。",
+                tip: "默认会话权限最低，功能受限；扩展会话权限最高，可访问所有功能。",
+                knowledge: "诊断会话控制是UDS协议的入口点。它决定了ECU将响应哪些诊断服务。在编程会话中，某些安全相关功能会被禁用以保护ECU。"
+            },
+            0x11: {
+                name: "ECU重置",
+                description: "对ECU执行不同类型的重置操作",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 硬重置（Hard Reset，非易失性复位）",
+                    "• 0x02 - 软重置（Soft Reset，易失性复位）",
+                    "• 0x03 - 开启快速断电（Enable Rapid Power Shutdown）",
+                    "• 0x04-0xFF - OEM特定重置（OEM Specific Reset）"
+                ],
+                examples: [
+                    "请求: 0x11 0x01 (硬重置)",
+                    "响应: 0x51 0x01 (重置执行)",
+                    "请求: 0x11 0x02 (软重置)",
+                    "响应: 0x51 0x02 (重置确认)"
+                ],
+                useCase: "在刷写ECU或解决软件故障时使用。硬重置相当于完全断电重启，软重置只重启处理器。",
+                tip: "硬重置会丢失易失性数据，软重置则保留RAM中的数据。",
+                knowledge: "ECU重置服务允许诊断设备触发ECU内部的重启序列。硬重置会完全关闭并重启ECU，可能导致未保存的数据丢失。软重置只是重启ECU的应用程序，保持RAM中的数据。"
+            },
+            0x27: {
+                name: "安全访问",
+                description: "通过种子-密钥机制实现安全认证",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 请求种子(0x01级)",
+                    "• 0x02 - 发送密钥(0x01级)",
+                    "• 0x03 - 请求种子(0x03级)",
+                    "• 0x04 - 发送密钥(0x03级)",
+                    "• 0x05-0xFF - 更高级别认证"
+                ],
+                examples: [
+                    "请求种子: 0x27 0x01",
+                    "接收种子: 0x67 0x01 [SEED]",
+                    "发送密钥: 0x27 0x02 [KEY]",
+                    "认证成功: 0x67 0x02"
+                ],
+                useCase: "访问安全功能（如ECU刷写）前必须进行安全认证",
+                tip: "种子密钥算法由ECU内部实现，通常不可逆",
+                knowledge: "安全访问是UDS中最重要安全机制之一。它使用挑战-响应协议，ECU生成随机种子，诊断设备使用特定算法计算密钥。只有使用正确的算法和密钥才能通过认证，访问受保护的功能。"
+            },
+            0x28: {
+                name: "通信控制",
+                description: "控制ECU的通信行为",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x00 - 启用接收和传输 (Enable Rx and Tx)",
+                    "• 0x01 - 启用接收禁用传输 (Enable Rx, Disable Tx)", 
+                    "• 0x02 - 禁用接收启用传输 (Disable Rx, Enable Tx)",
+                    "• 0x03 - 禁用接收和传输 (Disable Rx and Tx)"
+                ],
+                examples: [
+                    "请求: 0x28 0x03 (关闭通信)",
+                    "响应: 0x68 0x03 (通信已关闭)"
+                ],
+                useCase: "在ECU刷写过程中暂停总线通信，避免其他ECU干扰刷写过程。",
+                tip: "关闭通信后ECU不会响应其他UDS请求，需重新启用",
+                knowledge: "通信控制服务用于管理ECU在总线上的通信活动。在多ECU环境中，此服务可以暂时抑制ECU的正常通信行为，这对于ECU刷写等需要独占总线的操作非常有用。"
+            },
+            0x3E: {
+                name: "待机握手",
+                description: "测试仪保持连接状态的握手信号",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x00 - 无额外功能 (No Additional Function)",
+                    "• 0x01-0xFF - OEM特定功能 (OEM Specific Functions)"
+                ],
+                examples: [
+                    "请求: 0x3E 0x00 (待机握手)",
+                    "响应: 0x7E 0x00 (握手确认)"
+                ],
+                useCase: "在诊断会话期间定期发送以保持连接",
+                tip: "通常每2-5秒发送一次以防止ECU超时断开连接",
+                knowledge: "待机握手服务用于维持诊断工具与ECU之间的连接。在长时间诊断操作中，定时发送握手信号可以防止ECU因超时而断开会话。"
+            },
+            0x83: {
+                name: "访问时间参数",
+                description: "修改或恢复网络通信的时间参数",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x00 - 默认值 (Default Values)",
+                    "• 0x01 - 设置时间参数 (Set Timing Parameters)",
+                    "• 0x02 - 恢复默认值 (Restore Default Values)"
+                ],
+                examples: [
+                    "请求: 0x83 0x01 [参数]",
+                    "响应: 0xC3 0x01 [确认]"
+                ],
+                useCase: "调整ECU通信的超时和延迟参数",
+                tip: "需要特殊权限才能修改时间参数",
+                knowledge: "访问时间参数服务允许调整诊断通信的时序参数，如超时时间和重试间隔，以优化诊断性能。"
+            },
+            0x84: {
+                name: "安全数据传输",
+                description: "加密和解密安全相关的数据传输",
+                category: "诊断和通信管理",
+                hasSubFunctions: false,
+                details: [
+                    "• 加密数据传输",
+                    "• 安全认证协议",
+                    "• 密钥管理"
+                ],
+                examples: [
+                    "请求: 0x84 [加密数据]",
+                    "响应: 0xC4 [解密结果]"
+                ],
+                useCase: "传输敏感或加密的诊断数据",
+                tip: "用于高级安全功能的数据传输",
+                knowledge: "安全数据传输服务提供加密的诊断通信功能，保护敏感数据在传输过程中的安全。"
+            },
+            0x85: {
+                name: "诊断故障码设置控制",
+                description: "控制DTC设置状态",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 开启DTC设置 (ON)",
+                    "• 0x02 - 关闭DTC设置 (OFF)",
+                    "• 0x03 - 检查DTC设置状态 (Check DTC Setting Status)"
+                ],
+                examples: [
+                    "请求: 0x85 0x02 (关闭DTC设置)",
+                    "响应: 0xC5 0x02 (确认)"
+                ],
+                useCase: "在特定测试期间暂时禁用DTC设置",
+                tip: "关闭DTC设置后，故障将不会被记录",
+                knowledge: "诊断故障码设置控制服务允许临时禁用DTC记录功能，常用于测试和调试场景。"
+            },
+            0x86: {
+                name: "事件响应",
+                description: "配置ECU对特定事件的响应行为",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 设置事件响应 (Set Event Response)",
+                    "• 0x02 - 清除事件响应 (Clear Event Response)",
+                    "• 0x03 - 获取事件响应信息 (Get Event Response Information)"
+                ],
+                examples: [
+                    "请求: 0x86 0x01 [事件ID]",
+                    "响应: 0xC6 0x01 [确认]"
+                ],
+                useCase: "配置ECU对特定条件或事件的响应",
+                tip: "可用于测试特定故障响应机制",
+                knowledge: "事件响应服务允许配置ECU对特定事件的自动响应行为，提高诊断灵活性。"
+            },
+            0x87: {
+                name: "链路控制",
+                description: "控制网络链路的物理参数",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 设置链路参数 (Set Link Parameters)",
+                    "• 0x02 - 检查链路参数 (Check Link Parameters)"
+                ],
+                examples: [
+                    "请求: 0x87 0x01 [参数]",
+                    "响应: 0xC7 0x01 [确认]"
+                ],
+                useCase: "调整网络物理层参数",
+                tip: "用于高级网络诊断和优化",
+                knowledge: "链路控制服务提供对网络物理层参数的精细控制，优化通信性能。"
+            },
+            0x22: {
+                name: "通过ID读数据",
+                description: "通过数据标识符(DID)读取ECU数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 0xF190 - 车辆识别号(VIN)",
+                    "• 0xF193 - 硬件版本号",
+                    "• 0xF197 - 软件版本号",
+                    "• 0xF198 - 软件零件号",
+                    "• 0xF199 - ECU零件号"
+                ],
+                examples: [
+                    "请求VIN: 0x22 0xF1 0x90",
+                    "响应VIN: 0x62 0xF1 0x90 [17位VIN码]",
+                    "请求软件版本: 0x22 0xF1 0x97",
+                    "响应软件版本: 0x62 0xF1 0x97 [版本信息]"
+                ],
+                useCase: "读取ECU的技术参数和配置信息",
+                tip: "不同ECU的DID范围可能不同，需参考具体文档",
+                knowledge: "数据读取服务是UDS中最常用的服务之一，用于获取ECU中的静态数据。DID（Data Identifier）定义了特定数据的地址。每个DID通常对应ECU内存中的特定位置，可能包含标定参数、配置信息或硬件特性。"
+            },
+            0x23: {
+                name: "通过地址读数据",
+                description: "根据内存地址读取ECU内存数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 读取指定内存地址数据",
+                    "• 支持多种地址格式",
+                    "• 安全访问可能需要"
+                ],
+                examples: [
+                    "请求: 0x23 [地址] [长度]",
+                    "响应: 0x63 [数据]"
+                ],
+                useCase: "直接访问ECU内存中的特定位置",
+                tip: "需要适当的访问权限才能读取内存",
+                knowledge: "通过地址读数据服务允许直接访问ECU内存空间，提供底层数据访问能力。"
+            },
+            0x24: {
+                name: "通过ID读比例数据",
+                description: "读取带标定信息的数据值",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 包含物理单位的标定数据",
+                    "• 包含换算参数",
+                    "• 物理值 = (存储值 × 因子) + 偏移"
+                ],
+                examples: [
+                    "请求: 0x24 [DID]",
+                    "响应: 0x64 [标定数据]"
+                ],
+                useCase: "读取带有物理单位的传感器数据",
+                tip: "返回值包含换算所需的标定参数",
+                knowledge: "通过ID读比例数据服务专门用于读取需要单位转换的数据，简化数据处理流程。"
+            },
+            0x2A: {
+                name: "通过周期ID读数据",
+                description: "读取周期性发送的数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 周期性数据传输",
+                    "• 支持多种传输模式",
+                    "• 可配置传输间隔"
+                ],
+                examples: [
+                    "请求: 0x2A [模式] [ID]",
+                    "响应: 0x6A [数据]"
+                ],
+                useCase: "获取周期性更新的ECU数据",
+                tip: "用于实时监控ECU状态",
+                knowledge: "通过周期ID读数据服务支持周期性数据传输，适用于动态数据监控。"
+            },
+            0x2C: {
+                name: "动态定义标识符",
+                description: "动态定义用于数据传输的标识符",
+                category: "数据传输",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 定义DID (Define DID)",
+                    "• 0x02 - 清除DID定义 (Clear DID Definition)",
+                    "• 0x03 - 条件支持 (Conditional Support)"
+                ],
+                examples: [
+                    "定义: 0x2C 0x01 [DID] [源DID]",
+                    "响应: 0x6C 0x01 [确认]"
+                ],
+                useCase: "创建自定义的数据组合标识符",
+                tip: "允许将多个DID合并为一个逻辑数据单元",
+                knowledge: "动态定义标识符服务允许创建复合数据标识符，提高数据访问效率。"
+            },
+            0x2E: {
+                name: "通过ID写数据",
+                description: "通过数据标识符(DID)写入ECU数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 写入配置数据",
+                    "• 修改ECU参数",
+                    "• 需要适当权限"
+                ],
+                examples: [
+                    "请求: 0x2E [DID] [数据]",
+                    "响应: 0x6E [DID]"
+                ],
+                useCase: "修改ECU配置参数",
+                tip: "写入操作需要安全访问权限",
+                knowledge: "通过ID写数据服务允许修改ECU中的可配置参数，实现远程调优。"
+            },
+            0x3D: {
+                name: "通过地址写内存",
+                description: "根据内存地址写入ECU内存数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 直接写入内存",
+                    "• 高风险操作",
+                    "• 需要特殊权限"
+                ],
+                examples: [
+                    "请求: 0x3D [地址] [数据]",
+                    "响应: 0x7D [确认]"
+                ],
+                useCase: "直接修改ECU内存内容",
+                tip: "这是一个高风险操作，可能导致ECU损坏",
+                knowledge: "通过地址写内存服务提供底层内存写入功能，常用于高级调试。"
+            },
+            0x14: {
+                name: "清除诊断信息",
+                description: "清除ECU中存储的诊断信息",
+                category: "存储数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 清除所有DTC",
+                    "• 清除冻结帧数据",
+                    "• 清除故障历史"
+                ],
+                examples: [
+                    "请求: 0x14 FF FF FF (清除所有DTC)",
+                    "响应: 0x54 [确认]"
+                ],
+                useCase: "在维修完成后清除故障记录",
+                tip: "此操作不可逆，请在确认修复后执行",
+                knowledge: "清除诊断信息服务用于删除ECU中存储的历史诊断信息，为新的诊断周期做准备。"
+            },
+            0x19: {
+                name: "读取故障码信息",
+                description: "读取ECU中存储的DTC信息",
+                category: "存储数据传输",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 报告支持的DTC (Report Supported DTC)",
+                    "• 0x02 - 报告DTC镜像内存 (Report DTC Mirror Memory)",
+                    "• 0x04 - 报告确认的DTC (Report Confirmed DTC)",
+                    "• 0x06 - 报告严重DTC (Report Severe DTC)",
+                    "• 0x0A - 报告所有DTC (Report All DTC)"
+                ],
+                examples: [
+                    "请求: 0x19 0x0A (报告所有DTC)",
+                    "响应: 0x59 0x0A [DTC列表]"
+                ],
+                useCase: "获取车辆故障诊断信息",
+                tip: "不同子功能返回不同类型的DTC信息",
+                knowledge: "DTC（Diagnostic Trouble Code）是ECU检测到系统故障时存储的代码。DTC包含故障类型、系统和具体故障的信息。DTCs通常遵循标准格式，如P0123，其中P表示动力系统，0表示SAE标准，1表示数字系统，23表示具体故障。"
+            },
+            0x2F: {
+                name: "通过标识符控制输入输出",
+                description: "控制ECU的输入输出端口",
+                category: "输入输出控制",
+                hasSubFunctions: false,
+                details: [
+                    "• 控制ECU内部继电器",
+                    "• 控制传感器模拟",
+                    "• 控制执行器测试"
+                ],
+                examples: [
+                    "请求: 0x2F [DID] [控制参数]",
+                    "响应: 0x6F [控制结果]"
+                ],
+                useCase: "执行器功能测试和诊断",
+                tip: "可用于执行器的功能验证测试",
+                knowledge: "通过标识符控制输入输出服务提供对ECU外围设备的直接控制能力。"
+            },
+            0x31: {
+                name: "例行程序控制",
+                description: "执行特定的诊断例程",
+                category: "例行程序",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 开始例程 (Start Routine)",
+                    "• 0x02 - 停止例程 (Stop Routine)",
+                    "• 0x03 - 获取例程结果 (Request Routine Results)",
+                    "• 0x04-0xFF - OEM特定例程ID (OEM Specific Routine ID)"
+                ],
+                examples: [
+                    "开始例程: 0x31 0x01 [ID] [参数]",
+                    "响应: 0x71 0x01 [ID] [结果]"
+                ],
+                useCase: "执行ECU内置的自诊断和校准程序",
+                tip: "例程控制功能丰富，可执行ECU特有的测试程序",
+                knowledge: "例行程序是ECU内置的特定算法或测试程序，可以执行复杂的诊断任务，如执行器测试、传感器校准、系统自检等。每个例程都有唯一的ID，可以接受参数并返回执行结果。"
+            },
+            0x34: {
+                name: "请求下载",
+                description: "向ECU下载数据（通常用于刷写）",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 0x34 - 请求下载",
+                    "• 0x36 - 传输数据",
+                    "• 0x37 - 退出传输"
+                ],
+                examples: [
+                    "请求下载: 0x34 0x00 [地址] [长度]",
+                    "传输数据: 0x36 0x00 [数据块]",
+                    "退出传输: 0x37"
+                ],
+                useCase: "ECU固件更新和重新编程",
+                tip: "数据下载是高风险操作，需严格遵循刷写流程",
+                knowledge: "请求下载服务是ECU刷写流程的起始点，建立数据传输通道。"
+            },
+            0x35: {
+                name: "请求上传",
+                description: "从ECU上传数据（通常用于备份）",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 请求ECU内存数据上传",
+                    "• 内存备份功能",
+                    "• 数据恢复操作"
+                ],
+                examples: [
+                    "请求上传: 0x35 0x00 [地址] [长度]",
+                    "响应: 0x75 0x00 [确认]"
+                ],
+                useCase: "ECU数据备份和恢复",
+                tip: "用于ECU数据的备份和恢复操作",
+                knowledge: "请求上传服务用于从ECU导出数据，支持数据迁移和备份需求。"
+            },
+            0x36: {
+                name: "数据传输",
+                description: "在下载/上传过程中传输数据",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 下载过程中的数据传输",
+                    "• 上传过程中的数据传输",
+                    "• 分块传输机制"
+                ],
+                examples: [
+                    "传输数据: 0x36 0x01 [数据块]",
+                    "响应: 0x76 0x01 [确认]"
+                ],
+                useCase: "在下载或上传过程中传输实际数据",
+                tip: "数据传输需要与请求下载/上传配合使用",
+                knowledge: "数据传输服务负责实际的数据块传输，确保大数据量的可靠传输。"
+            },
+            0x37: {
+                name: "请求退出传输",
+                description: "结束下载或上传过程",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 结束数据传输会话",
+                    "• 完成传输过程",
+                    "• 资源清理"
+                ],
+                examples: [
+                    "退出传输: 0x37",
+                    "响应: 0x77 [确认]"
+                ],
+                useCase: "完成数据传输后的清理操作",
+                tip: "退出传输后ECU恢复正常操作状态",
+                knowledge: "请求退出传输服务标志着数据传输过程的结束，释放相关资源。"
+            },
+            0x38: {
+                name: "请求文件传输",
+                description: "执行文件级别的传输操作",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 文件传输操作",
+                    "• 支持长数据传输",
+                    "• 文件完整性检查"
+                ],
+                examples: [
+                    "请求文件传输: 0x38 [参数]",
+                    "响应: 0x78 [确认]"
+                ],
+                useCase: "执行高级文件传输操作",
+                tip: "用于大文件或复杂数据的传输",
+                knowledge: "请求文件传输服务提供高级文件操作功能，支持复杂的文件管理需求。"
+            }
+        };
+
+        // ======================
+        // 测试题库
+        // ======================
+        const QUIZ_QUESTIONS = [
+            {
+                question: "UDS协议中用于建立诊断会话的服务ID是什么？",
+                options: [
+                    "A. 0x10 - 诊断会话控制服务",
+                    "B. 0x11 - ECU重置服务", 
+                    "C. 0x27 - 安全访问服务",
+                    "D. 0x22 - 数据读取服务"
+                ],
+                correct: 0,
+                explanation: "0x10是诊断会话控制服务的标准ID，用于建立和管理不同级别的诊断会话"
+            },
+            {
+                question: "ISO-TP协议的主要作用是什么？",
+                options: [
+                    "A. 将超过8字节的长消息分段传输",
+                    "B. 提供网络层地址解析",
+                    "C. 实现应用层诊断服务", 
+                    "D. 管理电气信号传输"
+                ],
+                correct: 0,
+                explanation: "ISO-TP是ISO传输协议，将超过CAN总线8字节限制的长消息分段传输"
+            },
+            {
+                question: "安全访问服务(0x27)的工作原理是什么？",
+                options: [
+                    "A. 种子-密钥认证机制",
+                    "B. 用户名密码认证",
+                    "C. 数字证书认证",
+                    "D. 生物特征认证"
+                ],
+                correct: 0,
+                explanation: "安全访问服务采用种子-密钥机制，客户端需计算正确密钥才能通过认证"
+            },
+            {
+                question: "默认会话(0x01)和扩展会话(0x03)有什么区别？",
+                options: [
+                    "A. 扩展会话权限更高，可访问更多功能",
+                    "B. 默认会话响应更快",
+                    "C. 扩展会话更安全",
+                    "D. 没有实质区别"
+                ],
+                correct: 0,
+                explanation: "扩展会话拥有更高权限，可访问安全访问、刷写等高级功能"
+            },
+            {
+                question: "DTC代表什么？",
+                options: [
+                    "A. 诊断故障码",
+                    "B. 数据传输控制",
+                    "C. 诊断工具连接",
+                    "D. 诊断测试周期"
+                ],
+                correct: 0,
+                explanation: "DTC(Diagnostic Trouble Code)是诊断故障码，用于标示车辆故障"
+            },
+            {
+                question: "UDS协议遵循哪个国际标准？",
+                options: [
+                    "A. ISO 14229",
+                    "B. ISO 15765",
+                    "C. ISO 11898",
+                    "D. ISO 11519"
+                ],
+                correct: 0,
+                explanation: "UDS协议遵循ISO 14229国际标准，定义了统一诊断服务"
+            },
+            {
+                question: "以下哪个服务用于读取ECU的VIN码？",
+                options: [
+                    "A. 0x22 F190 读取数据标识符",
+                    "B. 0x10 01 诊断会话控制",
+                    "C. 0x19 01 故障码管理",
+                    "D. 0x27 01 安全访问"
+                ],
+                correct: 0,
+                explanation: "使用0x22服务配合DID 0xF190可读取车辆识别号(VIN)"
+            },
+            {
+                question: "ECU硬重置(0x11 0x01)和软重置(0x11 0x02)的区别？",
+                options: [
+                    "A. 硬重置会丢失易失性数据，软重置保留",
+                    "B. 硬重置速度更快",
+                    "C. 软重置更安全",
+                    "D. 没有区别"
+                ],
+                correct: 0,
+                explanation: "硬重置相当于完全断电再上电，软重置只重置处理器，保留RAM数据"
+            },
+            {
+                question: "ISO-TP协议能够处理超过多少字节的诊断消息？",
+                options: [
+                    "A. 8字节",
+                    "B. 16字节",
+                    "C. 32字节",
+                    "D. 64字节"
+                ],
+                correct: 0,
+                explanation: "CAN总线最大帧长度为8字节，ISO-TP协议通过分段传输处理超过8字节的长消息"
+            },
+            {
+                question: "DID 0xF190代表什么数据？",
+                options: [
+                    "A. 车辆识别号(VIN)",
+                    "B. 软件版本号",
+                    "C. 硬件版本号",
+                    "D. ECU零件号"
+                ],
+                correct: 0,
+                explanation: "DID 0xF190是标准定义的车辆识别号(VIN)数据标识符"
+            },
+            {
+                question: "安全访问服务(0x27)中的种子-密钥算法通常如何实现？",
+                options: [
+                    "A. ECU内部算法实现，通常不可逆",
+                    "B. 公开算法，任何人都可计算",
+                    "C. 固定密钥，所有人相同",
+                    "D. 无需计算，直接发送"
+                ],
+                correct: 0,
+                explanation: "种子-密钥算法由ECU内部实现，通常为单向不可逆算法"
+            },
+            {
+                question: "以下哪个服务用于清除ECU中的故障码？",
+                options: [
+                    "A. 0x14 - 清除诊断信息",
+                    "B. 0x19 - 读取故障码信息",
+                    "C. 0x22 - 读取数据",
+                    "D. 0x31 - 例程控制"
+                ],
+                correct: 0,
+                explanation: "0x14服务用于清除ECU中存储的诊断故障码(DTC)"
+            }
+        ];
+
+        // ======================
+        // DID查询数据
+        // ======================
+        const UDS_DIDS = {
+            0xF190: "车辆识别号 (VIN)",
+            0xF191: "车辆生产序列号",
+            0xF192: "软件版本号",
+            0xF193: "硬件版本号",
+            0xF194: "ECU名称",
+            0xF195: "ODX文件标识符",
+            0xF196: "ODX文件版本",
+            0xF197: "软件版本号",
+            0xF198: "软件零件号",
+            0xF199: "ECU零件号",
+            0xF19A: "CIN (Calibration ID Number)",
+            0xF19B: "CVN (Calibration Verification Number)",
+            0xF19C: "ECU制造商标识",
+            0xF19D: "ECU制造日期",
+            0xF19E: "诊断数据标识符",
+            0xF19F: "OEM特定数据"
+        };
+
+        // ======================
+        // 例程ID查询数据
+        // ======================
+        const UDS_ROUTINES = {
+            0xFF00: "ECU编程",
+            0xFF01: "擦除内存",
+            0xFF02: "检查编程依赖",
+            0x0202: "输入输出控制",
+            0x0317: "清除不可信DTC",
+            0x0318: "设置DTC镜像",
+            0x0319: "清除DTC镜像"
+        };
+
+        // ======================
+        // 主题切换功能
+        // ======================
+        function toggleTheme() {
+            const body = document.body;
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (body.hasAttribute('data-theme')) {
+                body.removeAttribute('data-theme');
+                themeToggle.textContent = '🌙 深色模式';
+                localStorage.setItem('theme', 'light');
+                console.log('切换到浅色模式');
+            } else {
+                body.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '☀️ 浅色模式';
+                localStorage.setItem('theme', 'dark');
+                console.log('切换到深色模式');
+            }
+        }
+
+        // 返回主页
+        function goBack() {
+            window.location.href = '../../index.html';
+        }
+
+        // ======================
+        // 页面加载时恢复主题
+        // ======================
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (savedTheme === 'dark') {
+                document.body.setAttribute('data-theme', 'dark');
+                themeToggle.textContent = '☀️ 浅色模式';
+            } else {
+                document.body.removeAttribute('data-theme');
+                themeToggle.textContent = '🌙 深色模式';
+            }
+            
+            // 初始化服务网格
+            renderServices();
+            
+            // 初始化第一个问题
+            loadQuizQuestion();
+        });
+
+        // ======================
+        // 标签页切换功能
+        // ======================
+        function showTab(tabName) {
+            try {
+                // 隐藏所有内容区域
+                document.querySelectorAll('.content-section').forEach(section => {
+                    section.classList.remove('active');
+                    section.hidden = true;
+                });
+
+                // 移除所有标签按钮的激活状态
+                document.querySelectorAll('.tab-button').forEach(button => {
+                    button.classList.remove('active');
+                    button.setAttribute('aria-selected', 'false');
+                });
+
+                // 显示目标内容区域
+                const targetSection = document.getElementById(tabName + '-tab');
+                if (targetSection) {
+                    targetSection.classList.add('active');
+                    targetSection.hidden = false;
+                }
+
+                // 激活对应按钮
+                const tabButton = document.querySelector(`[data-tab="${tabName}"]`);
+                if (tabButton) {
+                    tabButton.classList.add('active');
+                    tabButton.setAttribute('aria-selected', 'true');
+                }
+
+                // 更新当前标签
+                currentTab = tabName;
+                
+            } catch (error) {
+                console.error('标签页切换错误:', error);
+                // 静默处理错误，保证用户体验
+            }
+        }
+
+        // ======================
+        // 服务网格渲染
+        // ======================
+        function renderServices() {
+            const container = document.getElementById('servicesGrid');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            // Group services by category
+            const servicesByCategory = {};
+            Object.entries(UDS_SERVICES).forEach(([id, service]) => {
+                if (!servicesByCategory[service.category]) {
+                    servicesByCategory[service.category] = [];
+                }
+                servicesByCategory[service.category].push({id, service});
+            });
+            
+            // Create detailed information for each category
+            Object.entries(servicesByCategory).forEach(([category, services]) => {
+                // Add category header
+                const categorySection = document.createElement('div');
+                categorySection.style.cssText = `
+                    margin: var(--spacing-xl) 0;
+                    padding: var(--spacing-lg);
+                    background: var(--bg-card-light);
+                    border-radius: var(--border-radius);
+                    border: 1px solid var(--border-light);
+                `;
+                
+                categorySection.innerHTML = `
+                    <h3 style="color: var(--primary-gradient-start); margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-xs); border-bottom: 2px solid var(--primary-gradient-start);">
+                        ${category}
+                    </h3>
+                `;
+                
+                // Create grid for services in this category
+                const servicesContainer = document.createElement('div');
+                servicesContainer.style.cssText = `
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+                    gap: var(--spacing-md);
+                `;
+                
+                services.forEach(({id, service}) => {
+                    const serviceCard = document.createElement('div');
+                    serviceCard.style.cssText = `
+                        padding: var(--spacing-md);
+                        border: 1px solid var(--border-light);
+                        border-radius: var(--border-radius);
+                        background: var(--bg-light);
+                        margin-bottom: var(--spacing-md);
+                    `;
+                    
+                    let detailsHtml = `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-sm);">
+                            <h4 style="color: var(--primary-gradient-start); margin: 0; font-size: var(--font-size-lg);">
+                                <span style="font-family: monospace; background: rgba(102, 126, 234, 0.1); padding: 2px 6px; border-radius: 4px; margin-right: var(--spacing-xs);">0x${parseInt(id).toString(16).toUpperCase()}</span>
+                                ${service.name}
+                            </h4>
+                            <span style="font-size: var(--font-size-sm); ${service.hasSubFunctions ? 'color: #4CAF50;' : 'color: #f44336;'} font-weight: var(--font-weight-bold);">
+                                ${service.hasSubFunctions ? '支持子功能' : '无子功能'}
+                            </span>
+                        </div>
+                        <p style="color: var(--text-light-secondary); margin: var(--spacing-xs) 0; font-size: var(--font-size-sm);">
+                            ${service.description}
+                        </p>
+                        <div style="margin: var(--spacing-sm) 0;">
+                            <div style="font-weight: var(--font-weight-bold); color: var(--primary-gradient-start); margin-bottom: var(--spacing-xs);">功能详情:</div>
+                            <ul style="margin: 0 0 0 var(--spacing-lg); padding: 0; font-size: var(--font-size-sm);">
+                    `;
+                    
+                    service.details.forEach(detail => {
+                        detailsHtml += `<li style="margin-bottom: var(--spacing-xs);">${detail}</li>`;
+                    });
+                    
+                    detailsHtml += `
+                            </ul>
+                        </div>
+                        <div style="margin: var(--spacing-sm) 0;">
+                            <div style="font-weight: var(--font-weight-bold); color: var(--primary-gradient-start); margin-bottom: var(--spacing-xs);">示例:</div>
+                            <ul style="margin: 0 0 0 var(--spacing-lg); padding: 0; font-size: var(--font-size-xs); color: #666;">
+                    `;
+                    
+                    service.examples.forEach(example => {
+                        detailsHtml += `<li style="margin-bottom: var(--spacing-xs);">${example}</li>`;
+                    });
+                    
+                    detailsHtml += `
+                            </ul>
+                        </div>
+                    `;
+                    
+                    // Add professional knowledge if available
+                    if (service.knowledge) {
+                        detailsHtml += `
+                            <div style="margin: var(--spacing-sm) 0; padding: var(--spacing-sm); background: rgba(102, 126, 234, 0.05); border-radius: var(--border-radius);">
+                                <div style="font-weight: var(--font-weight-bold); color: #5b21b6; margin-bottom: var(--spacing-xs);">专业知识:</div>
+                                <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">${service.knowledge}</p>
+                            </div>
+                        `;
+                    }
+                    
+                    detailsHtml += `
+                        <div style="margin-top: var(--spacing-sm);">
+                            <button onclick="showServiceInfo('0x${parseInt(id).toString(16).toUpperCase()}')" 
+                                style="background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); 
+                                       color: white; border: none; padding: var(--spacing-xs) var(--spacing-sm); 
+                                       border-radius: var(--border-radius); cursor: pointer; font-size: var(--font-size-sm);">
+                                详细了解
+                            </button>
+                        </div>
+                    `;
+                    
+                    serviceCard.innerHTML = detailsHtml;
+                    servicesContainer.appendChild(serviceCard);
+                });
+                
+                categorySection.appendChild(servicesContainer);
+                container.appendChild(categorySection);
+            });
+        }
+
+        // ======================
+        // 服务详情显示
+        // ======================
+        function showServiceInfo(serviceId) {
+            // 标准化serviceId格式
+            let normalizedId = serviceId.toString().toLowerCase();
+            if (!normalizedId.startsWith('0x')) {
+                // 如果不是0x开头，需要转换
+                if (/^[0-9A-Fa-f]+$/.test(normalizedId)) {
+                    normalizedId = '0x' + normalizedId;
+                }
+            }
+            
+            const service = UDS_SERVICES[parseInt(normalizedId, 16)];
+            if (!service) {
+                createModal('服务信息', '未找到服务信息: ' + serviceId);
+                return;
+            }
+            
+            // Build detailed content including knowledge section if available
+            let details = `${service.name} (0x${parseInt(normalizedId, 16).toString(16).toUpperCase()})\n\n`;
+            details += `分类: ${service.category}\n\n`;
+            details += `${service.description}\n\n`;
+            details += `子功能支持: ${service.hasSubFunctions ? '支持' : '不支持'}\n\n`;
+            details += `详细信息:\n${service.details.join('\n')}\n\n`;
+            details += `示例:\n${service.examples.join('\n')}\n\n`;
+            details += `应用场景:\n${service.useCase}\n\n`;
+            if (service.knowledge) {
+                details += `专业知识:\n${service.knowledge}\n\n`;
+            }
+            details += `提示:\n${service.tip}`;
+            
+            // 创建模态框显示服务详情
+            createModal(`${service.name} (0x${parseInt(normalizedId, 16).toString(16).toUpperCase()})`, details);
+        }
+
+        // ======================
+        // 模态框功能
+        // ======================
+        function createModal(title, content) {
+            // 移除已存在的模态框
+            const existingModal = document.querySelector('.modal-overlay');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 分析内容并格式化
+            const lines = content.split('\n');
+            let formattedContent = '<div class="modal-content-formatted">';
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line.startsWith('分类:')) {
+                    formattedContent += `<div class="modal-field"><strong>分类:</strong> <span class="field-value">${line.substring(4).trim()}</span></div>`;
+                } else if (line.startsWith('子功能支持:')) {
+                    const value = line.substring(6).trim();
+                    const colorClass = value === '支持' ? 'value-yes' : 'value-no';
+                    formattedContent += `<div class="modal-field"><strong>子功能支持:</strong> <span class="field-value ${colorClass}">${value}</span></div>`;
+                } else if (line.startsWith('详细信息:')) {
+                    formattedContent += `<h4 class="modal-section-title">详细信息</h4><ul class="modal-list">`;
+                } else if (line.startsWith('•')) {
+                    formattedContent += `<li class="modal-list-item">${line.substring(2).trim()}</li>`;
+                } else if (line.startsWith('示例:')) {
+                    formattedContent += `</ul><h4 class="modal-section-title">示例</h4><ul class="modal-list">`;
+                } else if (line.startsWith('应用场景:')) {
+                    formattedContent += `</ul><h4 class="modal-section-title">应用场景</h4><p class="modal-paragraph">${line.substring(6).trim()}</p>`;
+                } else if (line.startsWith('提示:')) {
+                    formattedContent += `<h4 class="modal-section-title">提示</h4><p class="modal-paragraph">${line.substring(3).trim()}</p>`;
+                } else if (line.startsWith('专业知识:')) {
+                    formattedContent += `<h4 class="modal-section-title">专业知识</h4><p class="modal-paragraph">${line.substring(6).trim()}</p>`;
+                } else if (line.includes('(') && line.includes(')') && !line.startsWith('分类:') && !line.startsWith('子功能支持:') && !line.startsWith('应用场景:') && !line.startsWith('提示:') && !line.startsWith('专业知识:')) {
+                    // Handle service name with SID
+                    const namePart = line.substring(0, line.indexOf('(')).trim();
+                    const sidPart = line.substring(line.indexOf('('), line.indexOf(')') + 1).trim();
+                    formattedContent += `<h3 class="modal-service-title">${namePart} <span class="modal-sid">${sidPart}</span></h3>`;
+                } else if (line) {
+                    // Regular content
+                    if (i === 0) { // First line might be the title
+                        formattedContent += `<h3 class="modal-service-title">${line}</h3>`;
+                    } else {
+                        formattedContent += `<p class="modal-paragraph">${line}</p>`;
+                    }
+                }
+            }
+            
+            formattedContent += '</div>';
+            
+            // 创建模态框结构
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay';
+            modal.innerHTML = `
+                <div class="modal-content" role="dialog" aria-labelledby="modalTitle" aria-modal="true">
+                    <div class="modal-header">
+                        <h3 id="modalTitle">${title}</h3>
+                        <button class="modal-close" onclick="closeModal()" aria-label="关闭" title="关闭">×</button>
+                    </div>
+                    <div class="modal-body">
+                        ${formattedContent}
+                    </div>
+                    <div class="modal-footer">
+                        <button class="demo-button" onclick="closeModal()">关闭</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 点击背景关闭模态框
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    closeModal();
+                }
+            });
+            
+            // Esc键关闭模态框
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeModal();
+                }
+            });
+        }
+
+        // Function to remove the modal styles when modal is closed
+        function closeModal() {
+            const modal = document.querySelector('.modal-overlay');
+            if (modal) {
+                modal.remove();
+            }
+        }
+
+        // ======================
+        // 交互演示功能
+        // ======================
+        function startDemo(type) {
+            if (demoActive) return;
+            
+            demoActive = true;
+            const clientStatus = document.getElementById('clientStatus');
+            const serverStatus = document.getElementById('serverStatus');
+            const log = document.getElementById('communicationLog');
+            
+            // 清空日志
+            log.innerHTML = '';
+            addLogMessage('💡 开始' + getDemoName(type) + '演示...', 'info');
+            
+            // 重置设备状态
+            if (clientStatus) clientStatus.textContent = '准备中...';
+            if (serverStatus) serverStatus.textContent = '等待中...';
+            
+            // 执行演示
+            executeDemoSequence(type);
+        }
+
+        function getDemoName(type) {
+            const names = {
+                'session': '诊断会话',
+                'security': '安全访问', 
+                'read': '数据读取',
+                'dtc': '故障码'
+            };
+            return names[type] || '未知';
+        }
+
+        function executeDemoSequence(type) {
+            const sequences = {
+                'session': [
+                    { delay: 0, client: '发送会话请求', server: '处理中...', message: '📤 [诊断工具] → 0x10 0x03 (请求扩展会话)' },
+                    { delay: 1500, client: '等待响应', server: '处理完成', message: '📥 [车辆ECU] → 0x50 0x03 (扩展会话已建立)' },
+                    { delay: 3000, client: '会话就绪', server: '就绪', message: '✅ [系统] → 诊断会话建立成功' }
+                ],
+                'security': [
+                    { delay: 0, client: '请求种子', server: '生成种子', message: '📤 [诊断工具] → 0x27 0x01 (请求种子)' },
+                    { delay: 2000, client: '计算密钥', server: '等待验证', message: '📥 [车辆ECU] → 0x67 0x01 [随机种子] (返回种子)' },
+                    { delay: 4000, client: '发送密钥', server: '验证中...', message: '📤 [诊断工具] → 0x27 0x02 [计算密钥] (发送密钥)' },
+                    { delay: 5500, client: '认证成功', server: '已授权', message: '✅ [系统] → 安全访问已授权' }
+                ],
+                'read': [
+                    { delay: 0, client: '读取请求', server: '查找数据', message: '📤 [诊断工具] → 0x22 0xF1 0x90 (读取VIN)' },
+                    { delay: 1500, client: '接收数据', server: '发送数据', message: '📥 [车辆ECU] → 0x62 0xF1 0x90 [数据] (返回VIN)' },
+                    { delay: 3000, client: '解析完成', server: '完成', message: '✅ [系统] → 数据读取完成' }
+                ],
+                'dtc': [
+                    { delay: 0, client: 'DTC请求', server: '检查故障', message: '📤 [诊断工具] → 0x19 0x02 (读取DTC)' },
+                    { delay: 1500, client: '接收故障码', server: '发送DTC', message: '📥 [车辆ECU] → 0x59 0x02 [DTC] (返回故障码)' },
+                    { delay: 3000, client: '分析完成', server: '完成', message: '⚠️ [系统] → 故障码读取完成' }
+                ]
+            };
+            
+            const sequence = sequences[type];
+            if (!sequence) {
+                addLogMessage('❌ 未知演示类型', 'error');
+                demoActive = false;
+                return;
+            }
+            
+            sequence.forEach(step => {
+                setTimeout(() => {
+                    const clientStatus = document.getElementById('clientStatus');
+                    const serverStatus = document.getElementById('serverStatus');
+                    
+                    if (clientStatus) clientStatus.textContent = step.client;
+                    if (serverStatus) serverStatus.textContent = step.server;
+                    
+                    addLogMessage(step.message, 'info');
+                    
+                    // 添加动画效果 - 在协议栈中高亮对应的层
+                    animateProtocolLayers(type, step);
+                }, step.delay);
+            });
+            
+            // 演示完成
+            setTimeout(() => {
+                demoActive = false;
+                addLogMessage(`🏁 ${getDemoName(type)}演示完成`, 'info');
+            }, sequence[sequence.length - 1].delay + 1500);
+        }
+
+        // ======================
+        // 协议栈层动画功能
+        // ======================
+        function animateProtocolLayers(demoType, step) {
+            // 根据演示类型和步骤确定要高亮的协议层
+            const layerMappings = {
+                'session': ['application', 'session'],
+                'security': ['application', 'session', 'transport'],
+                'read': ['application', 'session', 'transport', 'network'],
+                'dtc': ['application', 'session', 'transport', 'network', 'datalink']
+            };
+            
+            const layersToAnimate = layerMappings[demoType] || ['application'];
+            
+            // 高亮客户端和服务器协议栈中的对应层
+            layersToAnimate.forEach(layer => {
+                // 客户端协议栈
+                const clientLayer = document.querySelector('#clientProtocolStack .protocol-layer.' + layer);
+                if (clientLayer) {
+                    clientLayer.classList.add('active');
+                    setTimeout(() => {
+                        clientLayer.classList.remove('active');
+                    }, 800);
+                }
+                
+                // 服务器协议栈
+                const serverLayer = document.querySelector('#serverProtocolStack .protocol-layer.' + layer);
+                if (serverLayer) {
+                    serverLayer.classList.add('active');
+                    setTimeout(() => {
+                        serverLayer.classList.remove('active');
+                    }, 800);
+                }
+            });
+            
+            // 添加连接线动画效果
+            const connectionLine = document.getElementById('connectionLine');
+            if (connectionLine) {
+                connectionLine.style.animation = 'pulse 1s infinite';
+                setTimeout(() => {
+                    connectionLine.style.animation = '';
+                }, 1000);
+            }
+        }
+
+        // ======================
+        // 协议栈流演示功能
+        // ======================
+        function animateProtocolFlow() {
+            addLogMessage('🔄 开始协议栈流演示...', 'info');
+            
+            // 按顺序激活协议栈中的每一层
+            const layers = ['application', 'session', 'transport', 'network', 'datalink'];
+            layers.forEach((layer, index) => {
+                setTimeout(() => {
+                    // 激活客户端协议栈中的层
+                    const clientLayer = document.querySelector('#clientProtocolStack .protocol-layer.' + layer);
+                    if (clientLayer) {
+                        clientLayer.classList.add('active');
+                        setTimeout(() => {
+                            clientLayer.classList.remove('active');
+                        }, 1000);
+                    }
+                    
+                    // 激活服务器协议栈中的层
+                    const serverLayer = document.querySelector('#serverProtocolStack .protocol-layer.' + layer);
+                    if (serverLayer) {
+                        serverLayer.classList.add('active');
+                        setTimeout(() => {
+                            serverLayer.classList.remove('active');
+                        }, 1000);
+                    }
+                    
+                    // 添加日志条目
+                    const layerNames = {
+                        'application': '应用层',
+                        'session': '会话层',
+                        'transport': '传输层',
+                        'network': '网络层',
+                        'datalink': '数据链路层'
+                    };
+                    
+                    addLogMessage(`📤 ${layerNames[layer]}: 协议处理`, 'info');
+                }, index * 600);
+            });
+            
+            setTimeout(() => {
+                addLogMessage('✅ 协议栈流演示完成', 'info');
+            }, layers.length * 600 + 1000);
+        }
+
+        // ======================
+        // 消息流向演示功能
+        // ======================
+        function showProtocolMessageFlow() {
+            addLogMessage('🔄 开始消息流向演示...', 'info');
+            
+            // 模拟消息在协议栈中的流向
+            const messageFlow = [
+                { layer: 'application', action: '创建UDS请求' },
+                { layer: 'session', action: '会话管理处理' },
+                { layer: 'transport', action: '分段封装' },
+                { layer: 'network', action: '路由寻址' },
+                { layer: 'datalink', action: 'CAN帧发送' },
+                { layer: 'physical', action: '物理传输' }
+            ];
+            
+            messageFlow.forEach((flow, index) => {
+                setTimeout(() => {
+                    // 高亮相应的协议层
+                    const clientLayer = document.querySelector(`#clientProtocolStack .protocol-layer.${flow.layer}`);
+                    const serverLayer = document.querySelector(`#serverProtocolStack .protocol-layer.${flow.layer}`);
+                    
+                    if (clientLayer) {
+                        clientLayer.classList.add('active');
+                        setTimeout(() => {
+                            clientLayer.classList.remove('active');
+                        }, 800);
+                    }
+                    
+                    if (serverLayer) {
+                        serverLayer.classList.add('active');
+                        setTimeout(() => {
+                            serverLayer.classList.remove('active');
+                        }, 800);
+                    }
+                    
+                    // 添加日志条目
+                    addLogMessage(`📤 ${flow.layer}: ${flow.action}`, 'info');
+                }, index * 700);
+            });
+            
+            setTimeout(() => {
+                addLogMessage('✅ 消息流向演示完成', 'info');
+            }, messageFlow.length * 700 + 1000);
+        }
+
+        // ======================
+        // 请求-响应流程演示功能
+        // ======================
+        function showRequestResponseFlow() {
+            addLogMessage('🔄 开始请求-响应流程演示...', 'info');
+            
+            // 模拟完整的请求-响应流程
+            const requestFlow = [
+                { direction: 'request', layer: 'application', action: '诊断工具: 创建 0x10 0x03 请求' },
+                { direction: 'request', layer: 'session', action: '会话层: 会话管理处理' },
+                { direction: 'request', layer: 'transport', action: '传输层: 消息分段封装' },
+                { direction: 'request', layer: 'network', action: '网络层: 路由寻址' },
+                { direction: 'request', layer: 'datalink', action: '数据链路层: CAN帧发送' },
+                { direction: 'request', layer: 'physical', action: '物理层: 消息到达ECU' }
+            ];
+            
+            const responseFlow = [
+                { direction: 'response', layer: 'physical', action: 'ECU物理层: 接收CAN帧' },
+                { direction: 'response', layer: 'datalink', action: 'ECU数据链路层: 帧处理' },
+                { direction: 'response', layer: 'network', action: 'ECU网络层: 路由转发' },
+                { direction: 'response', layer: 'transport', action: 'ECU传输层: 消息重组' },
+                { direction: 'response', layer: 'session', action: 'ECU会话层: 会话状态更新' },
+                { direction: 'response', layer: 'application', action: 'ECU应用层: 处理0x10服务，返回0x50 0x03' },
+                { direction: 'response', layer: 'transport', action: 'ECU传输层: 响应消息封装' },
+                { direction: 'response', layer: 'network', action: 'ECU网络层: 路由响应' },
+                { direction: 'response', layer: 'datalink', action: 'ECU数据链路层: 发送响应帧' },
+                { direction: 'response', layer: 'physical', action: 'ECU物理层: 响应消息返回诊断工具' },
+                { direction: 'response', layer: 'datalink', action: '诊断工具数据链路层: 接收响应' },
+                { direction: 'response', layer: 'network', action: '诊断工具网络层: 处理响应' },
+                { direction: 'response', layer: 'transport', action: '诊断工具传输层: 响应重组' },
+                { direction: 'response', layer: 'application', action: '诊断工具应用层: 接收确认，会话建立完成' }
+            ];
+            
+            // 执行请求流程
+            requestFlow.forEach((flow, index) => {
+                setTimeout(() => {
+                    // 高亮相应的协议层
+                    const clientLayer = document.querySelector(`#clientProtocolStack .protocol-layer.${flow.layer}`);
+                    const serverLayer = document.querySelector(`#serverProtocolStack .protocol-layer.${flow.layer}`);
+                    
+                    if (clientLayer) {
+                        clientLayer.classList.add('active');
+                        setTimeout(() => {
+                            clientLayer.classList.remove('active');
+                        }, 800);
+                    }
+                    
+                    if (serverLayer) {
+                        serverLayer.classList.add('active');
+                        setTimeout(() => {
+                            serverLayer.classList.remove('active');
+                        }, 800);
+                    }
+                    
+                    // 添加日志条目
+                    const arrow = flow.direction === 'request' ? '➡️' : '⬅️';
+                    addLogMessage(`${arrow} ${flow.layer}: ${flow.action}`, 'info');
+                }, index * 600);
+            });
+            
+            // 执行响应流程
+            responseFlow.forEach((flow, index) => {
+                setTimeout(() => {
+                    // 高亮相应的协议层
+                    const clientLayer = document.querySelector(`#clientProtocolStack .protocol-layer.${flow.layer}`);
+                    const serverLayer = document.querySelector(`#serverProtocolStack .protocol-layer.${flow.layer}`);
+                    
+                    if (clientLayer) {
+                        clientLayer.classList.add('active');
+                        setTimeout(() => {
+                            clientLayer.classList.remove('active');
+                        }, 800);
+                    }
+                    
+                    if (serverLayer) {
+                        serverLayer.classList.add('active');
+                        setTimeout(() => {
+                            serverLayer.classList.remove('active');
+                        }, 800);
+                    }
+                    
+                    // 添加日志条目
+                    const arrow = flow.direction === 'request' ? '➡️' : '⬅️';
+                    addLogMessage(`${arrow} ${flow.layer}: ${flow.action}`, 'info');
+                }, (requestFlow.length * 600) + (index * 600));
+            });
+            
+            setTimeout(() => {
+                addLogMessage('✅ 请求-响应流程演示完成', 'info');
+            }, (requestFlow.length + responseFlow.length) * 600 + 1000);
+        }
+
+        function addLogMessage(message, type = 'info') {
+            const log = document.getElementById('communicationLog');
+            if (!log) return;
+            
+            // Limit log entries to prevent DOM bloat
+            if (log.children.length > 50) {
+                log.removeChild(log.firstChild);
+            }
+            
+            const timestamp = new Date().toTimeString().substring(0, 8);
+            const entry = document.createElement('div');
+            entry.className = `log-entry`;
+            entry.innerHTML = `
+                <span class="log-timestamp">[${timestamp}]</span>
+                <span class="log-${type}">${message}</span>
+            `;
+            
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight; // 自动滚动到底部
+        }
+
+        function pulseDevice(deviceId) {
+            const device = document.getElementById(deviceId);
+            if (device) {
+                device.classList.add('pulse');
+                setTimeout(() => {
+                    device.classList.remove('pulse');
+                }, 1000);
+            }
+        }
+
+        function resetDemo() {
+            const clientStatus = document.getElementById('clientStatus');
+            const serverStatus = document.getElementById('serverStatus');
+            const log = document.getElementById('communicationLog');
+            
+            if (clientStatus) clientStatus.textContent = '就绪';
+            if (serverStatus) serverStatus.textContent = '待机';
+            
+            if (log) {
+                log.innerHTML = `
+                    <div class="log-entry">
+                        <span class="log-timestamp">[12:00:00]</span>
+                        <span class="log-info">💡 系统就绪，等待操作...</span>
+                    </div>
+                    <div class="log-entry">
+                        <span class="log-timestamp">[12:00:00]</span>
+                        <span class="log-info">🗣️ 点击上方按钮开始实时演示</span>
+                    </div>
+                `;
+            }
+            
+            demoActive = false;
+        }
+
+        // ======================
+        // 知识测试功能
+        // ======================
+        function loadQuizQuestion() {
+            if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                showQuizResults();
+                return;
+            }
+            
+            const question = QUIZ_QUESTIONS[quizState.currentQuestion];
+            const questionArea = document.getElementById('questionArea');
+            
+            if (!questionArea) return;
+            
+            let optionsHtml = '';
+            question.options.forEach((option, index) => {
+                optionsHtml += `
+                    <div class="quiz-option" onclick="selectAnswer(${index})" role="button" tabindex="0" 
+                         aria-label="${option}">
+                        <strong>${option}</strong>
+                    </div>
+                `;
+            });
+            
+            questionArea.innerHTML = `
+                <div class="quiz-question">
+                    <h3 class="quiz-title">第${quizState.currentQuestion + 1}题: ${question.question}</h3>
+                    <div class="quiz-options">
+                        ${optionsHtml}
+                    </div>
+                </div>
+                <div style="margin-top: var(--spacing-xl); text-align: center; color: var(--text-light-secondary);">
+                    ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}
+                </div>
+            `;
+            
+            quizState.answered = false;
+        }
+
+        function selectAnswer(selectedIndex) {
+            if (quizState.answered) return;
+            
+            const question = QUIZ_QUESTIONS[quizState.currentQuestion];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            // 禁用所有选项
+            options.forEach(option => {
+                option.classList.add('disabled');
+            });
+            
+            quizState.answered = true;
+            
+            // 标记正确和错误答案
+            options.forEach((option, index) => {
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex && selectedIndex !== question.correct) {
+                    option.classList.add('wrong');
+                }
+            });
+            
+            // 更新分数
+            if (selectedIndex === question.correct) {
+                quizState.score++;
+                addLogMessage(`✅ 正确！${question.explanation}`, 'info');
+            } else {
+                addLogMessage(`❌ 错误！正确答案是: ${question.options[question.correct]}. ${question.explanation}`, 'error');
+            }
+            
+            // 等待一段时间后加载下一题
+            setTimeout(() => {
+                quizState.currentQuestion++;
+                loadQuizQuestion();
+            }, 1500);
+        }
+
+        function showQuizResults() {
+            const resultsDiv = document.getElementById('quizResults');
+            const scoreValue = document.getElementById('scoreValue');
+            const totalQuestions = document.getElementById('totalQuestions');
+            const percentage = document.getElementById('percentage');
+            
+            if (!resultsDiv || !scoreValue || !totalQuestions || !percentage) return;
+            
+            const percent = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+            
+            scoreValue.textContent = quizState.score;
+            totalQuestions.textContent = QUIZ_QUESTIONS.length;
+            percentage.textContent = percent;
+            
+            // 根据成绩显示不同反馈
+            let feedback = '';
+            if (percent >= 80) {
+                feedback = '优秀！你对UDS协议有深入的理解！';
+            } else if (percent >= 60) {
+                feedback = '不错！继续学习可以掌握更多UDS知识。';
+            } else {
+                feedback = '需要加强学习，多练习有助于理解UDS协议。';
+            }
+            
+            // 在结果框中添加反馈
+            const resultsBox = document.querySelector('#quizResults .results-box');
+            if (resultsBox) {
+                resultsBox.innerHTML += `<div style="margin-top: var(--spacing-md);">${feedback}</div>`;
+            }
+            
+            // 隐藏问题区域，显示结果区域
+            document.getElementById('questionArea').style.display = 'none';
+            resultsDiv.style.display = 'block';
+            
+            // 保存结果到本地存储
+            const quizResult = {
+                score: quizState.score,
+                total: QUIZ_QUESTIONS.length,
+                percentage: percent,
+                date: new Date().toISOString()
+            };
+            localStorage.setItem('quiz_result', JSON.stringify(quizResult));
+        }
+
+        function restartQuiz() {
+            quizState = {
+                currentQuestion: 0,
+                score: 0,
+                answered: false
+            };
+            
+            document.getElementById('quizResults').style.display = 'none';
+            document.getElementById('questionArea').style.display = 'block';
+            
+            loadQuizQuestion();
+        }
+
+        // ======================
+        // 实用工具功能
+        // ======================
+        function parseUDSMessage() {
+            const input = document.getElementById('messageInput').value.trim();
+            const resultDiv = document.getElementById('parseResult');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">请输入UDS消息</div>';
+                return;
+            }
+            
+            // 简单解析：假设输入是空格分隔的十六进制数
+            const bytes = input.split(/\s+/).map(b => b.replace(/^0x/i, '')).filter(b => b.length > 0);
+            
+            if (bytes.length < 1) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">无效的消息格式</div>';
+                return;
+            }
+            
+            const serviceId = '0x' + bytes[0].toUpperCase();
+            const serviceName = getServiceName(serviceId);
+            
+            let html = `
+                <div><strong>服务ID:</strong> ${serviceId} (${serviceName})</div>
+                <div><strong>消息长度:</strong> ${bytes.length} 字节</div>
+                <div><strong>完整消息:</strong> ${bytes.join(' ')}</div>
+            `;
+            
+            // 如果是已知服务，显示更多详细信息
+            if (serviceName && serviceName !== '未知服务') {
+                html += `<div><strong>服务描述:</strong> ${UDS_SERVICES[parseInt(serviceId, 16)]?.description || ''}</div>`;
+            }
+            
+            resultDiv.innerHTML = html;
+        }
+
+        function getServiceName(serviceId) {
+            const id = parseInt(serviceId, 16);
+            if (UDS_SERVICES[id]) {
+                return UDS_SERVICES[id].name;
+            }
+            return '未知服务';
+        }
+
+        function convertNumber() {
+            const input = document.getElementById('hexInput').value.trim();
+            const resultDiv = document.getElementById('convertResult');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">请输入数值</div>';
+                return;
+            }
+            
+            try {
+                // 尝试解析各种格式的输入
+                let num = NaN;
+                let inputLower = input.toLowerCase();
+                
+                if (inputLower.startsWith('0x')) {
+                    // Remove '0x' prefix and parse as hexadecimal
+                    const hexValue = input.substring(2);
+                    if (!/^[0-9A-Fa-f]+$/.test(hexValue)) {
+                        throw new Error('十六进制值包含无效字符');
+                    }
+                    num = parseInt(hexValue, 16);
+                } else if (inputLower.startsWith('0b')) {
+                    // Remove '0b' prefix and parse as binary
+                    const binaryValue = input.substring(2);
+                    if (!/^[01]+$/.test(binaryValue)) {
+                        throw new Error('二进制值包含无效字符');
+                    }
+                    num = parseInt(binaryValue, 2);
+                } else if (/^[0-9]+$/.test(input)) {
+                    // Parse as decimal
+                    num = parseInt(input, 10);
+                } else {
+                    throw new Error('无法解析输入格式，请使用十进制、十六进制(0x...)或二进制(0b...)格式');
+                }
+                
+                if (isNaN(num) || !isFinite(num)) {
+                    throw new Error('无效数字');
+                }
+                
+                resultDiv.innerHTML = `
+                    <div><strong>十进制:</strong> ${num}</div>
+                    <div><strong>十六进制:</strong> 0x${num.toString(16).toUpperCase()}</div>
+                    <div><strong>二进制:</strong> 0b${num.toString(2)}</div>
+                `;
+            } catch (e) {
+                resultDiv.innerHTML = `<div style="color: var(--error-color);">错误: ${e.message}</div>`;
+            }
+        }
+
+        function lookupServiceId() {
+            const input = document.getElementById('serviceIdInput').value.trim();
+            const resultDiv = document.getElementById('serviceResult');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">请输入服务ID</div>';
+                return;
+            }
+            
+            let serviceId = input.toLowerCase();
+            
+            // 标准化ID格式
+            if (!serviceId.startsWith('0x')) {
+                serviceId = '0x' + serviceId.replace(/^0x/i, '');
+            }
+            
+            const id = parseInt(serviceId, 16);
+            
+            if (isNaN(id)) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">无效的服务ID格式</div>';
+                return;
+            }
+            
+            if (UDS_SERVICES[id]) {
+                const service = UDS_SERVICES[id];
+                resultDiv.innerHTML = `
+                    <div><strong>服务ID:</strong> ${serviceId.toUpperCase()}</div>
+                    <div><strong>服务名称:</strong> ${service.name}</div>
+                    <div><strong>描述:</strong> ${service.description}</div>
+                    <div><strong>详细信息:</strong></div>
+                    <ul style="margin-left: var(--spacing-lg);">
+                        ${service.details.map(d => `<li>${d}</li>`).join('')}
+                    </ul>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div>服务ID: ${serviceId.toUpperCase()} 未在标准UDS服务中找到</div>
+                    <div>这可能是OEM特定的自定义服务</div>
+                `;
+            }
+        }
+
+        function lookupDID() {
+            const input = document.getElementById('didInput').value.trim();
+            const resultDiv = document.getElementById('didResult');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">请输入DID</div>';
+                return;
+            }
+            
+            let did = input.toLowerCase();
+            
+            // 标准化DID格式
+            if (!did.startsWith('0x')) {
+                did = '0x' + did.replace(/^0x/i, '');
+            }
+            
+            const id = parseInt(did, 16);
+            
+            if (isNaN(id)) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">无效的DID格式</div>';
+                return;
+            }
+            
+            if (UDS_DIDS[id]) {
+                resultDiv.innerHTML = `
+                    <div><strong>DID:</strong> ${did.toUpperCase()}</div>
+                    <div><strong>名称:</strong> ${UDS_DIDS[id]}</div>
+                    <div><strong>描述:</strong> ${getDidDescription(id)}</div>
+                    <div><strong>用途:</strong> ${getDidUsage(id)}</div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div>DID: ${did.toUpperCase()} 不在标准DID列表中</div>
+                    <div>这可能是厂商特定的DID</div>
+                `;
+            }
+        }
+
+        function getDidDescription(id) {
+            const descriptions = {
+                0xF190: "车辆的17位识别码",
+                0xF191: "车辆的生产序列号",
+                0xF192: "ECU当前运行的软件版本",
+                0xF193: "ECU硬件版本信息",
+                0xF194: "ECU的名称标识",
+                0xF197: "ECU当前运行的软件版本",
+                0xF198: "ECU软件的零件编号"
+            };
+            return descriptions[id] || "未知数据";
+        }
+
+        function getDidUsage(id) {
+            const usages = {
+                0xF190: "用于车辆身份识别",
+                0xF197: "用于验证ECU软件版本",
+                0xF198: "用于ECU识别和匹配",
+                0xF193: "用于硬件兼容性验证"
+            };
+            return usages[id] || "一般诊断数据";
+        }
+
+        function lookupRoutineId() {
+            const input = document.getElementById('routineIdInput').value.trim();
+            const resultDiv = document.getElementById('routineResult');
+            
+            if (!input) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">请输入例程ID</div>';
+                return;
+            }
+            
+            let routineId = input.toLowerCase();
+            
+            // 标准化例程ID格式
+            if (!routineId.startsWith('0x')) {
+                routineId = '0x' + routineId.replace(/^0x/i, '');
+            }
+            
+            const id = parseInt(routineId, 16);
+            
+            if (isNaN(id)) {
+                resultDiv.innerHTML = '<div style="color: var(--error-color);">无效的例程ID格式</div>';
+                return;
+            }
+            
+            if (UDS_ROUTINES[id]) {
+                resultDiv.innerHTML = `
+                    <div><strong>例程ID:</strong> ${routineId.toUpperCase()}</div>
+                    <div><strong>名称:</strong> ${UDS_ROUTINES[id]}</div>
+                    <div><strong>描述:</strong> ${getRoutineDescription(id)}</div>
+                    <div><strong>执行参数:</strong> ${getRoutineParameters(id)}</div>
+                    <div><strong>返回值:</strong> ${getRoutineResult(id)}</div>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <div>例程ID: ${routineId.toUpperCase()} 不在标准例程列表中</div>
+                    <div>这可能是厂商特定的例程</div>
+                `;
+            }
+        }
+
+        function getRoutineDescription(id) {
+            const descriptions = {
+                0xFF00: "执行ECU刷写过程",
+                0xFF01: "擦除ECU内存指定区域",
+                0xFF02: "检查编程依赖关系",
+                0x0202: "控制ECU输入输出状态",
+                0x0317: "清除系统记录的不可信故障码",
+                0x0318: "设置DTC镜像功能",
+                0x0319: "清除DTC镜像数据"
+            };
+            return descriptions[id] || "执行特定的ECU功能";
+        }
+
+        function getRoutineParameters(id) {
+            const params = {
+                0xFF00: "内存地址和数据",
+                0xFF01: "内存地址范围",
+                0xFF02: "编程依赖检查参数",
+                0x0202: "控制参数",
+                0x0317: "DTC代码",
+                0x0318: "DTC镜像设置参数",
+                0x0319: "DTC镜像清除参数"
+            };
+            return params[id] || "无参数或特定参数";
+        }
+
+        function getRoutineResult(id) {
+            const results = {
+                0xFF00: "刷写状态",
+                0xFF01: "擦除状态",
+                0xFF02: "依赖检查结果",
+                0x0202: "控制结果",
+                0x0317: "清除状态",
+                0x0318: "设置结果",
+                0x0319: "清除结果"
+            };
+            return results[id] || "执行结果";
+        }
+
+        // ======================
+        // 事件监听
+        // ======================
+        // 为所有标签按钮添加点击事件
+        document.querySelectorAll('[data-tab]').forEach(button => {
+            button.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                showTab(tabName);
+            });
+        });
+
+        // 键盘导航支持
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Tab') {
+                // 添加焦点指示器样式
+                document.body.classList.add('keyboard-navigation');
+            }
+        });
+
+        window.addEventListener('mousedown', function() {
+            document.body.classList.remove('keyboard-navigation');
+        });
+
+        // ======================
+        // 初始化
+        // ======================
+        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+    </script>
+</body>
+</html>
