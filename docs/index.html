@@ -3,513 +3,222 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🚗 Visual Protocol - 多协议学习平台</title>
-    <meta name="description" content="交互式汽车协议学习平台 - 通过可视化动画和演示帮助您理解各种汽车通信协议">
+    <title>Visual Protocol — 汽车协议学习平台</title>
+    <meta name="description" content="交互式汽车协议学习平台 — 通过可视化动画和交互式演示帮助您理解各种汽车通信协议">
     <meta name="keywords" content="汽车协议, UDS, DoIP, SOME/IP, CAN, 诊断协议, 车载网络">
-    <meta name="author" content="Visual Protocol Team">
-    
-    <!-- SEO and Social Media -->
-    <meta property="og:title" content="Visual Protocol - 多协议学习平台">
-    <meta property="og:description" content="交互式汽车协议学习平台 - 通过可视化动画和演示帮助您理解各种汽车通信协议">
+    <meta property="og:title" content="Visual Protocol — 汽车协议学习平台">
+    <meta property="og:description" content="交互式汽车协议学习平台 — 通过可视化动画和交互式演示帮助您理解各种汽车通信协议">
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://jrtxio.github.io/visual-protocol">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚗</text></svg>">
 
-    <!-- Google Fonts -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Umami Analytics -->
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+
     <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
 
-    <style>
-        :root {
-            /* Color system - Anthropic brand */
-            --primary-gradient-start: #d97757;
-            --primary-gradient-end: #c45a3a;
-            --client-color: #788c5d;
-            --server-color: #6a9bcc;
-            --success-color: #788c5d;
-            --success-hover: #667a4d;
-            --error-color: #d97757;
-            --warning-color: #d97757;
-            --info-color: #6a9bcc;
-            --bg-light: #faf9f5;
-            --bg-card-light: #faf9f5;
-            --border-light: #e8e6dc;
-            --text-light-main: #141413;
-            --text-light-secondary: #b0aea5;
-            --shadow-light: rgba(20,20,19,0.08);
-            --bg-dark: #141413;
-            --bg-card-dark: #1e1e1d;
-            --text-dark-main: #faf9f5;
-            --text-dark-secondary: #b0aea5;
-            --border-dark: #3a3a38;
-            --shadow-dark: rgba(0,0,0,0.4);
-            
-            /* Layout */
-            --container-max-width: 1200px;
-            --border-radius: 12px;
-            --spacing-xxs: 4px;
-            --spacing-xs: 8px;
-            --spacing-sm: 12px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-            --spacing-xxl: 48px;
-            
-            /* Typography */
-            --font-family-heading: 'Poppins', Arial, sans-serif;
-            --font-family-primary: 'Lora', Georgia, serif;
-            --font-size-xs: 0.75rem;
-            --font-size-sm: 0.875rem;
-            --font-size-base: 1rem;
-            --font-size-lg: 1.125rem;
-            --font-size-xl: 1.25rem;
-            --font-size-xxl: 1.5rem;
-            --font-size-xxxl: 2rem;
-            --font-weight-normal: 400;
-            --font-weight-medium: 500;
-            --font-weight-bold: 600;
-            --font-weight-extra-bold: 700;
-            
-            /* Animation */
-            --transition-fast: 0.15s ease;
-            --transition-normal: 0.3s ease;
-            --transition-slow: 0.5s ease;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            transition: background-color var(--transition-normal), 
-                        color var(--transition-normal), 
-                        border-color var(--transition-normal);
-        }
-
-        body {
-            font-family: var(--font-family-primary);
-            background: var(--bg-light);
-            color: var(--text-light-main);
-            min-height: 100vh;
-            line-height: 1.6;
-        }
-
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-family-heading);
-        }
-
-        body[data-theme="dark"] {
-            background: var(--bg-dark);
-            color: var(--text-dark-main);
-        }
-
-        .container {
-            max-width: var(--container-max-width);
-            margin: 0 auto;
-            padding: var(--spacing-md);
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: var(--spacing-xl);
-            padding: var(--spacing-lg) 0;
-        }
-
-        .header h1 {
-            font-size: var(--font-size-xxxl);
-            margin-bottom: var(--spacing-sm);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .header p {
-            font-size: var(--font-size-lg);
-            color: var(--text-light-secondary);
-        }
-
-        body[data-theme="dark"] .header p {
-            color: var(--text-dark-secondary);
-        }
-
-        /* Protocol Selection */
-        .protocol-selection {
-            margin: var(--spacing-xl) 0;
-        }
-
-        .protocol-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-lg);
-            margin-top: var(--spacing-lg);
-        }
-
-        .protocol-card {
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            padding: var(--spacing-xl);
-            border-radius: var(--border-radius);
-            text-align: center;
-            cursor: pointer;
-            transition: transform var(--transition-normal);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.1);
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        body[data-theme="dark"] .protocol-card {
-            background: linear-gradient(135deg, #d9775780, #c45a3a80);
-            border-color: rgba(255,255,255,0.1);
-        }
-
-        .protocol-card:hover {
-            transform: translateY(-5px) scale(1.02);
-        }
-
-        .protocol-card h3 {
-            margin-bottom: var(--spacing-sm);
-            font-size: var(--font-size-xl);
-        }
-
-        .protocol-card p {
-            font-size: var(--font-size-sm);
-            margin-bottom: var(--spacing-md);
-            opacity: 0.9;
-        }
-
-        .protocol-id {
-            font-family: monospace;
-            font-weight: var(--font-weight-bold);
-            background: rgba(0,0,0,0.2);
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border-radius: 6px;
-            margin-top: auto;
-            align-self: flex-start;
-        }
-
-        /* Features Section */
-        .features-section {
-            margin: var(--spacing-xxl) 0;
-            padding: var(--spacing-xl);
-            background: var(--bg-card-light);
-            border-radius: var(--border-radius);
-            border: 1px solid var(--border-light);
-        }
-
-        body[data-theme="dark"] .features-section {
-            background: var(--bg-card-dark);
-            border-color: var(--border-dark);
-        }
-
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: var(--spacing-lg);
-            margin-top: var(--spacing-lg);
-        }
-
-        .feature-card {
-            padding: var(--spacing-lg);
-            border: 1px solid var(--border-light);
-            border-radius: var(--border-radius);
-            background: var(--bg-light);
-            text-align: center;
-        }
-
-        body[data-theme="dark"] .feature-card {
-            background: var(--bg-card-dark);
-            border-color: var(--border-dark);
-            color: var(--text-dark-main);
-        }
-
-        .feature-card h3 {
-            color: var(--primary-gradient-start);
-            margin-bottom: var(--spacing-sm);
-        }
-
-        body[data-theme="dark"] .feature-card h3 {
-            color: #d97757;
-        }
-
-        .feature-card p {
-            font-size: var(--font-size-sm);
-            color: var(--text-light-secondary);
-        }
-
-        body[data-theme="dark"] .feature-card p {
-            color: var(--text-dark-secondary);
-        }
-
-        /* Stats Section */
-        .stats-section {
-            text-align: center;
-            margin: var(--spacing-xxl) 0 var(--spacing-lg);
-            padding: var(--spacing-xl);
-        }
-
-        .stats-link {
-            display: inline-block;
-            padding: var(--spacing-md) var(--spacing-xl);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: #faf9f5;
-            text-decoration: none;
-            border-radius: 25px;
-            font-family: var(--font-family-heading);
-            font-weight: var(--font-weight-bold);
-            font-size: var(--font-size-base);
-            transition: all var(--transition-normal);
-            box-shadow: 0 2px 10px rgba(217,119,87,0.3);
-        }
-
-        .stats-link:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(217,119,87,0.4);
-        }
-
-        /* Footer */
-        .footer {
-            text-align: center;
-            margin-top: var(--spacing-lg);
-            padding: var(--spacing-lg);
-            color: var(--text-light-secondary);
-            border-top: 1px solid var(--border-light);
-        }
-
-        body[data-theme="dark"] .footer {
-            color: var(--text-dark-secondary);
-            border-color: var(--border-dark);
-        }
-
-        /* Theme Toggle */
-        .theme-toggle {
-            position: fixed;
-            top: var(--spacing-lg);
-            right: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            transition: all var(--transition-normal);
-            font-weight: var(--font-weight-bold);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-        }
-
-        .theme-toggle:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-        }
-
-        body[data-theme="dark"] .theme-toggle {
-            background: rgba(0,0,0,0.3);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-
-        body[data-theme="dark"] .theme-toggle:hover {
-            background: rgba(0,0,0,0.4);
-        }
-
-        /* Coming Soon Badge */
-        .coming-soon-badge {
-            position: absolute;
-            top: var(--spacing-sm);
-            right: var(--spacing-sm);
-            background: rgba(217, 119, 87, 0.15);
-            color: #d97757;
-            padding: var(--spacing-xs) var(--spacing-sm);
-            border-radius: 20px;
-            font-size: var(--font-size-xs);
-            font-weight: var(--font-weight-bold);
-        }
-
-        /* Responsive Design */
-        @media screen and (max-width: 768px) {
-            .container {
-                padding: var(--spacing-sm);
-            }
-
-            .header h1 {
-                font-size: var(--font-size-xxl);
-            }
-
-            .protocol-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media screen and (max-width: 480px) {
-            .header h1 {
-                font-size: var(--font-size-xl);
-            }
-
-            .protocol-card {
-                padding: var(--spacing-lg);
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle" aria-label="切换深色主题">🌙 深色模式</button>
-    
-    <div class="container">
-        <header class="header" role="banner">
-            <h1>🚗 Visual Protocol</h1>
-            <p>多协议学习平台 - 15分钟极速掌握汽车通信协议</p>
-        </header>
-
-        <section class="protocol-selection">
-            <h2 style="text-align: center; color: var(--primary-gradient-start); margin-bottom: var(--spacing-lg);">
-                🎯 支持的协议标准
-            </h2>
-            <p style="text-align: center; color: var(--text-light-secondary); margin-bottom: var(--spacing-xl);">
-                通过可视化动画和交互式演示学习各种汽车通信协议
-            </p>
-            
-            <div class="protocol-grid">
-                <div class="protocol-card" onclick="selectProtocol('uds')">
-                    <h3>🔧 UDS协议</h3>
-                    <p>统一诊断服务 (ISO 14229)</p>
-                    <p>用于车辆诊断和ECU通信的标准协议</p>
-                    <div class="protocol-id">ISO 14229</div>
-                </div>
-                
-                <div class="protocol-card" onclick="selectProtocol('doip')" style="position: relative;">
-                    <div class="coming-soon-badge">开发中</div>
-                    <h3>🌐 DoIP协议</h3>
-                    <p>基于IP的诊断 (ISO 13400)</p>
-                    <p>通过以太网进行车辆诊断通信</p>
-                    <div class="protocol-id">ISO 13400</div>
-                </div>
-                
-                <div class="protocol-card" onclick="selectProtocol('someip')" style="position: relative;">
-                    <div class="coming-soon-badge">开发中</div>
-                    <h3>🔌 SOME/IP</h3>
-                    <p>面向服务的中间件</p>
-                    <p>下一代车载以太网通信架构</p>
-                    <div class="protocol-id">AUTOSAR</div>
-                </div>
-                
-                <div class="protocol-card" onclick="selectProtocol('can')" style="position: relative;">
-                    <div class="coming-soon-badge">开发中</div>
-                    <h3>🛰️ CAN协议</h3>
-                    <p>控制器局域网络 (ISO 11898)</p>
-                    <p>经典车载网络通信协议</p>
-                    <div class="protocol-id">ISO 11898</div>
-                </div>
-            </div>
-        </section>
-
-        <section class="features-section">
-            <h2 style="text-align: center; color: var(--primary-gradient-start); margin-bottom: var(--spacing-lg);">
-                🚀 平台核心功能
-            </h2>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <h3>🎯 基础概念</h3>
-                    <p>深入浅出地讲解协议核心概念和工作原理</p>
-                </div>
-                
-                <div class="feature-card">
-                    <h3>🔧 详细规范</h3>
-                    <p>完整的技术规范和消息格式定义</p>
-                </div>
-                
-                <div class="feature-card">
-                    <h3>🎮 交互演示</h3>
-                    <p>动画演示协议通信流程和交互过程</p>
-                </div>
-                
-                <div class="feature-card">
-                    <h3>🛠️ 实用工具</h3>
-                    <p>专业的协议分析和调试工具集</p>
-                </div>
-                
-                <div class="feature-card">
-                    <h3>🧠 知识测试</h3>
-                    <p>多样化的测试题型评估学习效果</p>
-                </div>
-                
-                <div class="feature-card">
-                    <h3>📚 学习资源</h3>
-                    <p>丰富的学习材料和最佳实践指南</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="stats-section">
-            <a href="https://cloud.umami.is/share/8DxQeDATUet96dDV" target="_blank" rel="noopener" class="stats-link">
-                📊 查看访问统计
+    <nav class="site-nav" role="navigation">
+        <div class="nav-inner container-wide">
+            <a href="/" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span class="nav-logo-text">Visual Protocol</span>
             </a>
-        </section>
+            <div class="nav-links">
+                <a href="#protocols">协议</a>
+                <a href="#features">功能</a>
+                <a href="https://github.com/jrtxio/visual-protocol" target="_blank" rel="noopener">GitHub</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
 
-        <footer class="footer">
-            <p>&copy; 2025 Visual Protocol - 多协议学习平台 | 让汽车通信协议学习更简单</p>
-            <p style="margin-top: var(--spacing-sm); font-size: var(--font-size-sm);">基于 Apache 2.0 许可证</p>
-        </footer>
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle"
+                style="display:block"
+                data-ad-client="ca-pub-3215512126020129"
+                data-ad-slot="7014497615"
+                data-ad-format="auto"
+                data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <header class="hero">
+                <div class="container">
+                    <h1 class="hero-title">理解汽车通信协议<br>从未如此直观</h1>
+                    <p class="hero-desc">通过可视化动画和交互式演示，15 分钟极速掌握 UDS、DoIP、CAN 等汽车通信协议的核心概念。</p>
+                    <div class="hero-actions">
+                        <a href="protocols/uds/" class="btn btn-primary">开始学习 UDS</a>
+                        <a href="#protocols" class="btn btn-secondary">浏览全部协议</a>
+                    </div>
+                </div>
+            </header>
+
+            <section class="protocols-section" id="protocols">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">支持的协议标准</h2>
+                        <p class="section-desc">选择一个协议，开始你的学习之旅</p>
+                    </div>
+
+                    <div class="protocol-grid">
+                        <a href="protocols/uds/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <div class="protocol-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+                                </div>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">UDS</h3>
+                            <p class="protocol-fullname">统一诊断服务</p>
+                            <p class="protocol-desc">车辆诊断和 ECU 通信的标准协议，涵盖诊断会话、数据读取、例程控制等核心服务。</p>
+                            <div class="protocol-standard">ISO 14229</div>
+                        </a>
+
+                        <a class="protocol-card protocol-card--coming">
+                            <div class="protocol-card-header">
+                                <div class="protocol-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+                                </div>
+                                <span class="protocol-status protocol-status--coming">开发中</span>
+                            </div>
+                            <h3 class="protocol-name">DoIP</h3>
+                            <p class="protocol-fullname">基于 IP 的诊断</p>
+                            <p class="protocol-desc">通过以太网进行车辆高速诊断通信，支持远程诊断和 OTA 更新。</p>
+                            <div class="protocol-standard">ISO 13400</div>
+                        </a>
+
+                        <a class="protocol-card protocol-card--coming">
+                            <div class="protocol-card-header">
+                                <div class="protocol-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+                                </div>
+                                <span class="protocol-status protocol-status--coming">开发中</span>
+                            </div>
+                            <h3 class="protocol-name">SOME/IP</h3>
+                            <p class="protocol-fullname">面向服务的中间件</p>
+                            <p class="protocol-desc">下一代车载以太网通信架构，基于服务发现机制的中间件协议。</p>
+                            <div class="protocol-standard">AUTOSAR</div>
+                        </a>
+
+                        <a class="protocol-card protocol-card--coming">
+                            <div class="protocol-card-header">
+                                <div class="protocol-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                                </div>
+                                <span class="protocol-status protocol-status--coming">开发中</span>
+                            </div>
+                            <h3 class="protocol-name">CAN</h3>
+                            <p class="protocol-fullname">控制器局域网络</p>
+                            <p class="protocol-desc">经典的车载网络通信协议，高可靠性、实时性的串行总线标准。</p>
+                            <div class="protocol-standard">ISO 11898</div>
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="features-section" id="features">
+                <div class="container">
+                    <div class="section-header">
+                        <h2 class="section-title">平台核心功能</h2>
+                        <p class="section-desc">为协议学习而设计的完整工具链</p>
+                    </div>
+
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
+                            </div>
+                            <h3>基础概念</h3>
+                            <p>深入浅出地讲解协议核心概念和工作原理，从零开始构建知识体系。</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            </div>
+                            <h3>详细规范</h3>
+                            <p>完整的技术规范和消息格式定义，按服务类别分门别类。</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                            </div>
+                            <h3>交互演示</h3>
+                            <p>动画演示协议通信流程，直观理解客户端与服务器的交互过程。</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>
+                            </div>
+                            <h3>实用工具</h3>
+                            <p>专业的协议分析和调试工具集，报文构造、解析一应俱全。</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                            </div>
+                            <h3>知识测试</h3>
+                            <p>多样化的测试题型，即时评估学习效果，巩固知识掌握。</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                            </div>
+                            <h3>学习资源</h3>
+                            <p>精选的学习材料和最佳实践指南，持续更新的知识库。</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <div class="container">
+                    <div class="cta-inner">
+                        <h2>准备好开始了吗？</h2>
+                        <p>从 UDS 协议开始，开启你的汽车通信协议学习之旅。</p>
+                        <a href="protocols/uds/" class="btn btn-primary">立即开始</a>
+                    </div>
+                </div>
+            </section>
+
+            <footer class="site-footer">
+                <div class="container">
+                    <div class="footer-inner">
+                        <div class="footer-left">
+                            <span class="footer-brand">Visual Protocol</span>
+                            <span class="footer-copy">&copy; 2025 &middot; 让汽车通信协议学习更简单</span>
+                        </div>
+                        <div class="footer-links">
+                            <a href="https://github.com/jrtxio/visual-protocol" target="_blank" rel="noopener">GitHub</a>
+                            <a href="https://github.com/jrtxio/visual-protocol/blob/main/LICENSE">Apache 2.0</a>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+            <ins class="adsbygoogle"
+                style="display:block"
+                data-ad-client="ca-pub-3215512126020129"
+                data-ad-slot="7014497615"
+                data-ad-format="auto"
+                data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
     </div>
 
-    <script>
-        // Theme switching functionality
-        function toggleTheme() {
-            const body = document.body;
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
-
-        // Protocol selection functionality
-        function selectProtocol(protocol) {
-            // Navigate to the protocol-specific page
-            if (protocol === 'uds') {
-                window.location.href = 'protocols/uds/';
-            } else {
-                // For other protocols, show alert for now
-                alert(`${protocol.toUpperCase()}协议学习功能正在开发中...\n请期待后续版本！`);
-            }
-        }
-
-        // Initialize theme on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (savedTheme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-            } else {
-                document.body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-            }
-            
-            // Add event listener to theme toggle button
-            themeToggle.addEventListener('click', toggleTheme);
-        });
-    </script>
+    <script src="assets/js/main.js"></script>
 </body>
 </html>

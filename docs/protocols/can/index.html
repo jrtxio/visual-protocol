@@ -3,38 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🛰️ CAN协议学习 - Visual Protocol</title>
-    <meta name="description" content="交互式CAN协议学习平台 - 通过可视化动画和演示帮助您理解控制器局域网络协议">
-
-    <!-- Google Fonts -->
+    <title>CAN 协议 — Visual Protocol</title>
+    <meta name="description" content="CAN 协议可视化学习：控制器局域网络（ISO 11898）帧结构、总线仲裁与错误处理机制。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Umami Analytics -->
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script async defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
     <style>
         :root {
-            --primary-gradient-start: #d97757;
-            --primary-gradient-end: #c45a3a;
-            --bg-light: #faf9f5;
-            --bg-card-light: #faf9f5;
-            --border-light: #e8e6dc;
-            --text-light-main: #141413;
-            --text-light-secondary: #b0aea5;
-            --bg-dark: #141413;
-            --bg-card-dark: #1e1e1d;
-            --text-dark-main: #faf9f5;
-            --text-dark-secondary: #b0aea5;
-            --border-dark: #3a3a38;
-            --border-radius: 12px;
-            --spacing-sm: 12px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-            --font-family-heading: 'Poppins', Arial, sans-serif;
-            --font-family: 'Lora', Georgia, serif;
+            --accent: #9B7ACC;
+            --accent-bg: #F5F0FF;
+            --bg: #F9F7F4;
+            --surface: #FFFFFF;
+            --text: #1C1917;
+            --text-2: #57534E;
+            --text-3: #A8A29E;
+            --border: #E7E5E4;
+        }
+
+        [data-theme="dark"] {
+            --accent: #B08FDD;
+            --accent-bg: #221A35;
+            --bg: #171412;
+            --surface: #231F1D;
+            --text: #E7E5E4;
+            --text-2: #A8A29E;
+            --text-3: #78716C;
+            --border: #3D3835;
         }
 
         * {
@@ -44,159 +40,246 @@
         }
 
         body {
-            font-family: var(--font-family);
-            background: var(--bg-light);
-            color: var(--text-light-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
             min-height: 100vh;
+            transition: background-color 0.2s, color 0.2s;
         }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-family-heading);
+        /* Navigation */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: background-color 0.2s, border-color 0.2s;
         }
 
-        body[data-theme="dark"] {
-            background: var(--bg-dark);
-            color: var(--text-dark-main);
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 24px;
         }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: var(--spacing-md);
+        .nav-logo {
+            font-weight: 700;
+            font-size: 16px;
+            color: var(--text);
+            text-decoration: none;
         }
 
-        .header {
-            text-align: center;
-            margin-bottom: var(--spacing-xl);
-            padding: var(--spacing-lg) 0;
+        .nav-link {
+            font-size: 14px;
+            color: var(--text-2);
+            text-decoration: none;
+            transition: color 0.15s;
         }
 
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: var(--spacing-sm);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .coming-soon {
-            text-align: center;
-            padding: var(--spacing-xl);
-            background: var(--bg-card-light);
-            border-radius: var(--border-radius);
-            margin: var(--spacing-lg) 0;
-            border: 1px solid var(--border-light);
-        }
-
-        body[data-theme="dark"] .coming-soon {
-            background: var(--bg-card-dark);
-            border-color: var(--border-dark);
-        }
-
-        .back-button {
-            position: fixed;
-            top: var(--spacing-lg);
-            left: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            font-weight: 600;
+        .nav-link:hover {
+            color: var(--text);
         }
 
         .theme-toggle {
-            position: fixed;
-            top: var(--spacing-lg);
-            right: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
+            background: none;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 6px 10px;
             cursor: pointer;
-            font-weight: 600;
+            color: var(--text-2);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.15s, color 0.15s;
         }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5rem;
+        .theme-toggle:hover {
+            border-color: var(--text-3);
+            color: var(--text);
+        }
+
+        /* Main content */
+        main {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 64px 24px 96px;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 8px;
+        }
+
+        .page-subtitle {
+            font-size: 16px;
+            color: var(--text-3);
+            font-weight: 400;
+        }
+
+        /* Card */
+        .card {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            text-align: center;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+
+        .badge {
+            display: inline-block;
+            background-color: var(--accent-bg);
+            color: var(--accent);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+        }
+
+        .card-description {
+            font-size: 15px;
+            color: var(--text-2);
+            margin-bottom: 24px;
+            line-height: 1.7;
+        }
+
+        .features-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .features-list {
+            list-style: none;
+            text-align: left;
+        }
+
+        .features-list li {
+            font-size: 14px;
+            color: var(--text-2);
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .features-list li:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .features-list li::before {
+            content: '';
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            margin-top: 7px;
+            flex-shrink: 0;
+        }
+
+        /* Ad placeholder */
+        .ad-container {
+            margin-top: 48px;
+            text-align: center;
+        }
+
+        @media (max-width: 480px) {
+            .page-title {
+                font-size: 26px;
             }
-            
-            .back-button, .theme-toggle {
-                padding: var(--spacing-sm) var(--spacing-md);
-                font-size: 0.9rem;
+
+            .card {
+                padding: 24px;
+            }
+
+            nav {
+                padding: 0 16px;
+            }
+
+            main {
+                padding: 48px 16px 64px;
             }
         }
     </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle" aria-label="切换深色主题">🌙 深色模式</button>
-    <button class="back-button" onclick="goBack()" aria-label="返回主页">🏠 返回主页</button>
-    
-    <div class="container">
-        <header class="header" role="banner">
-            <h1>🛰️ CAN协议学习</h1>
-            <p>控制器局域网络 - ISO 11898标准</p>
-        </header>
+    <nav>
+        <div class="nav-left">
+            <a href="../../index.html" class="nav-logo">Visual Protocol</a>
+            <a href="../../index.html" class="nav-link">返回主页</a>
+        </div>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题"></button>
+    </nav>
 
-        <div class="coming-soon">
-            <h2>🚧 功能开发中</h2>
-            <p>CAN协议学习功能正在紧张开发中...</p>
-            <p style="margin-top: var(--spacing-lg); font-size: 1.2rem;">
-                🔧 <strong>敬请期待！</strong> 🔧
+    <main>
+        <div class="page-header">
+            <h1 class="page-title">CAN 协议</h1>
+            <p class="page-subtitle">控制器局域网络 — ISO 11898</p>
+        </div>
+
+        <div class="card">
+            <span class="badge">开发中</span>
+            <p class="card-description">
+                CAN 协议的可视化学习内容正在制作中。我们将通过交互式图解，帮助你深入理解控制器局域网络的核心原理。
             </p>
-            <p style="margin-top: var(--spacing-md); color: var(--text-light-secondary);">
-                CAN协议将为您提供：
-            </p>
-            <ul style="margin: var(--spacing-md) auto; max-width: 500px; text-align: left; color: var(--text-light-secondary);">
-                <li>经典车载网络通信基础</li>
-                <li>差分信号传输机制</li>
-                <li>多主仲裁和错误检测</li>
-                <li>实时性强的通信保障</li>
+            <p class="features-title">即将推出的内容</p>
+            <ul class="features-list">
+                <li>经典 CAN 和 CAN FD 帧结构</li>
+                <li>总线仲裁与错误处理机制</li>
+                <li>高可靠性、实时性的通信原理</li>
+                <li>CAN 总线在车载网络中的应用</li>
             </ul>
         </div>
-    </div>
+
+        <div class="ad-container">
+            <ins class="adsbygoogle"
+                 style="display:block"
+                 data-ad-client="ca-pub-3215512126020129"
+                 data-ad-slot="7014497615"
+                 data-ad-format="auto"
+                 data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </div>
+    </main>
 
     <script>
-        // Theme toggle functionality
+        function getTheme() {
+            return localStorage.getItem('vp-theme') || 'light';
+        }
+
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            var btn = document.querySelector('.theme-toggle');
+            btn.textContent = theme === 'dark' ? '浅色' : '深色';
+        }
+
         function toggleTheme() {
-            const body = document.body;
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-                localStorage.setItem('theme', 'dark');
-            }
+            var current = getTheme();
+            var next = current === 'dark' ? 'light' : 'dark';
+            localStorage.setItem('vp-theme', next);
+            applyTheme(next);
         }
 
-        // Back to home page
-        function goBack() {
-            window.location.href = '../../index.html';
-        }
-
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (savedTheme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-            } else {
-                document.body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-            }
-            
-            themeToggle.addEventListener('click', toggleTheme);
-        });
+        applyTheme(getTheme());
     </script>
 </body>
 </html>

@@ -1,202 +1,407 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🔌 SOME/IP协议学习 - Visual Protocol</title>
-    <meta name="description" content="交互式SOME/IP协议学习平台 - 通过可视化动画和演示帮助您理解面向服务的中间件协议">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOME/IP 协议 — Visual Protocol</title>
+  <meta name="description" content="SOME/IP 协议可视化学习，面向服务的中间件，AUTOSAR 车载以太网通信。">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Umami Analytics -->
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+  <!-- Google AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
 
-    <style>
-        :root {
-            --primary-gradient-start: #d97757;
-            --primary-gradient-end: #c45a3a;
-            --bg-light: #faf9f5;
-            --bg-card-light: #faf9f5;
-            --border-light: #e8e6dc;
-            --text-light-main: #141413;
-            --text-light-secondary: #b0aea5;
-            --bg-dark: #141413;
-            --bg-card-dark: #1e1e1d;
-            --text-dark-main: #faf9f5;
-            --text-dark-secondary: #b0aea5;
-            --border-dark: #3a3a38;
-            --border-radius: 12px;
-            --spacing-sm: 12px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-            --font-family-heading: 'Poppins', Arial, sans-serif;
-            --font-family: 'Lora', Georgia, serif;
-        }
+  <!-- Umami Analytics -->
+  <script async defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <style>
+    /* ---------- Reset & Base ---------- */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: var(--font-family);
-            background: var(--bg-light);
-            color: var(--text-light-main);
-            min-height: 100vh;
-        }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      transition: background-color 0.25s ease, color 0.25s ease;
+    }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-family-heading);
-        }
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
 
-        body[data-theme="dark"] {
-            background: var(--bg-dark);
-            color: var(--text-dark-main);
-        }
+    ul {
+      list-style: none;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: var(--spacing-md);
-        }
+    /* ---------- Light Theme (default) ---------- */
+    [data-theme="light"] body,
+    body {
+      background-color: #F9F7F4;
+      color: #1C1917;
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: var(--spacing-xl);
-            padding: var(--spacing-lg) 0;
-        }
+    [data-theme="light"] .nav,
+    :root .nav {
+      background-color: #FFFFFF;
+      border-bottom: 1px solid #E7E5E4;
+    }
 
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: var(--spacing-sm);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    [data-theme="light"] .card,
+    :root .card {
+      background-color: #FFFFFF;
+      border: 1px solid #E7E5E4;
+    }
 
-        .coming-soon {
-            text-align: center;
-            padding: var(--spacing-xl);
-            background: var(--bg-card-light);
-            border-radius: var(--border-radius);
-            margin: var(--spacing-lg) 0;
-            border: 1px solid var(--border-light);
-        }
+    [data-theme="light"] .badge,
+    :root .badge {
+      background-color: #F0F5EC;
+      color: #788C5D;
+    }
 
-        body[data-theme="dark"] .coming-soon {
-            background: var(--bg-card-dark);
-            border-color: var(--border-dark);
-        }
+    [data-theme="light"] .text-secondary,
+    :root .text-secondary {
+      color: #57534E;
+    }
 
-        .back-button {
-            position: fixed;
-            top: var(--spacing-lg);
-            left: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            font-weight: 600;
-        }
+    [data-theme="light"] .text-tertiary,
+    :root .text-tertiary {
+      color: #A8A29E;
+    }
 
-        .theme-toggle {
-            position: fixed;
-            top: var(--spacing-lg);
-            right: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            font-weight: 600;
-        }
+    [data-theme="light"] .feature-item::before,
+    :root .feature-item::before {
+      color: #788C5D;
+    }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .back-button, .theme-toggle {
-                padding: var(--spacing-sm) var(--spacing-md);
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+    [data-theme="light"] .theme-toggle svg,
+    :root .theme-toggle svg {
+      stroke: #57534E;
+    }
+
+    [data-theme="light"] .accent-link,
+    :root .accent-link {
+      color: #788C5D;
+    }
+
+    [data-theme="light"] .accent-link:hover,
+    :root .accent-link:hover {
+      color: #5c6d47;
+    }
+
+    /* ---------- Dark Theme ---------- */
+    [data-theme="dark"] body {
+      background-color: #171412;
+      color: #E7E5E4;
+    }
+
+    [data-theme="dark"] .nav {
+      background-color: #231F1D;
+      border-bottom: 1px solid #3D3835;
+    }
+
+    [data-theme="dark"] .card {
+      background-color: #231F1D;
+      border: 1px solid #3D3835;
+    }
+
+    [data-theme="dark"] .badge {
+      background-color: #1D2418;
+      color: #8FA374;
+    }
+
+    [data-theme="dark"] .text-secondary {
+      color: #A8A29E;
+    }
+
+    [data-theme="dark"] .text-tertiary {
+      color: #78716C;
+    }
+
+    [data-theme="dark"] .feature-item::before {
+      color: #8FA374;
+    }
+
+    [data-theme="dark"] .theme-toggle svg {
+      stroke: #A8A29E;
+    }
+
+    [data-theme="dark"] .accent-link {
+      color: #8FA374;
+    }
+
+    [data-theme="dark"] .accent-link:hover {
+      color: #a7b98e;
+    }
+
+    /* ---------- Navigation ---------- */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 56px;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .logo {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .nav-link {
+      font-size: 14px;
+      font-weight: 500;
+      transition: opacity 0.15s ease;
+    }
+
+    .nav-link:hover {
+      opacity: 0.7;
+    }
+
+    .theme-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: opacity 0.15s ease;
+    }
+
+    .theme-toggle:hover {
+      opacity: 0.7;
+    }
+
+    .theme-toggle svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    /* ---------- Main Content ---------- */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+    }
+
+    .page-title {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      text-align: center;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      font-weight: 400;
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    /* ---------- Card ---------- */
+    .card {
+      max-width: 520px;
+      width: 100%;
+      border-radius: 12px;
+      padding: 40px;
+      text-align: center;
+      transition: background-color 0.25s ease, border-color 0.25s ease;
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+      letter-spacing: 0.02em;
+    }
+
+    .card-description {
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .features-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 16px;
+    }
+
+    .features-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .feature-item {
+      font-size: 14px;
+      font-weight: 500;
+      padding-left: 20px;
+      position: relative;
+    }
+
+    .feature-item::before {
+      content: "\25B8";
+      position: absolute;
+      left: 0;
+      font-size: 12px;
+    }
+
+    /* ---------- Footer ---------- */
+    .footer {
+      text-align: center;
+      padding: 24px;
+      font-size: 13px;
+    }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 600px) {
+      .page-title {
+        font-size: 24px;
+      }
+
+      .card {
+        padding: 28px 24px;
+      }
+
+      .nav {
+        padding: 0 16px;
+      }
+    }
+  </style>
 </head>
-<body>
-    <button class="theme-toggle" id="themeToggle" aria-label="切换深色主题">🌙 深色模式</button>
-    <button class="back-button" onclick="goBack()" aria-label="返回主页">🏠 返回主页</button>
-    
-    <div class="container">
-        <header class="header" role="banner">
-            <h1>🔌 SOME/IP协议学习</h1>
-            <p>面向服务的中间件 - AUTOSAR标准</p>
-        </header>
+<body data-theme="light">
 
-        <div class="coming-soon">
-            <h2>🚧 功能开发中</h2>
-            <p>SOME/IP协议学习功能正在紧张开发中...</p>
-            <p style="margin-top: var(--spacing-lg); font-size: 1.2rem;">
-                🔧 <strong>敬请期待！</strong> 🔧
-            </p>
-            <p style="margin-top: var(--spacing-md); color: var(--text-light-secondary);">
-                SOME/IP协议将为您提供：
-            </p>
-            <ul style="margin: var(--spacing-md) auto; max-width: 500px; text-align: left; color: var(--text-light-secondary);">
-                <li>基于服务的通信架构</li>
-                <li>高效的消息序列化机制</li>
-                <li>服务发现和注册功能</li>
-                <li>支持大规模分布式系统</li>
-            </ul>
-        </div>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-left">
+      <a href="../../index.html" class="logo">Visual Protocol</a>
+      <a href="../../index.html" class="nav-link accent-link">返回主页</a>
     </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="5"></circle>
+        <line x1="12" y1="1" x2="12" y2="3"></line>
+        <line x1="12" y1="21" x2="12" y2="23"></line>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+        <line x1="1" y1="12" x2="3" y2="12"></line>
+        <line x1="21" y1="12" x2="23" y2="12"></line>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+      </svg>
+      <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none;">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+    </button>
+  </nav>
 
-    <script>
-        // Theme toggle functionality
-        function toggleTheme() {
-            const body = document.body;
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-                localStorage.setItem('theme', 'dark');
-            }
+  <!-- Main Content -->
+  <main class="main">
+    <h1 class="page-title">SOME/IP 协议</h1>
+    <p class="page-subtitle text-secondary">面向服务的中间件 — AUTOSAR</p>
+
+    <div class="card">
+      <span class="badge">开发中</span>
+      <p class="card-description text-secondary">
+        SOME/IP 协议的可视化学习内容正在筹备中。以下是我们计划涵盖的内容：
+      </p>
+      <p class="features-title text-tertiary">即将推出</p>
+      <ul class="features-list">
+        <li class="feature-item text-secondary">服务发现机制 (SD) 详解</li>
+        <li class="feature-item text-secondary">面向服务的通信架构</li>
+        <li class="feature-item text-secondary">序列化协议与消息格式</li>
+        <li class="feature-item text-secondary">下一代车载以太网应用</li>
+      </ul>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer text-tertiary">
+    Visual Protocol &mdash; 协议可视化学习
+  </footer>
+
+  <!-- AdSense Ad Unit -->
+  <ins class="adsbygoogle"
+       style="display:block"
+       data-ad-client="ca-pub-3215512126020129"
+       data-ad-slot="7014497615"
+       data-ad-format="auto"
+       data-full-width-responsive="true"></ins>
+  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+
+  <!-- Theme Toggle Script -->
+  <script>
+    (function () {
+      const key = 'vp-theme';
+      const toggle = document.getElementById('themeToggle');
+      const iconSun = document.getElementById('iconSun');
+      const iconMoon = document.getElementById('iconMoon');
+
+      function applyTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          iconSun.style.display = 'none';
+          iconMoon.style.display = 'block';
+        } else {
+          iconSun.style.display = 'block';
+          iconMoon.style.display = 'none';
         }
+      }
 
-        // Back to home page
-        function goBack() {
-            window.location.href = '../../index.html';
-        }
+      // Initialize from localStorage
+      const saved = localStorage.getItem(key);
+      if (saved === 'dark' || saved === 'light') {
+        applyTheme(saved);
+      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        applyTheme('dark');
+      } else {
+        applyTheme('light');
+      }
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (savedTheme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-            } else {
-                document.body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-            }
-            
-            themeToggle.addEventListener('click', toggleTheme);
-        });
-    </script>
+      toggle.addEventListener('click', function () {
+        const current = document.body.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem(key, next);
+      });
+    })();
+  </script>
+
 </body>
 </html>

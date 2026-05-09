@@ -1,202 +1,347 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🌐 DoIP协议学习 - Visual Protocol</title>
-    <meta name="description" content="交互式DoIP协议学习平台 - 通过可视化动画和演示帮助您理解基于IP的诊断协议">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DoIP 协议 — Visual Protocol</title>
+  <meta name="description" content="DoIP 协议（ISO 13400）可视化学习指南：基于 IP 的诊断通信，远程诊断与 OTA 更新能力。">
 
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Umami Analytics -->
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+  <!-- AdSense -->
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
 
-    <style>
-        :root {
-            --primary-gradient-start: #d97757;
-            --primary-gradient-end: #c45a3a;
-            --bg-light: #faf9f5;
-            --bg-card-light: #faf9f5;
-            --border-light: #e8e6dc;
-            --text-light-main: #141413;
-            --text-light-secondary: #b0aea5;
-            --bg-dark: #141413;
-            --bg-card-dark: #1e1e1d;
-            --text-dark-main: #faf9f5;
-            --text-dark-secondary: #b0aea5;
-            --border-dark: #3a3a38;
-            --border-radius: 12px;
-            --spacing-sm: 12px;
-            --spacing-md: 16px;
-            --spacing-lg: 24px;
-            --spacing-xl: 32px;
-            --font-family-heading: 'Poppins', Arial, sans-serif;
-            --font-family: 'Lora', Georgia, serif;
-        }
+  <!-- Umami Analytics -->
+  <script async defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <style>
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        body {
-            font-family: var(--font-family);
-            background: var(--bg-light);
-            color: var(--text-light-main);
-            min-height: 100vh;
-        }
+    :root {
+      --accent: #6A9BCC;
+      --accent-bg: #EFF6FF;
+      --bg: #F9F7F4;
+      --surface: #FFFFFF;
+      --text: #1C1917;
+      --text-2: #57534E;
+      --text-3: #A8A29E;
+      --border: #E7E5E4;
+    }
 
-        h1, h2, h3, h4, h5, h6 {
-            font-family: var(--font-family-heading);
-        }
+    [data-theme="dark"] {
+      --accent: #7DB4DD;
+      --accent-bg: #1A2535;
+      --bg: #171412;
+      --surface: #231F1D;
+      --text: #E7E5E4;
+      --text-2: #A8A29E;
+      --text-3: #78716C;
+      --border: #3D3835;
+    }
 
-        body[data-theme="dark"] {
-            background: var(--bg-dark);
-            color: var(--text-dark-main);
-        }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: var(--spacing-md);
-        }
+    /* Navigation */
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background-color: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 24px;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
 
-        .header {
-            text-align: center;
-            margin-bottom: var(--spacing-xl);
-            padding: var(--spacing-lg) 0;
-        }
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+    }
 
-        .header h1 {
-            font-size: 2rem;
-            margin-bottom: var(--spacing-sm);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
+    .nav-logo {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.02em;
+    }
 
-        .coming-soon {
-            text-align: center;
-            padding: var(--spacing-xl);
-            background: var(--bg-card-light);
-            border-radius: var(--border-radius);
-            margin: var(--spacing-lg) 0;
-            border: 1px solid var(--border-light);
-        }
+    .nav-logo:hover {
+      color: var(--accent);
+    }
 
-        body[data-theme="dark"] .coming-soon {
-            background: var(--bg-card-dark);
-            border-color: var(--border-dark);
-        }
+    .nav-link {
+      font-size: 14px;
+      color: var(--text-2);
+      text-decoration: none;
+      transition: color 0.15s;
+    }
 
-        .back-button {
-            position: fixed;
-            top: var(--spacing-lg);
-            left: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            font-weight: 600;
-        }
+    .nav-link:hover {
+      color: var(--accent);
+    }
 
-        .theme-toggle {
-            position: fixed;
-            top: var(--spacing-lg);
-            right: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
-            cursor: pointer;
-            font-weight: 600;
-        }
+    .theme-toggle {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-2);
+      transition: all 0.15s;
+    }
 
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 1.5rem;
-            }
-            
-            .back-button, .theme-toggle {
-                padding: var(--spacing-sm) var(--spacing-md);
-                font-size: 0.9rem;
-            }
-        }
-    </style>
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .theme-toggle svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 80px 24px 120px;
+    }
+
+    .page-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .page-title {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+      color: var(--text);
+    }
+
+    .page-subtitle {
+      font-size: 16px;
+      color: var(--text-2);
+      font-weight: 400;
+    }
+
+    /* Card */
+    .card {
+      background-color: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 48px;
+      max-width: 600px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-block;
+      background-color: var(--accent-bg);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+      letter-spacing: 0.02em;
+    }
+
+    .card-description {
+      font-size: 15px;
+      color: var(--text-2);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+
+    .card-divider {
+      height: 1px;
+      background-color: var(--border);
+      margin: 0 -48px 32px;
+    }
+
+    .features-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 20px;
+    }
+
+    .features-list {
+      list-style: none;
+      text-align: left;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .features-list li {
+      font-size: 14px;
+      color: var(--text-2);
+      padding-left: 24px;
+      position: relative;
+      line-height: 1.6;
+    }
+
+    .features-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 9px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background-color: var(--accent);
+    }
+
+    /* Ad container */
+    .ad-container {
+      margin-top: 48px;
+      max-width: 600px;
+      width: 100%;
+    }
+
+    /* Responsive */
+    @media (max-width: 640px) {
+      .main {
+        padding: 48px 16px 80px;
+      }
+
+      .page-title {
+        font-size: 28px;
+      }
+
+      .card {
+        padding: 32px 24px;
+      }
+
+      .card-divider {
+        margin: 0 -24px 24px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle" aria-label="切换深色主题">🌙 深色模式</button>
-    <button class="back-button" onclick="goBack()" aria-label="返回主页">🏠 返回主页</button>
-    
-    <div class="container">
-        <header class="header" role="banner">
-            <h1>🌐 DoIP协议学习</h1>
-            <p>基于IP的诊断 - ISO 13400标准</p>
-        </header>
+  <!-- Navigation -->
+  <nav class="nav">
+    <div class="nav-left">
+      <a href="../../index.html" class="nav-logo">Visual Protocol</a>
+      <a href="../../index.html" class="nav-link">返回主页</a>
+    </div>
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+      <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none;">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+      </svg>
+    </button>
+  </nav>
 
-        <div class="coming-soon">
-            <h2>🚧 功能开发中</h2>
-            <p>DoIP协议学习功能正在紧张开发中...</p>
-            <p style="margin-top: var(--spacing-lg); font-size: 1.2rem;">
-                🔧 <strong>敬请期待！</strong> 🔧
-            </p>
-            <p style="margin-top: var(--spacing-md); color: var(--text-light-secondary);">
-                DoIP协议将为您提供：
-            </p>
-            <ul style="margin: var(--spacing-md) auto; max-width: 500px; text-align: left; color: var(--text-light-secondary);">
-                <li>基于以太网的高速诊断通信</li>
-                <li>远程诊断和OTA更新能力</li>
-                <li>现代化的诊断服务架构</li>
-                <li>与传统UDS协议的无缝集成</li>
-            </ul>
-        </div>
+  <!-- Main Content -->
+  <main class="main">
+    <div class="page-header">
+      <h1 class="page-title">DoIP 协议</h1>
+      <p class="page-subtitle">基于 IP 的诊断 — ISO 13400</p>
     </div>
 
-    <script>
-        // Theme toggle functionality
-        function toggleTheme() {
-            const body = document.body;
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (body.getAttribute('data-theme') === 'dark') {
-                body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-                localStorage.setItem('theme', 'light');
-            } else {
-                body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-                localStorage.setItem('theme', 'dark');
-            }
-        }
+    <div class="card">
+      <span class="badge">开发中</span>
+      <p class="card-description">
+        我们正在精心制作 DoIP 协议的交互式可视化教程，涵盖从基础概念到实际应用的完整学习路径。以下内容即将上线：
+      </p>
+      <div class="card-divider"></div>
+      <p class="features-label">即将推出的内容</p>
+      <ul class="features-list">
+        <li>基于以太网的高速诊断通信</li>
+        <li>远程诊断和 OTA 更新能力</li>
+        <li>现代化的诊断服务架构</li>
+        <li>与传统 UDS 协议的无缝集成</li>
+      </ul>
+    </div>
 
-        // Back to home page
-        function goBack() {
-            window.location.href = '../../index.html';
-        }
+    <!-- AdSense -->
+    <div class="ad-container">
+      <ins class="adsbygoogle"
+        style="display:block"
+        data-ad-client="ca-pub-3215512126020129"
+        data-ad-slot="7014497615"
+        data-ad-format="auto"
+        data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </main>
 
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            const themeToggle = document.getElementById('themeToggle');
-            
-            if (savedTheme === 'dark') {
-                document.body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
-            } else {
-                document.body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
-            }
-            
-            themeToggle.addEventListener('click', toggleTheme);
-        });
-    </script>
+  <!-- Theme Toggle -->
+  <script>
+    (function () {
+      const key = 'vp-theme';
+      const toggle = document.getElementById('themeToggle');
+      const iconSun = document.getElementById('iconSun');
+      const iconMoon = document.getElementById('iconMoon');
+
+      function applyTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        if (theme === 'dark') {
+          iconSun.style.display = 'none';
+          iconMoon.style.display = 'block';
+        } else {
+          iconSun.style.display = 'block';
+          iconMoon.style.display = 'none';
+        }
+      }
+
+      const stored = localStorage.getItem(key);
+      if (stored) {
+        applyTheme(stored);
+      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        applyTheme('dark');
+      }
+
+      toggle.addEventListener('click', function () {
+        const current = document.body.getAttribute('data-theme');
+        const next = current === 'dark' ? 'light' : 'dark';
+        applyTheme(next);
+        localStorage.setItem(key, next);
+      });
+    })();
+  </script>
 </body>
 </html>
