@@ -193,6 +193,935 @@
                     <button class="tab-button" role="tab" aria-selected="false" aria-controls="quiz-tab" data-tab="quiz">知识测试</button>
                 </nav>
 
+        <section id="basics-tab" class="content-section active" role="tabpanel">
+            <h2 class="section-title">🎯 UDS协议基础概念</h2>
+            <p>UDS（统一诊断服务，Unified Diagnostic Services）是ISO 14229标准定义的汽车诊断协议，允许诊断工具与汽车电子控制单元(ECU)进行双向通信。UDS协议提供了一套标准化的诊断服务，使不同制造商的诊断工具能够与各种ECU进行通信。</p>
+
+            <div style="margin: var(--spacing-lg) 0; padding: var(--spacing-lg); background: var(--bg-card-light); border-radius: var(--border-radius); border: 1px solid var(--border-light);">
+                <h3 style="color: var(--primary-gradient-start); margin-bottom: var(--spacing-md);">协议核心概念详解</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-md);">
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🌐</span> 客户端-服务器模型
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议采用经典的客户端-服务器架构。诊断设备（如诊断仪、测试设备）作为客户端，车辆ECU作为服务器。客户端主动发起诊断请求，服务器接收请求后处理并返回响应。这种模式确保了通信的方向性和控制性。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔧</span> 服务导向架构
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议定义了一组标准化的诊断服务，每个服务由唯一的服务ID（SID）标识。每个服务执行特定功能，如读取数据、执行例程、控制会话等。服务ID通常为一个字节，例如0x10表示诊断会话控制，0x27表示安全访问。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔒</span> 分层安全机制
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议实现了多层安全保护机制。会话控制管理ECU的工作状态，安全访问通过种子-密钥机制认证用户权限，通信控制可以暂时关闭ECU的通信功能。这些机制共同保障了ECU的安全。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>📈</span> 诊断数据管理
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议提供全面的诊断数据管理功能，包括故障码（DTC）管理、数据读写、例程控制等。故障码用于记录车辆故障，数据读写用于获取或修改ECU参数，例程控制用于执行特定的诊断程序。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔄</span> 诊断会话管理
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS协议定义了不同的诊断会话级别（默认会话、编程会话、扩展会话等）。会话决定了ECU响应哪些诊断服务以及可用的功能。会话管理是UDS通信的第一步。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔑</span> 安全访问机制
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS通过安全访问服务（0x27）实现多级安全认证。采用种子-密钥算法，诊断工具需获取种子并计算正确密钥才能完成认证，访问受保护的功能，如ECU刷写。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>📊</span> 故障码管理系统（DTC）
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS提供完整的故障码管理功能，包括故障码的存储、读取、清除等。故障码按照标准格式定义，包含故障类型、系统和具体代码信息，便于故障诊断和维修。</p>
+                    </div>
+                    
+                    <div style="padding: var(--spacing-md); border: 1px solid var(--border-light); border-radius: var(--border-radius); background: var(--bg-light);">
+                        <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0; display: flex; align-items: center; gap: var(--spacing-xs);">
+                            <span>🔄</span> 例行程序控制
+                        </h4>
+                        <p style="margin: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                            UDS支持在ECU上执行特定的诊断例行程序，如执行器测试、传感器校验、系统初始化等。例行程序控制允许诊断工具触发ECU执行预定义的诊断功能。</p>
+                    </div>
+                </div>
+                
+                <h4 style="color: var(--primary-gradient-start); margin: var(--spacing-lg) 0 var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-xs);">
+                    <span>🔄</span> 协议栈结构
+                </h4>
+                <p style="margin: 0 0 var(--spacing-md) 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">UDS协议遵循ISO标准的通信模型，分为应用层、会话层、传输层、网络层和数据链路层。各层协同工作，确保诊断消息从客户端可靠传输到服务器。传输层通过ISO-TP协议处理超过8字节的长消息分段传输。</p>
+                
+                <!-- Static Protocol Stack Visualization -->
+                <div style="display: flex; justify-content: center; align-items: center; margin: var(--spacing-md) 0; background: var(--bg-light); border-radius: var(--border-radius); padding: var(--spacing-lg);">
+                    <div style="display: flex; flex-direction: column; align-items: stretch; width: 200px;">
+                        <div style="background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">应用层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">UDS服务</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #6a9bcc, #5a8ab5); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">会话层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">会话管理</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #FF9800, #F57C00); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">传输层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">ISO-TP</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #9C27B0, #7B1FA2); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center; margin-bottom: var(--spacing-xs);">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">网络层</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">CAN/Eth</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #607D8B, #455A64); color: white; padding: var(--spacing-md); border-radius: var(--border-radius); text-align: center;">
+                            <div style="font-weight: var(--font-weight-bold); font-size: var(--font-size-base);">数据链路</div>
+                            <div style="font-size: var(--font-size-sm); opacity: 0.9;">物理接口</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-top: var(--spacing-md); padding: var(--spacing-md); background: rgba(102, 126, 234, 0.05); border-radius: var(--border-radius);">
+                    <h4 style="color: var(--primary-gradient-start); margin: 0 0 var(--spacing-sm) 0;">UDS协议关键特点</h4>
+                    <ul style="margin: 0 0 0 var(--spacing-lg); padding: 0; font-size: var(--font-size-sm); color: var(--text-light-secondary);">
+                        <li>标准化：遵循ISO 14229国际标准，确保不同厂商设备间的互操作性</li>
+                        <li>可扩展：支持OEM特定的扩展服务和数据标识符</li>
+                        <li>安全性：通过分层安全机制保护ECU免受未授权访问</li>
+                        <li>兼容性：支持CAN、以太网等多种传输介质</li>
+                        <li>实用性：覆盖完整的车辆诊断和维修需求</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 服务详解标签 -->
+        <section id="services-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🔧 8大核心UDS服务详解</h2>
+            <p>覆盖汽车诊断的完整功能集，从会话管理到固件更新</p>
+
+            <div id="servicesGrid">
+                <!-- 服务详细介绍将通过JavaScript动态生成 -->
+            </div>
+        </section>
+
+        <!-- 交互演示标签 -->
+        <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🎮 交互演示：实时UDS通信</h2>
+            <p>通过可视化动画，观察UDS协议在诊断工具和车辆ECU之间的完整通信流程。</p>
+
+            <div class="demo-controls">
+                    <button class="demo-button" onclick="startDemo('session')" title="演示诊断会话建立流程">
+                        🔄 会话建立演示
+                    </button>
+                    <button class="demo-button" onclick="startDemo('security')" title="演示安全访问流程">
+                        🔐 安全访问演示
+                    </button>
+                    <button class="demo-button" onclick="startDemo('read')" title="演示数据读取流程">
+                        📊 数据读取演示
+                    </button>
+                    <button class="demo-button" onclick="startDemo('dtc')" title="演示故障码读取流程">
+                        ⚠️ 故障码演示
+                    </button>
+                    <button class="demo-button" onclick="animateProtocolFlow()" title="演示协议栈中数据处理流程">
+                        📹 协议栈流演示
+                    </button>
+                    <button class="demo-button" onclick="showProtocolMessageFlow()" title="展示消息在协议栈中的流向">
+                        🔄 消息流向演示
+                    </button>
+                    <button class="demo-button" onclick="showRequestResponseFlow()" title="展示请求和响应的完整流程">
+                        🔄 请求-响应流程
+                    </button>
+                    <button class="demo-button" onclick="resetDemo()" aria-label="重置演示" title="重置演示状态">
+                        🔄 重置
+                    </button>
+                </div>
+
+            <div class="device-container">
+                <div class="device client" id="clientDevice">
+                    <div class="device-content">
+                        <div class="device-icon">🖥️</div>
+                        <div class="device-name">诊断工具</div>
+                        <div class="device-status" id="clientStatus">就绪</div>
+                    </div>
+                </div>
+                <div class="connection-line" id="connectionLine" aria-hidden="true"></div>
+                <div class="device server" id="serverDevice">
+                    <div class="device-content">
+                        <div class="device-icon">🚗</div>
+                        <div class="device-name">车辆ECU</div>
+                        <div class="device-status" id="serverStatus">待机</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="communicationLog" class="log">
+                <div class="log-entry">
+                    <span class="log-timestamp">[12:00:00]</span>
+                    <span class="log-info">💡 点击上方任意按钮开始实时演示...</span>
+                </div>
+                <div class="log-entry">
+                    <span class="log-timestamp">[12:00:00]</span>
+                    <span class="log-info">🗣️ 系统会模拟完整的UDS通信流程</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 实用工具标签 -->
+        <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🛠️ 实用工具集</h2>
+            <p>为UDS协议开发和调试提供专业工具支持</p>
+
+            <div class="tools-container">
+                <div class="tool-card">
+                    <h3 class="tool-title">📊 UDS消息解析器</h3>
+                    <p>解析十六进制格式的UDS消息，显示各字段含义</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="messageInput" placeholder="输入十六进制消息 (如: 10 03 FF 00 00)" aria-label="UDS消息输入">
+                        <button class="tool-button" onclick="parseUDSMessage()">解析</button>
+                    </div>
+                    <div id="parseResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">🔢 十进制转换器</h3>
+                    <p>在十六进制、十进制、二进制之间进行转换</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="hexInput" placeholder="输入数值" aria-label="数值输入">
+                        <button class="tool-button" onclick="convertNumber()">转换</button>
+                    </div>
+                    <div id="convertResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">🔧 服务ID查询</h3>
+                    <p>快速查找UDS服务ID对应的功能描述</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="serviceIdInput" placeholder="输入服务ID (如: 0x10)" aria-label="服务ID输入">
+                        <button class="tool-button" onclick="lookupServiceId()">查询</button>
+                    </div>
+                    <div id="serviceResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">📊 DID (数据标识符) 查询</h3>
+                    <p>查找DID对应的车辆数据信息</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="didInput" placeholder="输入DID (如: 0xF190)" aria-label="DID输入">
+                        <button class="tool-button" onclick="lookupDID()">查询</button>
+                    </div>
+                    <div id="didResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+
+                <div class="tool-card">
+                    <h3 class="tool-title">🔄 例程ID查询</h3>
+                    <p>查找例程ID对应的功能描述</p>
+                    <div class="tool-controls">
+                        <input type="text" class="tool-input" id="routineIdInput" placeholder="输入例程ID (如: 0xFF00)" aria-label="例程ID输入">
+                        <button class="tool-button" onclick="lookupRoutineId()">查询</button>
+                    </div>
+                    <div id="routineResult" style="margin-top: var(--spacing-md);"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 知识测试标签 -->
+        <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+            <h2 class="section-title">🧠 知识测试：UDS协议专家认证</h2>
+            
+            <div class="quiz-container" id="quizContainer">
+                <div id="questionArea">
+                    <!-- 问题将通过JavaScript动态生成 -->
+                </div>
+                
+                <div id="quizResults" class="quiz-results" style="display: none;">
+                    <div class="results-box">
+                        <h3>🎯 测试完成！</h3>
+                        <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">0</span></div>
+                        <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                    </div>
+                    <button class="demo-button" onclick="restartQuiz()">🔄 重新测试</button>
+                </div>
+            </div>
+        </section>
+    <script>
+        // ======================
+        // 应用状态管理
+        // ======================
+        let currentTab = 'basics';
+        let quizState = {
+            currentQuestion: 0,
+            score: 0,
+            answered: false
+        };
+        let demoActive = false;
+        let progress = 0;
+
+        // ======================
+        // UDS服务数据
+        // ======================
+        const UDS_SERVICES = {
+            0x10: {
+                name: "诊断会话控制",
+                description: "建立和管理不同级别的诊断会话",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 默认会话 (Default Session)",
+                    "• 0x02 - 编程会话 (Programming Session)", 
+                    "• 0x03 - 扩展诊断会话 (Extended Diagnostic Session)",
+                    "• 0x04-0xFF - OEM特定会话 (OEM Specific Sessions)"
+                ],
+                examples: [
+                    "请求: 0x10 0x03 (进入扩展会话)",
+                    "响应: 0x50 0x03 (会话建立成功)",
+                    "请求: 0x10 0x01 (进入默认会话)",
+                    "响应: 0x50 0x01 (会话切换确认)"
+                ],
+                useCase: "在进行任何诊断操作前，必须先建立诊断会话。默认会话权限最低，功能受限；扩展会话权限最高，可访问所有功能。",
+                tip: "默认会话权限最低，功能受限；扩展会话权限最高，可访问所有功能。",
+                knowledge: "诊断会话控制是UDS协议的入口点。它决定了ECU将响应哪些诊断服务。在编程会话中，某些安全相关功能会被禁用以保护ECU。"
+            },
+            0x11: {
+                name: "ECU重置",
+                description: "对ECU执行不同类型的重置操作",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 硬重置（Hard Reset，非易失性复位）",
+                    "• 0x02 - 软重置（Soft Reset，易失性复位）",
+                    "• 0x03 - 开启快速断电（Enable Rapid Power Shutdown）",
+                    "• 0x04-0xFF - OEM特定重置（OEM Specific Reset）"
+                ],
+                examples: [
+                    "请求: 0x11 0x01 (硬重置)",
+                    "响应: 0x51 0x01 (重置执行)",
+                    "请求: 0x11 0x02 (软重置)",
+                    "响应: 0x51 0x02 (重置确认)"
+                ],
+                useCase: "在刷写ECU或解决软件故障时使用。硬重置相当于完全断电重启，软重置只重启处理器。",
+                tip: "硬重置会丢失易失性数据，软重置则保留RAM中的数据。",
+                knowledge: "ECU重置服务允许诊断设备触发ECU内部的重启序列。硬重置会完全关闭并重启ECU，可能导致未保存的数据丢失。软重置只是重启ECU的应用程序，保持RAM中的数据。"
+            },
+            0x27: {
+                name: "安全访问",
+                description: "通过种子-密钥机制实现安全认证",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 请求种子(0x01级)",
+                    "• 0x02 - 发送密钥(0x01级)",
+                    "• 0x03 - 请求种子(0x03级)",
+                    "• 0x04 - 发送密钥(0x03级)",
+                    "• 0x05-0xFF - 更高级别认证"
+                ],
+                examples: [
+                    "请求种子: 0x27 0x01",
+                    "接收种子: 0x67 0x01 [SEED]",
+                    "发送密钥: 0x27 0x02 [KEY]",
+                    "认证成功: 0x67 0x02"
+                ],
+                useCase: "访问安全功能（如ECU刷写）前必须进行安全认证",
+                tip: "种子密钥算法由ECU内部实现，通常不可逆",
+                knowledge: "安全访问是UDS中最重要安全机制之一。它使用挑战-响应协议，ECU生成随机种子，诊断设备使用特定算法计算密钥。只有使用正确的算法和密钥才能通过认证，访问受保护的功能。"
+            },
+            0x28: {
+                name: "通信控制",
+                description: "控制ECU的通信行为",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x00 - 启用接收和传输 (Enable Rx and Tx)",
+                    "• 0x01 - 启用接收禁用传输 (Enable Rx, Disable Tx)", 
+                    "• 0x02 - 禁用接收启用传输 (Disable Rx, Enable Tx)",
+                    "• 0x03 - 禁用接收和传输 (Disable Rx and Tx)"
+                ],
+                examples: [
+                    "请求: 0x28 0x03 (关闭通信)",
+                    "响应: 0x68 0x03 (通信已关闭)"
+                ],
+                useCase: "在ECU刷写过程中暂停总线通信，避免其他ECU干扰刷写过程。",
+                tip: "关闭通信后ECU不会响应其他UDS请求，需重新启用",
+                knowledge: "通信控制服务用于管理ECU在总线上的通信活动。在多ECU环境中，此服务可以暂时抑制ECU的正常通信行为，这对于ECU刷写等需要独占总线的操作非常有用。"
+            },
+            0x3E: {
+                name: "待机握手",
+                description: "测试仪保持连接状态的握手信号",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x00 - 无额外功能 (No Additional Function)",
+                    "• 0x01-0xFF - OEM特定功能 (OEM Specific Functions)"
+                ],
+                examples: [
+                    "请求: 0x3E 0x00 (待机握手)",
+                    "响应: 0x7E 0x00 (握手确认)"
+                ],
+                useCase: "在诊断会话期间定期发送以保持连接",
+                tip: "通常每2-5秒发送一次以防止ECU超时断开连接",
+                knowledge: "待机握手服务用于维持诊断工具与ECU之间的连接。在长时间诊断操作中，定时发送握手信号可以防止ECU因超时而断开会话。"
+            },
+            0x83: {
+                name: "访问时间参数",
+                description: "修改或恢复网络通信的时间参数",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x00 - 默认值 (Default Values)",
+                    "• 0x01 - 设置时间参数 (Set Timing Parameters)",
+                    "• 0x02 - 恢复默认值 (Restore Default Values)"
+                ],
+                examples: [
+                    "请求: 0x83 0x01 [参数]",
+                    "响应: 0xC3 0x01 [确认]"
+                ],
+                useCase: "调整ECU通信的超时和延迟参数",
+                tip: "需要特殊权限才能修改时间参数",
+                knowledge: "访问时间参数服务允许调整诊断通信的时序参数，如超时时间和重试间隔，以优化诊断性能。"
+            },
+            0x84: {
+                name: "安全数据传输",
+                description: "加密和解密安全相关的数据传输",
+                category: "诊断和通信管理",
+                hasSubFunctions: false,
+                details: [
+                    "• 加密数据传输",
+                    "• 安全认证协议",
+                    "• 密钥管理"
+                ],
+                examples: [
+                    "请求: 0x84 [加密数据]",
+                    "响应: 0xC4 [解密结果]"
+                ],
+                useCase: "传输敏感或加密的诊断数据",
+                tip: "用于高级安全功能的数据传输",
+                knowledge: "安全数据传输服务提供加密的诊断通信功能，保护敏感数据在传输过程中的安全。"
+            },
+            0x85: {
+                name: "诊断故障码设置控制",
+                description: "控制DTC设置状态",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 开启DTC设置 (ON)",
+                    "• 0x02 - 关闭DTC设置 (OFF)",
+                    "• 0x03 - 检查DTC设置状态 (Check DTC Setting Status)"
+                ],
+                examples: [
+                    "请求: 0x85 0x02 (关闭DTC设置)",
+                    "响应: 0xC5 0x02 (确认)"
+                ],
+                useCase: "在特定测试期间暂时禁用DTC设置",
+                tip: "关闭DTC设置后，故障将不会被记录",
+                knowledge: "诊断故障码设置控制服务允许临时禁用DTC记录功能，常用于测试和调试场景。"
+            },
+            0x86: {
+                name: "事件响应",
+                description: "配置ECU对特定事件的响应行为",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 设置事件响应 (Set Event Response)",
+                    "• 0x02 - 清除事件响应 (Clear Event Response)",
+                    "• 0x03 - 获取事件响应信息 (Get Event Response Information)"
+                ],
+                examples: [
+                    "请求: 0x86 0x01 [事件ID]",
+                    "响应: 0xC6 0x01 [确认]"
+                ],
+                useCase: "配置ECU对特定条件或事件的响应",
+                tip: "可用于测试特定故障响应机制",
+                knowledge: "事件响应服务允许配置ECU对特定事件的自动响应行为，提高诊断灵活性。"
+            },
+            0x87: {
+                name: "链路控制",
+                description: "控制网络链路的物理参数",
+                category: "诊断和通信管理",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 设置链路参数 (Set Link Parameters)",
+                    "• 0x02 - 检查链路参数 (Check Link Parameters)"
+                ],
+                examples: [
+                    "请求: 0x87 0x01 [参数]",
+                    "响应: 0xC7 0x01 [确认]"
+                ],
+                useCase: "调整网络物理层参数",
+                tip: "用于高级网络诊断和优化",
+                knowledge: "链路控制服务提供对网络物理层参数的精细控制，优化通信性能。"
+            },
+            0x22: {
+                name: "通过ID读数据",
+                description: "通过数据标识符(DID)读取ECU数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 0xF190 - 车辆识别号(VIN)",
+                    "• 0xF193 - 硬件版本号",
+                    "• 0xF197 - 软件版本号",
+                    "• 0xF198 - 软件零件号",
+                    "• 0xF199 - ECU零件号"
+                ],
+                examples: [
+                    "请求VIN: 0x22 0xF1 0x90",
+                    "响应VIN: 0x62 0xF1 0x90 [17位VIN码]",
+                    "请求软件版本: 0x22 0xF1 0x97",
+                    "响应软件版本: 0x62 0xF1 0x97 [版本信息]"
+                ],
+                useCase: "读取ECU的技术参数和配置信息",
+                tip: "不同ECU的DID范围可能不同，需参考具体文档",
+                knowledge: "数据读取服务是UDS中最常用的服务之一，用于获取ECU中的静态数据。DID（Data Identifier）定义了特定数据的地址。每个DID通常对应ECU内存中的特定位置，可能包含标定参数、配置信息或硬件特性。"
+            },
+            0x23: {
+                name: "通过地址读数据",
+                description: "根据内存地址读取ECU内存数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 读取指定内存地址数据",
+                    "• 支持多种地址格式",
+                    "• 安全访问可能需要"
+                ],
+                examples: [
+                    "请求: 0x23 [地址] [长度]",
+                    "响应: 0x63 [数据]"
+                ],
+                useCase: "直接访问ECU内存中的特定位置",
+                tip: "需要适当的访问权限才能读取内存",
+                knowledge: "通过地址读数据服务允许直接访问ECU内存空间，提供底层数据访问能力。"
+            },
+            0x24: {
+                name: "通过ID读比例数据",
+                description: "读取带标定信息的数据值",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 包含物理单位的标定数据",
+                    "• 包含换算参数",
+                    "• 物理值 = (存储值 × 因子) + 偏移"
+                ],
+                examples: [
+                    "请求: 0x24 [DID]",
+                    "响应: 0x64 [标定数据]"
+                ],
+                useCase: "读取带有物理单位的传感器数据",
+                tip: "返回值包含换算所需的标定参数",
+                knowledge: "通过ID读比例数据服务专门用于读取需要单位转换的数据，简化数据处理流程。"
+            },
+            0x2A: {
+                name: "通过周期ID读数据",
+                description: "读取周期性发送的数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 周期性数据传输",
+                    "• 支持多种传输模式",
+                    "• 可配置传输间隔"
+                ],
+                examples: [
+                    "请求: 0x2A [模式] [ID]",
+                    "响应: 0x6A [数据]"
+                ],
+                useCase: "获取周期性更新的ECU数据",
+                tip: "用于实时监控ECU状态",
+                knowledge: "通过周期ID读数据服务支持周期性数据传输，适用于动态数据监控。"
+            },
+            0x2C: {
+                name: "动态定义标识符",
+                description: "动态定义用于数据传输的标识符",
+                category: "数据传输",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 定义DID (Define DID)",
+                    "• 0x02 - 清除DID定义 (Clear DID Definition)",
+                    "• 0x03 - 条件支持 (Conditional Support)"
+                ],
+                examples: [
+                    "定义: 0x2C 0x01 [DID] [源DID]",
+                    "响应: 0x6C 0x01 [确认]"
+                ],
+                useCase: "创建自定义的数据组合标识符",
+                tip: "允许将多个DID合并为一个逻辑数据单元",
+                knowledge: "动态定义标识符服务允许创建复合数据标识符，提高数据访问效率。"
+            },
+            0x2E: {
+                name: "通过ID写数据",
+                description: "通过数据标识符(DID)写入ECU数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 写入配置数据",
+                    "• 修改ECU参数",
+                    "• 需要适当权限"
+                ],
+                examples: [
+                    "请求: 0x2E [DID] [数据]",
+                    "响应: 0x6E [DID]"
+                ],
+                useCase: "修改ECU配置参数",
+                tip: "写入操作需要安全访问权限",
+                knowledge: "通过ID写数据服务允许修改ECU中的可配置参数，实现远程调优。"
+            },
+            0x3D: {
+                name: "通过地址写内存",
+                description: "根据内存地址写入ECU内存数据",
+                category: "数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 直接写入内存",
+                    "• 高风险操作",
+                    "• 需要特殊权限"
+                ],
+                examples: [
+                    "请求: 0x3D [地址] [数据]",
+                    "响应: 0x7D [确认]"
+                ],
+                useCase: "直接修改ECU内存内容",
+                tip: "这是一个高风险操作，可能导致ECU损坏",
+                knowledge: "通过地址写内存服务提供底层内存写入功能，常用于高级调试。"
+            },
+            0x14: {
+                name: "清除诊断信息",
+                description: "清除ECU中存储的诊断信息",
+                category: "存储数据传输",
+                hasSubFunctions: false,
+                details: [
+                    "• 清除所有DTC",
+                    "• 清除冻结帧数据",
+                    "• 清除故障历史"
+                ],
+                examples: [
+                    "请求: 0x14 FF FF FF (清除所有DTC)",
+                    "响应: 0x54 [确认]"
+                ],
+                useCase: "在维修完成后清除故障记录",
+                tip: "此操作不可逆，请在确认修复后执行",
+                knowledge: "清除诊断信息服务用于删除ECU中存储的历史诊断信息，为新的诊断周期做准备。"
+            },
+            0x19: {
+                name: "读取故障码信息",
+                description: "读取ECU中存储的DTC信息",
+                category: "存储数据传输",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 报告支持的DTC (Report Supported DTC)",
+                    "• 0x02 - 报告DTC镜像内存 (Report DTC Mirror Memory)",
+                    "• 0x04 - 报告确认的DTC (Report Confirmed DTC)",
+                    "• 0x06 - 报告严重DTC (Report Severe DTC)",
+                    "• 0x0A - 报告所有DTC (Report All DTC)"
+                ],
+                examples: [
+                    "请求: 0x19 0x0A (报告所有DTC)",
+                    "响应: 0x59 0x0A [DTC列表]"
+                ],
+                useCase: "获取车辆故障诊断信息",
+                tip: "不同子功能返回不同类型的DTC信息",
+                knowledge: "DTC（Diagnostic Trouble Code）是ECU检测到系统故障时存储的代码。DTC包含故障类型、系统和具体故障的信息。DTCs通常遵循标准格式，如P0123，其中P表示动力系统，0表示SAE标准，1表示数字系统，23表示具体故障。"
+            },
+            0x2F: {
+                name: "通过标识符控制输入输出",
+                description: "控制ECU的输入输出端口",
+                category: "输入输出控制",
+                hasSubFunctions: false,
+                details: [
+                    "• 控制ECU内部继电器",
+                    "• 控制传感器模拟",
+                    "• 控制执行器测试"
+                ],
+                examples: [
+                    "请求: 0x2F [DID] [控制参数]",
+                    "响应: 0x6F [控制结果]"
+                ],
+                useCase: "执行器功能测试和诊断",
+                tip: "可用于执行器的功能验证测试",
+                knowledge: "通过标识符控制输入输出服务提供对ECU外围设备的直接控制能力。"
+            },
+            0x31: {
+                name: "例行程序控制",
+                description: "执行特定的诊断例程",
+                category: "例行程序",
+                hasSubFunctions: true,
+                details: [
+                    "• 0x01 - 开始例程 (Start Routine)",
+                    "• 0x02 - 停止例程 (Stop Routine)",
+                    "• 0x03 - 获取例程结果 (Request Routine Results)",
+                    "• 0x04-0xFF - OEM特定例程ID (OEM Specific Routine ID)"
+                ],
+                examples: [
+                    "开始例程: 0x31 0x01 [ID] [参数]",
+                    "响应: 0x71 0x01 [ID] [结果]"
+                ],
+                useCase: "执行ECU内置的自诊断和校准程序",
+                tip: "例程控制功能丰富，可执行ECU特有的测试程序",
+                knowledge: "例行程序是ECU内置的特定算法或测试程序，可以执行复杂的诊断任务，如执行器测试、传感器校准、系统自检等。每个例程都有唯一的ID，可以接受参数并返回执行结果。"
+            },
+            0x34: {
+                name: "请求下载",
+                description: "向ECU下载数据（通常用于刷写）",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 0x34 - 请求下载",
+                    "• 0x36 - 传输数据",
+                    "• 0x37 - 退出传输"
+                ],
+                examples: [
+                    "请求下载: 0x34 0x00 [地址] [长度]",
+                    "传输数据: 0x36 0x00 [数据块]",
+                    "退出传输: 0x37"
+                ],
+                useCase: "ECU固件更新和重新编程",
+                tip: "数据下载是高风险操作，需严格遵循刷写流程",
+                knowledge: "请求下载服务是ECU刷写流程的起始点，建立数据传输通道。"
+            },
+            0x35: {
+                name: "请求上传",
+                description: "从ECU上传数据（通常用于备份）",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 请求ECU内存数据上传",
+                    "• 内存备份功能",
+                    "• 数据恢复操作"
+                ],
+                examples: [
+                    "请求上传: 0x35 0x00 [地址] [长度]",
+                    "响应: 0x75 0x00 [确认]"
+                ],
+                useCase: "ECU数据备份和恢复",
+                tip: "用于ECU数据的备份和恢复操作",
+                knowledge: "请求上传服务用于从ECU导出数据，支持数据迁移和备份需求。"
+            },
+            0x36: {
+                name: "数据传输",
+                description: "在下载/上传过程中传输数据",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 下载过程中的数据传输",
+                    "• 上传过程中的数据传输",
+                    "• 分块传输机制"
+                ],
+                examples: [
+                    "传输数据: 0x36 0x01 [数据块]",
+                    "响应: 0x76 0x01 [确认]"
+                ],
+                useCase: "在下载或上传过程中传输实际数据",
+                tip: "数据传输需要与请求下载/上传配合使用",
+                knowledge: "数据传输服务负责实际的数据块传输，确保大数据量的可靠传输。"
+            },
+            0x37: {
+                name: "请求退出传输",
+                description: "结束下载或上传过程",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 结束数据传输会话",
+                    "• 完成传输过程",
+                    "• 资源清理"
+                ],
+                examples: [
+                    "退出传输: 0x37",
+                    "响应: 0x77 [确认]"
+                ],
+                useCase: "完成数据传输后的清理操作",
+                tip: "退出传输后ECU恢复正常操作状态",
+                knowledge: "请求退出传输服务标志着数据传输过程的结束，释放相关资源。"
+            },
+            0x38: {
+                name: "请求文件传输",
+                description: "执行文件级别的传输操作",
+                category: "上传下载",
+                hasSubFunctions: false,
+                details: [
+                    "• 文件传输操作",
+                    "• 支持长数据传输",
+                    "• 文件完整性检查"
+                ],
+                examples: [
+                    "请求文件传输: 0x38 [参数]",
+                    "响应: 0x78 [确认]"
+                ],
+                useCase: "执行高级文件传输操作",
+                tip: "用于大文件或复杂数据的传输",
+                knowledge: "请求文件传输服务提供高级文件操作功能，支持复杂的文件管理需求。"
+            }
+        };
+
+        // ======================
+        // 测试题库
+        // ======================
+        const QUIZ_QUESTIONS = [
+            {
+                question: "UDS协议中用于建立诊断会话的服务ID是什么？",
+                options: [
+                    "A. 0x10 - 诊断会话控制服务",
+                    "B. 0x11 - ECU重置服务", 
+                    "C. 0x27 - 安全访问服务",
+                    "D. 0x22 - 数据读取服务"
+                ],
+                correct: 0,
+                explanation: "0x10是诊断会话控制服务的标准ID，用于建立和管理不同级别的诊断会话"
+            },
+            {
+                question: "ISO-TP协议的主要作用是什么？",
+                options: [
+                    "A. 将超过8字节的长消息分段传输",
+                    "B. 提供网络层地址解析",
+                    "C. 实现应用层诊断服务", 
+                    "D. 管理电气信号传输"
+                ],
+                correct: 0,
+                explanation: "ISO-TP是ISO传输协议，将超过CAN总线8字节限制的长消息分段传输"
+            },
+            {
+                question: "安全访问服务(0x27)的工作原理是什么？",
+                options: [
+                    "A. 种子-密钥认证机制",
+                    "B. 用户名密码认证",
+                    "C. 数字证书认证",
+                    "D. 生物特征认证"
+                ],
+                correct: 0,
+                explanation: "安全访问服务采用种子-密钥机制，客户端需计算正确密钥才能通过认证"
+            },
+            {
+                question: "默认会话(0x01)和扩展会话(0x03)有什么区别？",
+                options: [
+                    "A. 扩展会话权限更高，可访问更多功能",
+                    "B. 默认会话响应更快",
+                    "C. 扩展会话更安全",
+                    "D. 没有实质区别"
+                ],
+                correct: 0,
+                explanation: "扩展会话拥有更高权限，可访问安全访问、刷写等高级功能"
+            },
+            {
+                question: "DTC代表什么？",
+                options: [
+                    "A. 诊断故障码",
+                    "B. 数据传输控制",
+                    "C. 诊断工具连接",
+                    "D. 诊断测试周期"
+                ],
+                correct: 0,
+                explanation: "DTC(Diagnostic Trouble Code)是诊断故障码，用于标示车辆故障"
+            },
+            {
+                question: "UDS协议遵循哪个国际标准？",
+                options: [
+                    "A. ISO 14229",
+                    "B. ISO 15765",
+                    "C. ISO 11898",
+                    "D. ISO 11519"
+                ],
+                correct: 0,
+                explanation: "UDS协议遵循ISO 14229国际标准，定义了统一诊断服务"
+            },
+            {
+                question: "以下哪个服务用于读取ECU的VIN码？",
+                options: [
+                    "A. 0x22 F190 读取数据标识符",
+                    "B. 0x10 01 诊断会话控制",
+                    "C. 0x19 01 故障码管理",
+                    "D. 0x27 01 安全访问"
+                ],
+                correct: 0,
+                explanation: "使用0x22服务配合DID 0xF190可读取车辆识别号(VIN)"
+            },
+            {
+                question: "ECU硬重置(0x11 0x01)和软重置(0x11 0x02)的区别？",
+                options: [
+                    "A. 硬重置会丢失易失性数据，软重置保留",
+                    "B. 硬重置速度更快",
+                    "C. 软重置更安全",
+                    "D. 没有区别"
+                ],
+                correct: 0,
+                explanation: "硬重置相当于完全断电再上电，软重置只重置处理器，保留RAM数据"
+            },
+            {
+                question: "ISO-TP协议能够处理超过多少字节的诊断消息？",
+                options: [
+                    "A. 8字节",
+                    "B. 16字节",
+                    "C. 32字节",
+                    "D. 64字节"
+                ],
+                correct: 0,
+                explanation: "CAN总线最大帧长度为8字节，ISO-TP协议通过分段传输处理超过8字节的长消息"
+            },
+            {
+                question: "DID 0xF190代表什么数据？",
+                options: [
+                    "A. 车辆识别号(VIN)",
+                    "B. 软件版本号",
+                    "C. 硬件版本号",
+                    "D. ECU零件号"
+                ],
+                correct: 0,
+                explanation: "DID 0xF190是标准定义的车辆识别号(VIN)数据标识符"
+            },
+            {
+                question: "安全访问服务(0x27)中的种子-密钥算法通常如何实现？",
+                options: [
+                    "A. ECU内部算法实现，通常不可逆",
+                    "B. 公开算法，任何人都可计算",
+                    "C. 固定密钥，所有人相同",
+                    "D. 无需计算，直接发送"
+                ],
+                correct: 0,
+                explanation: "种子-密钥算法由ECU内部实现，通常为单向不可逆算法"
+            },
+            {
+                question: "以下哪个服务用于清除ECU中的故障码？",
+                options: [
+                    "A. 0x14 - 清除诊断信息",
+                    "B. 0x19 - 读取故障码信息",
+                    "C. 0x22 - 读取数据",
+                    "D. 0x31 - 例程控制"
+                ],
+                correct: 0,
+                explanation: "0x14服务用于清除ECU中存储的诊断故障码(DTC)"
+            }
+        ];
+
+        // ======================
+        // DID查询数据
+        // ======================
+        const UDS_DIDS = {
+            0xF190: "车辆识别号 (VIN)",
+            0xF191: "车辆生产序列号",
+            0xF192: "软件版本号",
+            0xF193: "硬件版本号",
+            0xF194: "ECU名称",
+            0xF195: "ODX文件标识符",
+            0xF196: "ODX文件版本",
+            0xF197: "软件版本号",
+            0xF198: "软件零件号",
+            0xF199: "ECU零件号",
+            0xF19A: "CIN (Calibration ID Number)",
+            0xF19B: "CVN (Calibration Verification Number)",
+            0xF19C: "ECU制造商标识",
+            0xF19D: "ECU制造日期",
+            0xF19E: "诊断数据标识符",
+            0xF19F: "OEM特定数据"
+        };
 
         // ======================
         // 例程ID查询数据
@@ -459,6 +1388,8 @@
         function createModal(title, content) {
             // 移除已存在的模态框
             const existingModal = document.querySelector('.modal-overlay');
+            if (existingModal) {
+                existingModal.remove();
             }
             
             // 分析内容并格式化
@@ -1353,16 +2284,20 @@
         // ======================
         document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     </script>
-            </div>
-        </div>
-
-        <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
-            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
-            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-        </aside>
-    </div>
-</body>
-</html>
+    <script>
+    (function(){
+        function getPreferredTheme(){var s=localStorage.getItem('vp-theme');if(s)return s;return window.matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';}
+        function applyTheme(t){document.body.setAttribute('data-theme',t);}
+        document.addEventListener('DOMContentLoaded',function(){
+            applyTheme(getPreferredTheme());
+            var btn=document.getElementById('themeToggle');
+            if(btn)btn.addEventListener('click',function(){
+                var c=document.body.getAttribute('data-theme')||getPreferredTheme();
+                var n=c==='dark'?'light':'dark';applyTheme(n);localStorage.setItem('vp-theme',n);
+            });
+        });
+    })();
+    </script>
             </div>
         </div>
 
