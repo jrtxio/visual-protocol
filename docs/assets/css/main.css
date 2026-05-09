@@ -157,13 +157,13 @@ h1, h2, h3, h4 { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe
     color: var(--accent);
 }
 
-.nav-links {
+.nav-links, .nav-right {
     display: flex;
     align-items: center;
     gap: 8px;
 }
 
-.nav-links a {
+.nav-links a, .nav-back {
     padding: 6px 14px;
     border-radius: 100px;
     font-size: 0.9em;
@@ -171,7 +171,7 @@ h1, h2, h3, h4 { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe
     transition: color 0.15s, background 0.15s;
 }
 
-.nav-links a:hover {
+.nav-links a:hover, .nav-back:hover {
     color: var(--text);
     background: var(--accent-bg);
 }
@@ -556,6 +556,7 @@ body[data-theme="dark"] .protocol-status--active {
     .features-grid { grid-template-columns: 1fr; }
     .section-title { font-size: 1.5em; }
     .nav-links a { display: none; }
+    .nav-back { font-size: 0.82em; padding: 4px 10px; }
 }
 
 @media (max-width: 480px) {
