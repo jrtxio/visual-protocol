@@ -190,6 +190,8 @@ h1, h2, h3, h4 { font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe
     color: var(--text-2);
     cursor: pointer;
     transition: all 0.15s;
+    overflow: hidden;
+    flex-shrink: 0;
 }
 
 .theme-btn:hover {
