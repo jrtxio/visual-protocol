@@ -767,39 +767,38 @@
             font-size: var(--font-size-base);
         }
 
-        /* Theme Toggle */
-        .theme-toggle {
-            position: fixed;
-            top: var(--spacing-lg);
-            right: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: var(--spacing-md) var(--spacing-lg);
+        /* Theme Button */
+        .theme-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            border: 1px solid var(--border);
+            border-radius: 100px;
+            background: var(--surface);
+            color: var(--text-2);
             cursor: pointer;
-            transition: all var(--transition-normal);
-            font-weight: var(--font-weight-bold);
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            transition: all 0.15s;
+            overflow: hidden;
+            flex-shrink: 0;
         }
-
-        .theme-toggle:hover {
-            background: rgba(255,255,255,0.3);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        .theme-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-bg);
         }
-
-        body[data-theme="dark"] .theme-toggle {
-            background: rgba(0,0,0,0.2);
-            color: white;
-            border: 1px solid rgba(255,255,255,0.2);
+        .theme-btn svg { width: 18px; height: 18px; }
+        .theme-btn .icon-sun { display: none; }
+        .theme-btn .icon-moon { display: block; }
+        body[data-theme="dark"] .theme-btn .icon-sun { display: block; }
+        body[data-theme="dark"] .theme-btn .icon-moon { display: none; }
+        @media (prefers-color-scheme: dark) {
+            .theme-btn .icon-sun { display: block; }
+            .theme-btn .icon-moon { display: none; }
         }
-
-        body[data-theme="dark"] .theme-toggle:hover {
-            background: rgba(0,0,0,0.3);
-        }
+        body[data-theme="light"] .theme-btn .icon-sun { display: none; }
+        body[data-theme="light"] .theme-btn .icon-moon { display: block; }
 
         /* Back Button */
         .back-button {
@@ -992,7 +991,7 @@
 
         /* Print styles */
         @media print {
-            .theme-toggle,
+            .theme-btn,
             .back-button,
             .nav-tabs,
             .demo-controls {
@@ -2002,18 +2001,12 @@
         // ======================
         function toggleTheme() {
             const body = document.body;
-            const themeToggle = document.getElementById('themeToggle');
-            
             if (body.hasAttribute('data-theme')) {
                 body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
                 localStorage.setItem('theme', 'light');
-                console.log('切换到浅色模式');
             } else {
                 body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
                 localStorage.setItem('theme', 'dark');
-                console.log('切换到深色模式');
             }
         }
 
@@ -2027,14 +2020,11 @@
         // ======================
         document.addEventListener('DOMContentLoaded', function() {
             const savedTheme = localStorage.getItem('theme') || 'light';
-            const themeToggle = document.getElementById('themeToggle');
-            
+
             if (savedTheme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');
-                themeToggle.textContent = '☀️ 浅色模式';
             } else {
                 document.body.removeAttribute('data-theme');
-                themeToggle.textContent = '🌙 深色模式';
             }
             
             // 初始化服务网格
@@ -3143,7 +3133,6 @@
         // ======================
         // 初始化
         // ======================
-        document.getElementById('themeToggle').addEventListener('click', toggleTheme);
     </script>
     <script>
     (function(){
