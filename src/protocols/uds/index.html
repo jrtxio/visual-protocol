@@ -2003,10 +2003,10 @@
             const body = document.body;
             if (body.hasAttribute('data-theme')) {
                 body.removeAttribute('data-theme');
-                localStorage.setItem('theme', 'light');
+                localStorage.setItem('vp-theme', 'light');
             } else {
                 body.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
+                localStorage.setItem('vp-theme', 'dark');
             }
         }
 
@@ -2019,7 +2019,7 @@
         // 页面加载时恢复主题
         // ======================
         document.addEventListener('DOMContentLoaded', function() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
+            const savedTheme = localStorage.getItem('vp-theme') || 'light';
 
             if (savedTheme === 'dark') {
                 document.body.setAttribute('data-theme', 'dark');

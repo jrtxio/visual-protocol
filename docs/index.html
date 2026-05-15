@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual Protocol — 汽车协议学习平台</title>
     <meta name="description" content="交互式汽车协议学习平台 — 通过可视化动画和交互式演示帮助您理解各种汽车通信协议">
-    <meta name="keywords" content="汽车协议, UDS, DoIP, SOME/IP, CAN, Ethernet, DDS, 诊断协议, 车载网络, 自动驾驶">
+    <meta name="keywords" content="汽车协议, LIN, CAN, Ethernet, TCP, UDP, DoIP, UDS, SOME/IP, MQTT, DDS, 诊断协议, 车载网络, 自动驾驶, 发布订阅">
     <meta property="og:title" content="Visual Protocol — 汽车协议学习平台">
     <meta property="og:description" content="交互式汽车协议学习平台 — 通过可视化动画和交互式演示帮助您理解各种汽车通信协议">
     <meta property="og:type" content="website">
@@ -57,9 +57,9 @@
             <header class="hero">
                 <div class="container">
                     <h1 class="hero-title">理解汽车通信协议<br>从未如此直观</h1>
-                    <p class="hero-desc">通过可视化动画和交互式演示，按推荐路径自底向上掌握 CAN、Ethernet、DoIP、UDS、SOME/IP、DDS 等汽车通信协议。</p>
+                    <p class="hero-desc">通过可视化动画和交互式演示，按推荐路径自底向上掌握 LIN、CAN、Ethernet、TCP、UDP、DoIP、UDS、SOME/IP、MQTT、DDS 等通信协议。</p>
                     <div class="hero-actions">
-                        <a href="protocols/can/" class="btn btn-primary">开始学习 CAN</a>
+                        <a href="protocols/lin/" class="btn btn-primary">开始学习 LIN</a>
                         <a href="#protocols" class="btn btn-secondary">浏览全部协议</a>
                     </div>
                 </div>
@@ -73,9 +73,23 @@
                     </div>
 
                     <div class="protocol-grid">
-                        <a href="protocols/can/" class="protocol-card protocol-card--active">
+                        <a href="protocols/lin/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
                                 <span class="protocol-step">Step 1</span>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">LIN</h3>
+                            <p class="protocol-fullname">局域互联网络</p>
+                            <p class="protocol-desc">最简单的车载总线协议。单线主从架构，学习调度表、PID 和校验，为理解复杂总线打下基础。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">ISO 9141</span>
+                                <span class="protocol-layer">数据链路层</span>
+                            </div>
+                        </a>
+
+                        <a href="protocols/can/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <span class="protocol-step">Step 2</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">CAN</h3>
@@ -89,7 +103,7 @@
 
                         <a href="protocols/ethernet/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <span class="protocol-step">Step 2</span>
+                                <span class="protocol-step">Step 3</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">Ethernet</h3>
@@ -101,23 +115,51 @@
                             </div>
                         </a>
 
+                        <a href="protocols/tcp/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <span class="protocol-step">Step 4</span>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">TCP</h3>
+                            <p class="protocol-fullname">传输控制协议</p>
+                            <p class="protocol-desc">可靠传输的基石。掌握三次握手、滑动窗口和拥塞控制，理解 DoIP 等协议为何选择 TCP 传输。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">RFC 9293</span>
+                                <span class="protocol-layer">传输层</span>
+                            </div>
+                        </a>
+
+                        <a href="protocols/udp/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <span class="protocol-step">Step 5</span>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">UDP</h3>
+                            <p class="protocol-fullname">用户数据报协议</p>
+                            <p class="protocol-desc">低延迟传输的选择。无连接数据报模型，理解为何 DDS 和 SOME/IP 选择 UDP 作为底层传输。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">RFC 8085</span>
+                                <span class="protocol-layer">传输层</span>
+                            </div>
+                        </a>
+
                         <a href="protocols/doip/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <span class="protocol-step">Step 3</span>
+                                <span class="protocol-step">Step 6</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">DoIP</h3>
                             <p class="protocol-fullname">基于 IP 的诊断</p>
-                            <p class="protocol-desc">基于 Ethernet 的诊断传输协议。学完以太网后自然衔接，理解诊断数据如何通过 IP 网络传输。</p>
+                            <p class="protocol-desc">基于 Ethernet 的诊断传输协议。学完 TCP 后自然衔接，理解诊断数据如何通过 IP 网络传输。</p>
                             <div class="protocol-meta">
                                 <span class="protocol-standard">ISO 13400</span>
-                                <span class="protocol-layer">传输层</span>
+                                <span class="protocol-layer">传输 / 会话层</span>
                             </div>
                         </a>
 
                         <a href="protocols/uds/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <span class="protocol-step">Step 4</span>
+                                <span class="protocol-step">Step 7</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">UDS</h3>
@@ -131,7 +173,7 @@
 
                         <a href="protocols/someip/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <span class="protocol-step">Step 5</span>
+                                <span class="protocol-step">Step 8</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">SOME/IP</h3>
@@ -143,9 +185,23 @@
                             </div>
                         </a>
 
+                        <a href="protocols/mqtt/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <span class="protocol-step">Step 9</span>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">MQTT</h3>
+                            <p class="protocol-fullname">消息队列遥测传输</p>
+                            <p class="protocol-desc">轻量级发布/订阅协议。掌握 Topic、QoS 和 Broker 机制，为理解 DDS 的高级中间件概念做铺垫。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">OASIS</span>
+                                <span class="protocol-layer">应用层</span>
+                            </div>
+                        </a>
+
                         <a href="protocols/dds/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <span class="protocol-step">Step 6</span>
+                                <span class="protocol-step">Step 10</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">DDS</h3>
@@ -218,8 +274,8 @@
                 <div class="container">
                     <div class="cta-inner">
                         <h2>准备好开始了吗？</h2>
-                        <p>从 CAN 总线开始，按推荐学习路径逐步掌握汽车通信协议体系。</p>
-                        <a href="protocols/can/" class="btn btn-primary">立即开始</a>
+                        <p>从 LIN 总线开始，按推荐学习路径逐步掌握汽车通信协议体系。</p>
+                        <a href="protocols/lin/" class="btn btn-primary">立即开始</a>
                     </div>
                 </div>
             </section>

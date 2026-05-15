@@ -583,11 +583,11 @@
             // ==================== Theme & Tab ====================
             function toggleTheme() {
                 const body = document.body;
-                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
-                else { body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('vp-theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('vp-theme','dark'); }
             }
             document.addEventListener('DOMContentLoaded', function() {
-                const t = localStorage.getItem('theme') || 'light';
+                const t = localStorage.getItem('vp-theme') || 'light';
                 if (t === 'dark') document.body.setAttribute('data-theme','dark');
                 else document.body.removeAttribute('data-theme');
                 renderMessageTypes();

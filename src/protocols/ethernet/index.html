@@ -249,8 +249,8 @@
         const ETHER_TYPES = { '0x0800':'IPv4','0x0806':'ARP','0x8100':'VLAN (802.1Q)','0x86DD':'IPv6','0x88F7':'PTP (精确时间协议)','0x22F0':'AVTP (音视频传输)','0x0801':'EtherCat','0x22EB':'SOME/IP' };
 
         // Theme & Tab
-        function toggleTheme() { const b = document.body; if(b.hasAttribute('data-theme')){b.removeAttribute('data-theme');localStorage.setItem('theme','light');}else{b.setAttribute('data-theme','dark');localStorage.setItem('theme','dark');} }
-        document.addEventListener('DOMContentLoaded', function() { const t=localStorage.getItem('theme')||'light'; if(t==='dark')document.body.setAttribute('data-theme','dark'); else document.body.removeAttribute('data-theme'); renderFrameFields(); loadQuizQuestion(); });
+        function toggleTheme() { const b = document.body; if(b.hasAttribute('data-theme')){b.removeAttribute('data-theme');localStorage.setItem('vp-theme','light');}else{b.setAttribute('data-theme','dark');localStorage.setItem('vp-theme','dark');} }
+        document.addEventListener('DOMContentLoaded', function() { const t=localStorage.getItem('vp-theme')||'light'; if(t==='dark')document.body.setAttribute('data-theme','dark'); else document.body.removeAttribute('data-theme'); renderFrameFields(); loadQuizQuestion(); });
         function showTab(n) { document.querySelectorAll('.content-section').forEach(s=>{s.classList.remove('active');s.hidden=true;}); document.querySelectorAll('.tab-button').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');}); const s=document.getElementById(n+'-tab'); if(s){s.classList.add('active');s.hidden=false;} const b=document.querySelector(`[data-tab="${n}"]`); if(b){b.classList.add('active');b.setAttribute('aria-selected','true');} currentTab=n; }
         document.querySelectorAll('.tab-button').forEach(b=>{b.addEventListener('click',()=>showTab(b.dataset.tab));});
 

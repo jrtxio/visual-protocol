@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UDP 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 UDP 协议学习平台 — 掌握用户数据报协议的核心原理">
+    <meta name="keywords" content="UDP, 用户数据报协议, User Datagram Protocol, DNS, 多播, QUIC, 无连接">
+    <meta property="og:title" content="Visual Protocol — UDP 协议学习平台">
+    <meta property="og:description" content="交互式 UDP 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/udp/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        :root {
+            --primary-gradient-start: #0891B2;
+            --primary-gradient-end: #0E7490;
+            --sender-color: #0891B2; --receiver-color: #0EA5C9; --network-color: #E8A838;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #0F1419; --bg-card-dark: #1A2332;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #2D3A4A;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root { --primary-gradient-start: #22D3EE; --primary-gradient-end: #67E8F9; --sender-color: #22D3EE; --receiver-color: #67E8F9; --bg-card-light: #1A2332; --bg-light: #0F1419; --border-light: #2D3A4A; --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E; }
+        }
+        body[data-theme="light"] { --primary-gradient-start: #0891B2; --primary-gradient-end: #0E7490; --sender-color: #0891B2; --receiver-color: #0EA5C9; --bg-card-light: #FFFFFF; --bg-light: #F9F7F4; --border-light: #E7E5E4; --text-light-main: #1C1917; --text-light-secondary: #57534E; }
+        body[data-theme="dark"] { --primary-gradient-start: #22D3EE; --primary-gradient-end: #67E8F9; --sender-color: #22D3EE; --receiver-color: #67E8F9; --bg-card-light: #1A2332; --bg-light: #0F1419; --border-light: #2D3A4A; --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E; }
+
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
+        .nav-tabs { display: flex; justify-content: center; gap: 4px; margin: 24px 0 32px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; flex-wrap: wrap; }
+        .tab-button { padding: 10px 20px; background: transparent; color: var(--text-2); border: none; border-radius: 100px; cursor: pointer; font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif; transition: all 0.15s; white-space: nowrap; }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
+        .content-section { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 32px; }
+        .content-section.active { display: block; }
+        .back-button, .theme-toggle, .header { display: none; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
+        .quiz-option { display: block; width: 100%; text-align: left; padding: 14px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em; transition: all 0.15s; }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-family: "SF Mono","Fira Code",monospace; }
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button { padding: 10px 20px; background: var(--accent); color: #FFF; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .tool-button:hover { opacity: 0.9; }
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th { text-align: left; padding: 12px; background: var(--accent-bg); color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border); }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+
+        .device-container { display: flex; justify-content: center; align-items: center; gap: 48px; margin: 32px 0; flex-wrap: wrap; }
+        .device { width: 120px; height: 80px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .device .device-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .device .device-name { font-size: 0.8rem; margin-bottom: 2px; }
+        .device .device-status { font-size: 0.7rem; opacity: 0.9; }
+        .sender-device { background: linear-gradient(135deg, #0891B2, #0E7490); }
+        .receiver-device { background: linear-gradient(135deg, #0EA5C9, #14B8D9); }
+        .network-device { background: linear-gradient(135deg, #E8A838, #C88818); width: 80px; height: 60px; }
+        .multicast-receiver { background: linear-gradient(135deg, #14B8D9, #22C7DE); width: 100px; height: 70px; }
+        .connection-line { font-size: 2rem; color: #b0aea5; }
+        .log { background: #111; color: #0f0; padding: 24px; border-radius: 12px; font-family: 'Courier New', monospace; text-align: left; max-width: 100%; margin: 24px auto; min-height: 150px; max-height: 250px; overflow-y: auto; border: 1px solid #3a3a38; font-size: 0.875rem; }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; } .log-warning { color: #FFD700; } .log-error { color: #FF6B6B; }
+        .demo-controls { display: flex; gap: 8px; justify-content: center; margin: 24px 0; flex-wrap: wrap; }
+        .demo-btn { padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px; background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em; font-weight: 500; transition: all 0.15s; }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); cursor: pointer; transition: all 0.15s; margin-bottom: 8px; }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta { display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3); }
+
+        .concept-card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer { color: white; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 4px; }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box { background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); color: white; padding: 24px; border-radius: 12px; margin: 16px 0; text-align: center; }
+
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        .device.pulse { animation: pulse 1s infinite; }
+        @keyframes packetMove { 0%{transform:translateX(-20px);opacity:0}20%{opacity:1}80%{opacity:1}100%{transform:translateX(20px);opacity:0} }
+        .packet-indicator { position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--primary-gradient-start); animation: packetMove 0.8s ease-in-out; }
+
+        .multicast-container { display: flex; justify-content: center; align-items: flex-start; gap: 24px; margin: 24px 0; flex-wrap: wrap; }
+        .multicast-receivers { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+
+        @media (max-width: 768px) { .page-header h1 { font-size: 1.5em; } .content-section { padding: 20px; } .tab-button { padding: 8px 12px; font-size: 0.82em; } .device { width: 100px; height: 70px; } .device-container { gap: 24px; } }
+        @media (max-width: 480px) { .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; } }
+    </style>
+</head>
+<body>
+    <nav class="site-nav"><div class="nav-inner container-wide">
+        <a href="../../index.html" class="nav-logo" aria-label="首页"><svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><span>Visual Protocol</span></a>
+        <div class="nav-right"><a href="../../index.html" class="nav-back">返回主页</a>
+            <button class="theme-btn" id="themeToggle" aria-label="切换主题"><svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg><svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg></button>
+        </div>
+    </div></nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></aside>
+        <div class="page-body"><div class="container">
+            <header class="page-header"><h1>UDP 协议学习</h1><p>User Datagram Protocol — 无连接、轻量、高效的数据报传输</p></header>
+            <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                <button class="tab-button" role="tab" data-tab="frames">报文详解</button>
+                <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+            </nav>
+
+            <!-- ===== Tab 1: 基础概念 ===== -->
+            <section id="basics-tab" class="content-section active" role="tabpanel">
+                <h2 class="section-title">UDP 协议基础概念</h2>
+                <p>UDP（User Datagram Protocol，用户数据报协议）是传输层最轻量的协议，以极低的头部开销提供无连接的数据报传输服务，广泛用于实时通信、DNS 查询、音视频流和车载网络。</p>
+                <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                    <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                        <div class="concept-card"><h4>无连接传输</h4><p>UDP 不需要建立连接即可发送数据。每个数据报独立传输，不保证到达、不保证顺序、不保证不重复。开销极低（仅 8 字节头部），适合对实时性要求高、可容忍少量丢包的应用。</p></div>
+                        <div class="concept-card"><h4>数据报模型</h4><p>UDP 保留应用层数据的边界，每次发送对应一个完整的数据报。不同于 TCP 的字节流模型，UDP 的消息边界完整保留，接收方收到的就是发送方发出的完整消息。</p></div>
+                        <div class="concept-card"><h4>与 TCP 对比</h4><p>UDP 无连接/不可靠/无序/无流量控制/无拥塞控制/8字节头部；TCP 面向连接/可靠/有序/流量控制/拥塞控制/20+字节头部。UDP 延迟低、吞吐高，适合实时场景。</p></div>
+                        <div class="concept-card"><h4>多播与广播</h4><p>UDP 支持一对多通信：多播（Multicast，组地址 224.0.0.0-239.255.255.255）和广播（Broadcast，255.255.255.255）。TCP 只支持点对点。DDS 的发现协议使用 UDP 多播。</p></div>
+                        <div class="concept-card"><h4>DNS 查询</h4><p>DNS 是 UDP 最典型的应用之一。DNS 查询通常使用 UDP 53 端口，因为查询-响应模式简单、数据量小（通常 &lt;512 字节）。只有区域传输（Zone Transfer）才使用 TCP。</p></div>
+                        <div class="concept-card"><h4>在车载中的应用</h4><p>SOME/IP 使用 UDP 传输事件通知和周期性数据；DDS 使用 UDP 多播进行节点发现和数据分发；TSN（Time-Sensitive Networking）基于 UDP 实现确定性传输。</p></div>
+                        <div class="concept-card"><h4>校验和</h4><p>UDP 校验和是可选的（IPv4 中可以设为 0 表示不校验），但 IPv6 中强制使用。校验范围覆盖伪头部（源/目的 IP、协议号、UDP 长度）+ UDP 头部 + 数据。</p></div>
+                        <div class="concept-card"><h4>UDP-Lite</h4><p>UDP-Lite（RFC 3828）是 UDP 的变体，允许只校验数据报的部分内容。适合音视频流媒体场景——部分数据损坏时仍可将未损坏的部分传递给应用层。</p></div>
+                        <div class="concept-card"><h4>QUIC 协议</h4><p>QUIC 基于 UDP 实现了类似 TCP 的可靠传输，同时支持多路复用和 0-RTT 连接建立。HTTP/3 使用 QUIC 作为传输层。展示了 UDP 作为"构建基座"的灵活性。</p></div>
+                        <div class="concept-card"><h4>协议栈结构</h4><p>在车载场景中的位置：应用层（SOME/IP 事件 / DDS / TSN）→ UDP → IP → Ethernet → 物理链路。UDP 位于传输层，为上层应用提供端口复用和可选校验功能。</p></div>
+                    </div>
+                    <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                    <div style="display:flex;flex-direction:column;align-items:center;">
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#0891B2,#0E7490);width:260px;"><div class="layer-name">应用层</div><div class="layer-desc">SOME/IP / DDS / DNS / DHCP</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#0EA5C9,#14B8D9);width:260px;"><div class="layer-name">UDP</div><div class="layer-desc">无连接数据报传输</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#14B8D9,#22C7DE);width:260px;"><div class="layer-name">IP</div><div class="layer-desc">网络层路由</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#22C7DE,#30D6E3);width:260px;"><div class="layer-name">Ethernet</div><div class="layer-desc">数据链路层</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#30D6E3,#5EEAD4);width:260px;"><div class="layer-name">物理链路</div><div class="layer-desc">100BASE-T1 / 物理介质</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Tab 2: 报文详解 ===== -->
+            <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">UDP 数据报结构详解</h2>
+                <p>逐字段解析 UDP 数据报头部，点击卡片查看详细信息</p>
+                <div id="frameFieldsGrid"></div>
+            </section>
+
+            <!-- ===== Tab 3: 交互演示 ===== -->
+            <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">UDP 协议交互演示</h2>
+                <p>观察 UDP 数据报在节点间的传输行为</p>
+                <div class="demo-controls">
+                    <button class="demo-btn" onclick="startDemo('send')">数据报发送</button>
+                    <button class="demo-btn" onclick="startDemo('loss')">丢包场景</button>
+                    <button class="demo-btn" onclick="startDemo('multicast')">多播传输</button>
+                    <button class="demo-btn" onclick="startDemo('compare')">与 TCP 对比</button>
+                    <button class="demo-btn" onclick="resetDemo()">重置</button>
+                </div>
+                <div class="device-container" id="demoTopology">
+                    <div class="device sender-device" id="senderNode"><div class="device-icon">📤</div><div class="device-name">Sender</div><div class="device-status" id="senderStatus">就绪</div></div>
+                    <div style="text-align:center;"><div class="connection-line">⟷</div><div style="font-size:0.75rem;color:var(--text-3);">Network</div></div>
+                    <div class="device receiver-device" id="receiverNode"><div class="device-icon">📥</div><div class="device-name">Receiver</div><div class="device-status" id="receiverStatus">就绪</div></div>
+                </div>
+                <div id="commLog" class="log"><div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">点击上方按钮开始 UDP 通信演示...</span></div></div>
+            </section>
+
+            <!-- ===== Tab 4: 实用工具 ===== -->
+            <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">UDP 实用工具集</h2>
+                <p>为 UDP 协议开发和调试提供专业工具支持</p>
+                <div style="display:grid;gap:24px;margin:24px 0;">
+                    <div class="tool-card">
+                        <h3 style="color:var(--accent);">UDP 校验和计算器</h3>
+                        <p>输入伪头部和 UDP 数据，计算 UDP 校验和</p>
+                        <div style="margin:12px 0;">
+                            <label style="font-size:0.85rem;color:var(--text-2);display:block;margin-bottom:4px;">源 IP 地址</label>
+                            <input type="text" class="tool-input" id="srcIP" placeholder="如: 192.168.0.10" style="margin-bottom:8px;">
+                            <label style="font-size:0.85rem;color:var(--text-2);display:block;margin-bottom:4px;">目的 IP 地址</label>
+                            <input type="text" class="tool-input" id="dstIP" placeholder="如: 192.168.0.20" style="margin-bottom:8px;">
+                            <label style="font-size:0.85rem;color:var(--text-2);display:block;margin-bottom:4px;">源端口</label>
+                            <input type="text" class="tool-input" id="srcPortChk" placeholder="如: 12345" style="margin-bottom:8px;">
+                            <label style="font-size:0.85rem;color:var(--text-2);display:block;margin-bottom:4px;">目的端口</label>
+                            <input type="text" class="tool-input" id="dstPortChk" placeholder="如: 53" style="margin-bottom:8px;">
+                            <label style="font-size:0.85rem;color:var(--text-2);display:block;margin-bottom:4px;">数据（十六进制）</label>
+                            <input type="text" class="tool-input" id="udpData" placeholder="如: 01 02 03 04" style="margin-bottom:12px;">
+                            <button class="tool-button" onclick="calcChecksum()">计算校验和</button>
+                        </div>
+                        <div id="checksumResult" style="margin-top:12px;"></div>
+                    </div>
+                    <div class="tool-card">
+                        <h3 style="color:var(--accent);">端口查询</h3>
+                        <p>输入端口号，查看常见 UDP 服务</p>
+                        <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                            <input type="text" class="tool-input" id="portInput" placeholder="输入端口号 (如: 53)" style="flex:1;min-width:200px;">
+                            <button class="tool-button" onclick="lookupPort()">查询</button>
+                        </div>
+                        <div id="portResult" style="margin-top:12px;"></div>
+                    </div>
+                    <div class="tool-card">
+                        <h3 style="color:var(--accent);">数据报构造器</h3>
+                        <p>输入源端口、目标端口和数据，生成完整 UDP 数据报的十六进制表示</p>
+                        <div style="margin:12px 0;">
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="dgSrcPort" placeholder="源端口 (如: 12345)" style="flex:1;min-width:120px;">
+                                <input type="text" class="tool-input" id="dgDstPort" placeholder="目标端口 (如: 53)" style="flex:1;min-width:120px;">
+                            </div>
+                            <input type="text" class="tool-input" id="dgData" placeholder="数据（十六进制，如: 48 65 6C 6C 6F）" style="margin-top:8px;">
+                            <button class="tool-button" onclick="buildDatagram()" style="margin-top:12px;">生成数据报</button>
+                        </div>
+                        <div id="datagramResult" style="margin-top:12px;"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Tab 5: 知识测试 ===== -->
+            <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">UDP 协议知识测试</h2>
+                <div id="questionArea"></div>
+                <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                    <div class="results-box"><h3>测试完成！</h3><div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div><div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div></div>
+                    <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">重新测试</button>
+                </div>
+            </section>
+
+        <script>
+        let currentTab = 'basics';
+        let quizState = { currentQuestion: 0, score: 0, answered: false };
+        let demoActive = false;
+
+        const UDP_FRAME_FIELDS = {
+            'src_port': { name: 'Source Port（源端口）', bytes: '2 字节', description: '发送方的端口号，取值范围 0-65535。这是一个可选字段——当不需要回复时可以设为 0。在响应数据报中，通常设为目标之前使用的源端口。', details: ['长度：16 bit (2 字节)','取值范围：0-65535','可选字段，可设为 0','知名端口：0-1023（如 DNS 53）','注册端口：1024-49151','动态/私有端口：49152-65535'], examples: ['DNS 查询源端口：随机高位端口（如 54321）','DNS 响应源端口：53'], tip: 'UDP 使用端口实现多路复用——同一 IP 地址上可同时运行多个 UDP 应用' },
+            'dst_port': { name: 'Destination Port（目标端口）', bytes: '2 字节', description: '接收方的端口号，标识数据报应交付给哪个应用进程。这是 UDP 头部最重要的字段——接收方根据目标端口号将数据分发给对应的应用。', details: ['长度：16 bit (2 字节)','取值范围：0-65535','必需字段，不能为 0','常见端口：DNS 53, DHCP 67/68, NTP 123','SOME/IP 常用端口：30509','DDS 默认端口：7400-7417'], examples: ['DNS 查询目标端口：53','NTP 目标端口：123'], tip: '服务器通常监听在知名端口上（如 DNS=53），客户端使用临时端口发起请求' },
+            'length': { name: 'Length（长度）', bytes: '2 字节', description: 'UDP 数据报的总长度，包括 UDP 头部（8 字节）和数据部分。最小值为 8（仅有头部无数据），最大值为 65535。实际应用中受 IP 层 MTU 限制，通常不超过 1472 字节（1500 MTU - 20 IP头 - 8 UDP头）。', details: ['长度：16 bit (2 字节)','最小值：8（仅有头部，无数据）','最大值：65535 字节','包含 UDP 头部 + 数据的总长度','超过 MTU 会导致 IP 分片'], examples: ['仅头部：0x0008','8 字节头部 + 100 字节数据：0x006C (108)'], tip: 'UDP 数据字段可以为空——长度为 8 的 UDP 数据报是完全合法的' },
+            'checksum': { name: 'Checksum（校验和）', bytes: '2 字节', description: '覆盖伪头部 + UDP 头部 + 数据的校验和，用于检测传输中的比特错误。在 IPv4 中可选（可设为 0 表示不校验），但 IPv6 中强制使用。校验算法为 16 位反码求和。', details: ['长度：16 bit (2 字节)','IPv4 中可选（值为 0 表示不校验）','IPv6 中强制使用','算法：16 位反码求和','覆盖范围：伪头部 + UDP 头部 + 数据','伪头部包含：源 IP、目的 IP、协议号(17)、UDP 长度'], examples: ['不校验（仅 IPv4）：0x0000','计算值示例：0xA87B'], tip: '虽然 IPv4 允许不校验，但强烈建议启用——链路层校验（如 Ethernet FCS）仅覆盖单跳，端到端校验由 UDP 完成' }
+        };
+
+        const QUIZ_QUESTIONS = [
+            { question: 'UDP 头部长度是多少字节？', options: ['4 字节','8 字节','16 字节','20 字节'], correct: 1, explanation: 'UDP 头部固定 8 字节：源端口(2) + 目标端口(2) + 长度(2) + 校验和(2)。是传输层最精简的头部。' },
+            { question: '以下哪项不是 UDP 的特性？', options: ['无连接','不可靠传输','流量控制','保留消息边界'], correct: 2, explanation: 'UDP 没有流量控制机制。UDP 只提供无连接、不可靠的数据报传输，保留消息边界但不提供流量控制、拥塞控制或重传。' },
+            { question: 'DNS 查询通常使用哪个传输层协议和端口？', options: ['TCP 53','UDP 53','UDP 80','TCP 443'], correct: 1, explanation: 'DNS 查询通常使用 UDP 53 端口，因为查询-响应模式简单且数据量小（通常 <512 字节）。只有区域传输（Zone Transfer）才使用 TCP。' },
+            { question: 'UDP 校验和在 IPv4 中是什么性质？', options: ['强制使用','可选的（可设为 0）','不需要','必须与 TCP 校验和相同'], correct: 1, explanation: 'IPv4 中 UDP 校验和是可选的，可以设为 0 表示不校验。但在 IPv6 中，UDP 校验和是强制使用的。' },
+            { question: 'UDP 支持以下哪种 TCP 不支持的通信模式？', options: ['单播','多播','点对点','全双工'], correct: 1, explanation: 'UDP 支持多播（一对多）和广播，而 TCP 只支持点对点通信。DDS 使用 UDP 多播进行节点发现。' },
+            { question: 'UDP 数据报的最小长度（含头部）是多少字节？', options: ['4 字节','8 字节','16 字节','64 字节'], correct: 1, explanation: 'UDP 数据报最小 8 字节——仅有头部（源端口+目标端口+长度+校验和各 2 字节），数据部分可以为空。' },
+            { question: '在车载网络中，DDS 使用 UDP 的什么特性进行节点发现？', options: ['校验和','多播','长度字段','源端口'], correct: 1, explanation: 'DDS 使用 UDP 多播进行节点发现和数据分发。多播允许多个节点同时接收同一数据，非常适合分布式系统中的服务发现。' },
+            { question: 'SOME/IP 使用 UDP 传输什么类型的数据？', options: ['仅诊断数据','仅文件传输','事件通知和周期性数据','仅配置数据'], correct: 2, explanation: 'SOME/IP 使用 UDP 传输事件通知和周期性数据。这些数据对实时性要求高，可容忍少量丢包，适合 UDP 的无连接特性。' },
+            { question: 'QUIC 协议基于 UDP 的主要原因是什么？', options: ['UDP 更安全','UDP 可以绕过中间件限制并支持快速迭代','UDP 带宽更大','UDP 有更好的拥塞控制'], correct: 1, explanation: 'QUIC 基于 UDP 可以绕过现有网络中间件（如防火墙、NAT）对新协议的限制，同时允许在用户态快速迭代传输协议，无需修改操作系统内核。' },
+            { question: 'UDP-Lite 与标准 UDP 的关键区别是什么？', options: ['头部更短','允许只校验部分数据','支持加密','使用不同端口号范围'], correct: 1, explanation: 'UDP-Lite（RFC 3828）允许只校验数据报的部分内容。适合音视频流媒体——部分数据损坏时仍可将未损坏部分传递给应用层。' },
+            { question: 'UDP Length 字段的值 8 表示什么？', options: ['数据部分 8 字节','总长度 8 字节（仅头部无数据）','最大 8 字节数据','8 位长度字段'], correct: 1, explanation: 'UDP Length 字段表示头部+数据的总长度。值为 8 意味着仅有 8 字节头部，数据部分长度为 0。这是 UDP 数据报的最小合法长度。' },
+            { question: 'NTP（网络时间协议）使用哪个 UDP 端口？', options: ['53','67','123','161'], correct: 2, explanation: 'NTP 使用 UDP 123 端口。时间同步需要低延迟，UDP 的无连接特性使其成为 NTP 的理想传输协议。' }
+        ];
+
+        const UDP_PORTS = {
+            '53': { service: 'DNS', desc: '域名系统 — 解析域名为 IP 地址' },
+            '67': { service: 'DHCP (Server)', desc: '动态主机配置协议 — 服务器端口' },
+            '68': { service: 'DHCP (Client)', desc: '动态主机配置协议 — 客户端端口' },
+            '69': { service: 'TFTP', desc: '简单文件传输协议' },
+            '123': { service: 'NTP', desc: '网络时间协议 — 时钟同步' },
+            '161': { service: 'SNMP', desc: '简单网络管理协议' },
+            '162': { service: 'SNMP Trap', desc: 'SNMP 陷阱通知' },
+            '500': { service: 'IKE/ISAKMP', desc: 'Internet 密钥交换' },
+            '514': { service: 'Syslog', desc: '系统日志' },
+            '1194': { service: 'OpenVPN', desc: 'VPN 通信协议' },
+            '1900': { service: 'SSDP', desc: '简单服务发现协议（UPnP）' },
+            '4500': { service: 'NAT-T', desc: 'NAT 穿越的 IKE' },
+            '5353': { service: 'mDNS', desc: '多播 DNS（Bonjour/Avahi）' },
+            '7400': { service: 'DDS', desc: '数据分发服务 — 默认起始端口' },
+            '7401': { service: 'DDS', desc: '数据分发服务 — 端口 +1' },
+            '30509': { service: 'SOME/IP', desc: '面向服务的以太网通信 — 默认端口' },
+            '4789': { service: 'VXLAN', desc: '虚拟扩展局域网' }
+        };
+
+        // Theme & Tab
+        function toggleTheme() { const b = document.body; if(b.hasAttribute('data-theme') && b.getAttribute('data-theme')==='dark'){b.removeAttribute('data-theme');localStorage.setItem('vp-theme','light');}else{b.setAttribute('data-theme','dark');localStorage.setItem('vp-theme','dark');} }
+        document.addEventListener('DOMContentLoaded', function() { const t=localStorage.getItem('vp-theme')||'light'; if(t==='dark')document.body.setAttribute('data-theme','dark'); else document.body.removeAttribute('data-theme'); renderFrameFields(); loadQuizQuestion(); });
+        function showTab(n) { document.querySelectorAll('.content-section').forEach(s=>{s.classList.remove('active');s.hidden=true;}); document.querySelectorAll('.tab-button').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');}); const s=document.getElementById(n+'-tab'); if(s){s.classList.add('active');s.hidden=false;} const b=document.querySelector(`[data-tab="${n}"]`); if(b){b.classList.add('active');b.setAttribute('aria-selected','true');} currentTab=n; }
+        document.querySelectorAll('.tab-button').forEach(b=>{b.addEventListener('click',()=>showTab(b.dataset.tab));});
+
+        // Render Frame Fields
+        function renderFrameFields() { const g=document.getElementById('frameFieldsGrid'); if(!g)return; let h=''; Object.entries(UDP_FRAME_FIELDS).forEach(([k,f])=>{ h+=`<div class="frame-field-card" onclick="showFieldModal('${k}')"><h4>${f.name}</h4><p>${f.description.substring(0,80)}...</p><div class="field-meta"><span>${f.bytes}</span><span>点击查看详情</span></div></div>`; }); g.innerHTML=h; }
+        function showFieldModal(key) { const f=UDP_FRAME_FIELDS[key]; if(!f)return; const o=document.createElement('div'); o.className='modal-overlay active'; o.innerHTML=`<div class="modal"><button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button><h3 style="color:var(--accent);margin-bottom:4px;">${f.name}</h3><p style="color:var(--text-3);font-size:0.85rem;margin-bottom:16px;">${f.bytes}</p><p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${f.description}</p><h4 style="color:var(--accent);margin-bottom:8px;">功能详情</h4><ul style="margin:0 0 16px 20px;font-size:0.9rem;color:var(--text-2);">${f.details.map(d=>`<li style="margin-bottom:4px;">${d}</li>`).join('')}</ul><div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">${f.tip}</div></div>`; o.addEventListener('click',function(e){if(e.target===o)o.remove();}); document.body.appendChild(o); }
+
+        // Demo
+        function addLog(m,t){const l=document.getElementById('commLog');const n=new Date();const ts=`[${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')}]`; const cls=t==='warning'?'log-warning':t==='error'?'log-error':'log-info'; l.innerHTML+=`<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${m}</span></div>`; l.scrollTop=l.scrollHeight;}
+        function setStatus(id,t){const e=document.getElementById(id);if(e)e.textContent=t;}
+        function resetDemo(){demoActive=false; ['senderNode','receiverNode'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('pulse');}); setStatus('senderStatus','就绪'); setStatus('receiverStatus','就绪'); document.querySelectorAll('.multicast-receiver').forEach(e=>{e.classList.remove('pulse');}); const l=document.getElementById('commLog'); l.innerHTML='<div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">已重置，点击按钮开始演示</span></div>';}
+        function startDemo(type){if(demoActive)return; resetDemo(); demoActive=true; if(type==='send')demoSend(); else if(type==='loss')demoLoss(); else if(type==='multicast')demoMulticast(); else if(type==='compare')demoCompare();}
+
+        function demoSend(){
+            addLog('UDP 数据报发送演示','info');
+            setTimeout(()=>{const e=document.getElementById('senderNode');if(e)e.classList.add('pulse');setStatus('senderStatus','构建数据报');addLog('[Sender] 构建 UDP 数据报...','info');},400);
+            setTimeout(()=>{addLog('[Sender] 源端口: 54321 | 目标端口: 53','info');},1000);
+            setTimeout(()=>{addLog('[Sender] 长度: 38 字节 (8 头部 + 30 数据)','info');},1600);
+            setTimeout(()=>{addLog('[Sender] 校验和: 0xA87B','info');},2200);
+            setTimeout(()=>{setStatus('senderStatus','发送中');addLog('[Sender] 发送数据报到 192.168.0.20:53','info');addLog('[Network] 数据报通过网络转发（无握手）','warning');},2800);
+            setTimeout(()=>{const e=document.getElementById('receiverNode');if(e)e.classList.add('pulse');addLog('[Receiver] 收到 UDP 数据报','info');addLog('[Receiver] 校验和验证通过，交付到端口 53','info');setStatus('receiverStatus','接收成功');setStatus('senderStatus','发送完成');demoActive=false;},3800);
+        }
+
+        function demoLoss(){
+            addLog('UDP 丢包场景演示 — 发送 5 个数据报','info');
+            const packets=['Seq=1','Seq=2','Seq=3','Seq=4','Seq=5'];
+            const lost=[1,3]; // index 1 and 3 lost
+            let delay=500;
+            packets.forEach((p,i)=>{
+                setTimeout(()=>{setStatus('senderStatus','发送 '+p);addLog('[Sender] 发送 '+p,'info');},delay);
+                delay+=600;
+                if(lost.includes(i)){
+                    setTimeout(()=>{addLog('[Network] '+p+' 在网络中丢失!','error');},delay);
+                } else {
+                    setTimeout(()=>{addLog('[Network] '+p+' 正常转发','info');},delay);
+                }
+                delay+=600;
+                if(!lost.includes(i)){
+                    setTimeout(()=>{addLog('[Receiver] 收到 '+p,'info');},delay);
+                } else {
+                    setTimeout(()=>{addLog('[Receiver] 未收到 '+p+' — UDP 不重传','warning');},delay);
+                }
+                delay+=500;
+            });
+            setTimeout(()=>{addLog('结果：5 个数据报，3 个到达，2 个丢失','error');addLog('UDP 不提供重传机制 — 应用层需自行处理','warning');setStatus('senderStatus','发送完毕');setStatus('receiverStatus','收到 3/5');demoActive=false;},delay);
+        }
+
+        function demoMulticast(){
+            addLog('UDP 多播传输演示 — 一对多通信','info');
+            setTimeout(()=>{const e=document.getElementById('senderNode');if(e)e.classList.add('pulse');setStatus('senderStatus','发送多播');addLog('[Sender] 发送多播数据报到 224.0.0.251:5353','info');},500);
+            setTimeout(()=>{addLog('[Sender] 源端口: 5353 | 目标端口: 5353','info');addLog('[Sender] 多播组地址: 224.0.0.251 (mDNS)','info');},1200);
+            setTimeout(()=>{addLog('[Network] 交换机复制数据报到所有订阅端口','warning');},1900);
+            setTimeout(()=>{addLog('[Receiver A] 收到多播数据报','info');addLog('[Receiver B] 收到多播数据报','info');addLog('[Receiver C] 收到多播数据报','info');setStatus('receiverStatus','多播接收');},2600);
+            setTimeout(()=>{addLog('所有订阅该多播组的节点同时收到同一数据报','info');addLog('TCP 无法实现多播 — 这正是 UDP 的优势','info');demoActive=false;},3500);
+        }
+
+        function demoCompare(){
+            addLog('UDP vs TCP 传输对比','info');
+            setTimeout(()=>{addLog('===== UDP 传输 =====','warning');},500);
+            setTimeout(()=>{addLog('[UDP] 直接发送数据报，无需握手','info');addLog('[UDP] 源端口 → 目标端口，一次完成','info');},1200);
+            setTimeout(()=>{addLog('[UDP] 发送完毕，总耗时: 1 RTT','info');},2000);
+            setTimeout(()=>{addLog('===== TCP 传输（对比） =====','warning');},3000);
+            setTimeout(()=>{addLog('[TCP] SYN → 建立连接（第 1 次握手）','warning');},3700);
+            setTimeout(()=>{addLog('[TCP] SYN-ACK ← 确认连接（第 2 次握手）','warning');},4400);
+            setTimeout(()=>{addLog('[TCP] ACK → 连接建立完成（第 3 次握手）','warning');},5100);
+            setTimeout(()=>{addLog('[TCP] 现在才能发送数据...','info');},5800);
+            setTimeout(()=>{addLog('UDP: 1 步完成 | TCP: 3 次握手 + 数据传输','info');addLog('UDP 延迟更低，但 TCP 提供可靠性和顺序保证','info');setStatus('senderStatus','对比完成');demoActive=false;},6800);
+        }
+
+        // Tools — Checksum Calculator
+        function calcChecksum(){
+            const srcIP=document.getElementById('srcIP').value.trim();
+            const dstIP=document.getElementById('dstIP').value.trim();
+            const srcP=parseInt(document.getElementById('srcPortChk').value);
+            const dstP=parseInt(document.getElementById('dstPortChk').value);
+            const dataHex=document.getElementById('udpData').value.trim();
+            const r=document.getElementById('checksumResult');
+            if(!srcIP||!dstIP||isNaN(srcP)||isNaN(dstP)){r.innerHTML='<p style="color:#dc3545;">请填写源 IP、目的 IP、源端口和目的端口</p>';return;}
+            const srcBytes=srcIP.split('.').map(Number);
+            const dstBytes=dstIP.split('.').map(Number);
+            if(srcBytes.length!==4||dstBytes.length!==4||srcBytes.some(isNaN)||dstBytes.some(isNaN)){r.innerHTML='<p style="color:#dc3545;">IP 地址格式不正确，请使用 x.x.x.x 格式</p>';return;}
+            let dataBytes=[];
+            if(dataHex){dataBytes=dataHex.replace(/0x/gi,'').replace(/[\s,:-]/g,'').match(/.{2}/g);if(dataBytes)dataBytes=dataBytes.map(h=>parseInt(h,16));}
+            if(!dataBytes)dataBytes=[];
+            const udpLen=8+dataBytes.length;
+            // Build 16-bit words: pseudo header + UDP header + data
+            let words=[];
+            // Pseudo header: srcIP(4B) + dstIP(4B) + zero(1B) + proto(1B=17) + udpLen(2B)
+            words.push((srcBytes[0]<<8)|srcBytes[1]);
+            words.push((srcBytes[2]<<8)|srcBytes[3]);
+            words.push((dstBytes[0]<<8)|dstBytes[1]);
+            words.push((dstBytes[2]<<8)|dstBytes[3]);
+            words.push(17); // protocol
+            words.push(udpLen);
+            // UDP header: srcPort + dstPort + length + checksum(0)
+            words.push(srcP);
+            words.push(dstP);
+            words.push(udpLen);
+            words.push(0); // checksum placeholder
+            // Data
+            for(let i=0;i<dataBytes.length;i+=2){
+                const hi=dataBytes[i];
+                const lo=dataBytes[i+1]||0;
+                words.push((hi<<8)|lo);
+            }
+            // Sum
+            let sum=0;
+            for(const w of words){sum+=w;}
+            while(sum>0xFFFF){sum=(sum&0xFFFF)+(sum>>16);}
+            const checksum=(~sum)&0xFFFF;
+            const hex='0x'+checksum.toString(16).toUpperCase().padStart(4,'0');
+            r.innerHTML=`<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;font-family:monospace;">
+                <p><strong>UDP 长度:</strong> ${udpLen} 字节 (8 头部 + ${dataBytes.length} 数据)</p>
+                <p><strong>校验和:</strong> <code style="background:rgba(8,145,178,0.15);padding:2px 8px;border-radius:4px;">${hex}</code></p>
+                <p style="font-size:0.8rem;color:var(--text-3);margin-top:8px;">覆盖范围: 伪头部(IP+协议+长度) + UDP 头部 + 数据</p>
+            </div>`;
+        }
+
+        // Tools — Port Lookup
+        function lookupPort(){
+            const i=document.getElementById('portInput').value.trim();
+            const r=document.getElementById('portResult');
+            const p=parseInt(i);
+            if(isNaN(p)||p<0||p>65535){r.innerHTML='<p style="color:#dc3545;">请输入有效端口号 (0-65535)</p>';return;}
+            const info=UDP_PORTS[String(p)];
+            let h=`<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+            if(info){
+                h+=`<p><strong>端口 ${p}</strong> — ${info.service}</p><p style="color:var(--text-2);">${info.desc}</p>`;
+            }else{
+                h+=`<p><strong>端口 ${p}</strong> — 未在常见 UDP 端口列表中</p>`;
+                if(p>=49152)h+=`<p style="color:var(--text-3);font-size:0.85rem;">该端口属于动态/私有端口范围 (49152-65535)</p>`;
+                else if(p>=1024)h+=`<p style="color:var(--text-3);font-size:0.85rem;">该端口属于注册端口范围 (1024-49151)</p>`;
+                else h+=`<p style="color:var(--text-3);font-size:0.85rem;">该端口属于知名端口范围 (0-1023)</p>`;
+            }
+            h+=`<table style="width:100%;margin-top:12px;font-size:0.85rem;"><tr><th>端口</th><th>服务</th><th>说明</th></tr>`;
+            Object.entries(UDP_PORTS).filter(([k])=>Math.abs(parseInt(k)-p)<=5||['53','67','68','123','161','7400','30509'].includes(k)).slice(0,10).forEach(([k,v])=>{
+                h+=`<tr style="${k===String(p)?'font-weight:600;background:rgba(8,145,178,0.1);':''}"><td>${k}</td><td>${v.service}</td><td>${v.desc}</td></tr>`;
+            });
+            h+=`</table></div>`;
+            r.innerHTML=h;
+        }
+
+        // Tools — Datagram Builder
+        function buildDatagram(){
+            const sp=parseInt(document.getElementById('dgSrcPort').value);
+            const dp=parseInt(document.getElementById('dgDstPort').value);
+            const dataHex=document.getElementById('dgData').value.trim();
+            const r=document.getElementById('datagramResult');
+            if(isNaN(sp)||isNaN(dp)||sp<0||sp>65535||dp<0||dp>65535){r.innerHTML='<p style="color:#dc3545;">请输入有效端口号 (0-65535)</p>';return;}
+            let dataBytes=[];
+            if(dataHex){dataBytes=dataHex.replace(/0x/gi,'').replace(/[\s,:-]/g,'').match(/.{2}/g);if(dataBytes)dataBytes=dataBytes.map(h=>parseInt(h,16));}
+            if(!dataBytes)dataBytes=[];
+            const totalLen=8+dataBytes.length;
+            const bytes=[];
+            // Source Port
+            bytes.push((sp>>8)&0xFF,sp&0xFF);
+            // Destination Port
+            bytes.push((dp>>8)&0xFF,dp&0xFF);
+            // Length
+            bytes.push((totalLen>>8)&0xFF,totalLen&0xFF);
+            // Checksum (0 = not computed)
+            bytes.push(0x00,0x00);
+            // Data
+            bytes.push(...dataBytes);
+            const hexStr=bytes.map(b=>b.toString(16).toUpperCase().padStart(2,'0')).join(' ');
+            const headerHex=bytes.slice(0,8).map(b=>b.toString(16).toUpperCase().padStart(2,'0')).join(' ');
+            const dataHexStr=dataBytes.length?bytes.slice(8).map(b=>b.toString(16).toUpperCase().padStart(2,'0')).join(' '):'(无数据)';
+            r.innerHTML=`<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;font-family:monospace;">
+                <p><strong>总长度:</strong> ${totalLen} 字节 (${bytes.length} 字节原始数据)</p>
+                <p style="margin-top:8px;"><strong>UDP 头部:</strong></p>
+                <div style="padding:8px;background:var(--surface);border-radius:4px;margin:4px 0;font-size:0.85rem;word-break:break-all;">${headerHex}</div>
+                <p style="margin-top:4px;">源端口=${sp} | 目标端口=${dp} | 长度=${totalLen} | 校验和=0x0000</p>
+                <p style="margin-top:8px;"><strong>数据部分:</strong></p>
+                <div style="padding:8px;background:var(--surface);border-radius:4px;margin:4px 0;font-size:0.85rem;word-break:break-all;">${dataHexStr}</div>
+                <p style="margin-top:8px;"><strong>完整数据报:</strong></p>
+                <div style="padding:8px;background:var(--surface);border-radius:4px;margin:4px 0;font-size:0.85rem;word-break:break-all;color:var(--accent);">${hexStr}</div>
+                <p style="font-size:0.8rem;color:var(--text-3);margin-top:8px;">校验和设为 0x0000 — 实际应用中需要根据伪头部计算</p>
+            </div>`;
+        }
+
+        // Quiz
+        function loadQuizQuestion(){const a=document.getElementById('questionArea');if(!a)return;if(quizState.currentQuestion>=QUIZ_QUESTIONS.length){document.getElementById('quizResults').style.display='block';a.style.display='none';const p=Math.round((quizState.score/QUIZ_QUESTIONS.length)*100);document.getElementById('scoreValue').textContent=quizState.score;document.getElementById('percentage').textContent=p+'%';return;}quizState.answered=false;const q=QUIZ_QUESTIONS[quizState.currentQuestion];let h=`<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion+1} / ${QUIZ_QUESTIONS.length}</div><div style="display:flex;gap:4px;margin-bottom:16px;">`;QUIZ_QUESTIONS.forEach((_,i)=>{h+=`<div style="flex:1;height:4px;border-radius:2px;background:${i<quizState.currentQuestion?'var(--accent)':'var(--border)'};"></div>`;}); h+=`</div><h3 style="margin-bottom:16px;">${q.question}</h3>`;q.options.forEach((o,i)=>{h+=`<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${o}</button>`;}); h+=`<div id="quizFeedback" style="margin-top:12px;"></div>`; a.innerHTML=h; a.style.display='block'; document.getElementById('quizResults').style.display='none';}
+        function answerQuiz(idx){if(quizState.answered)return;quizState.answered=true;const q=QUIZ_QUESTIONS[quizState.currentQuestion];const fb=document.getElementById('quizFeedback');for(let i=0;i<q.options.length;i++){const b=document.getElementById('qopt'+i);if(i===q.correct)b.classList.add('correct');if(i===idx&&i!==q.correct)b.classList.add('wrong');b.classList.add('disabled');}if(idx===q.correct){quizState.score++;fb.innerHTML=`<p style="color:#28a745;font-weight:600;">正确！${q.explanation}</p>`;}else{fb.innerHTML=`<p style="color:#dc3545;font-weight:600;">错误。${q.explanation}</p>`;}setTimeout(()=>{quizState.currentQuestion++;loadQuizQuestion();},2500);}
+        function restartQuiz(){quizState={currentQuestion:0,score:0,answered:false};loadQuizQuestion();}
+        </script>
+        <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></aside>
+    </div></div>
+</body>
+</html>

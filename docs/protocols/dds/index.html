@@ -316,6 +316,38 @@
                             <div class="concept-card"><h4>🤖 ROS 2 集成</h4><p>ROS 2 的 rmw（ROS Middleware）层默认使用 DDS 作为底层通信机制。ROS 2 节点对应 DDS Participant，话题对应 Topic，服务通过 Topic + Request/Reply IDL 实现。切换 DDS 实现（Fast DDS、Cyclone DDS、Connext）只需改环境变量，应用代码无需修改。</p></div>
                             <div class="concept-card"><h4>📄 IDL 接口定义</h4><p>IDL（Interface Definition Language）是 DDS 定义数据类型的语言，独立于编程语言。用 IDL 定义 struct、enum、union 等数据结构后，DDS 工具链自动生成 C/C++/Java/Python 的类型代码和序列化/反序列化逻辑，确保多语言互操作。</p></div>
                             <div class="concept-card"><h4>🔄 vs SOME/IP</h4><p>同属中间件层但模式不同：SOME/IP 采用请求/响应模式（RPC），服务于 AUTOSAR 生态的 ECU 间通信；DDS 采用发布/订阅模式，强调去中心化、QoS 控制和多对多通信，服务于 ROS 2 生态的自动驾驶和机器人场景。两者可共存于同一车载以太网。</p></div>
+                            <div class="concept-card"><h4>📡 vs MQTT</h4><p>同属发布/订阅模式但定位不同：MQTT 轻量级、依赖中心化 Broker、3 级 QoS、适合 IoT 设备到云端通信；DDS 去中心化、22+ 种 QoS 策略、适合车内实时通信。MQTT 适合车辆遥测和远程监控，DDS 适合传感器融合和实时控制。</p></div>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">中间件对比：DDS vs SOME/IP vs MQTT</h4>
+                        <div style="overflow-x:auto;">
+                            <table style="width:100%;border-collapse:collapse;font-size:0.85rem;">
+                                <tr><th>特性</th><th>DDS</th><th>SOME/IP</th><th>MQTT</th></tr>
+                                <tr><td>通信模式</td><td>发布/订阅</td><td>请求/响应 + 事件</td><td>发布/订阅</td></tr>
+                                <tr><td>架构</td><td>去中心化 (P2P)</td><td>去中心化 (SD 发现)</td><td>中心化 (Broker)</td></tr>
+                                <tr><td>QoS 策略</td><td>22+ 种精细控制</td><td>有限 (可靠性/超时)</td><td>3 级 (QoS 0/1/2)</td></tr>
+                                <tr><td>发现机制</td><td>SPDP/SEDP 多播</td><td>SD 服务发现</td><td>Broker 连接</td></tr>
+                                <tr><td>传输层</td><td>UDP (多播+单播)</td><td>TCP + UDP</td><td>TCP</td></tr>
+                                <tr><td>延迟</td><td>微秒级</td><td>毫秒级</td><td>毫秒~秒级</td></tr>
+                                <tr><td>生态</td><td>ROS 2 / 自驾</td><td>AUTOSAR / 传统</td><td>IoT / 云端</td></tr>
+                                <tr><td>典型场景</td><td>传感器融合/路径规划</td><td>ECU 功能调用</td><td>遥测/OTA/Fleet</td></tr>
+                            </table>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">DDS 在自动驾驶中的应用</h4>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card">
+                                <h4>传感器融合</h4>
+                                <p>激光雷达、摄像头、毫米波雷达通过 DDS 发布原始点云和图像数据。感知节点订阅多源数据，基于 QoS 的 Deadline 策略保证数据新鲜度，History=KEEP_LAST(1) 确保只使用最新帧。</p>
+                            </div>
+                            <div class="concept-card">
+                                <h4>路径规划</h4>
+                                <p>规划节点订阅感知结果和地图数据，发布规划的行驶轨迹。Ownership=EXCLUSIVE 确保只有一个规划器输出有效轨迹，Durability=TRANSIENT_LOCAL 让新加入的控制节点立即获得最新轨迹。</p>
+                            </div>
+                            <div class="concept-card">
+                                <h4>决策控制</h4>
+                                <p>控制节点订阅轨迹和车辆状态，发布控制指令（转向/油门/制动）。Reliability=RELIABLE 保证控制指令可靠送达，Lifespan 限制指令有效期防止过期指令被执行。</p>
+                            </div>
                         </div>
 
                         <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
@@ -349,6 +381,16 @@
                         <button class="demo-btn" onclick="startDemo('qos')">⚙️ QoS 匹配</button>
                         <button class="demo-btn" onclick="startDemo('fullflow')">📋 完整流程</button>
                         <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                        <button class="demo-btn" onclick="togglePause()" id="pauseBtn" style="display:none;">⏸ 暂停</button>
+                    </div>
+
+                    <div id="demoProgress" style="display:none;margin:16px 0;">
+                        <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+                            <span id="demoStepLabel" style="font-size:0.85rem;color:var(--text-3);">步骤 0/0</span>
+                            <div style="flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;">
+                                <div id="demoProgressBar" style="height:100%;width:0%;background:var(--accent);transition:width 0.3s ease;border-radius:2px;"></div>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="device-topology">
@@ -420,6 +462,20 @@
                                 <button class="tool-button" onclick="parseRtpsMessage()">解析</button>
                             </div>
                             <div id="parseResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🏭 DDS 实现对比</h3>
+                            <p>对比主流 DDS 实现的特性差异</p>
+                            <div style="margin:12px 0;">
+                                <select class="tool-select" id="ddsImplSelect" onchange="compareDDSImpl()" aria-label="DDS实现选择">
+                                    <option value="">— 选择对比维度 —</option>
+                                    <option value="overview">总览对比</option>
+                                    <option value="performance">性能特性</option>
+                                    <option value="features">功能支持</option>
+                                </select>
+                            </div>
+                            <div id="ddsImplResult" style="margin-top:12px;"></div>
                         </div>
 
                         <div class="tool-card">
@@ -548,11 +604,11 @@
             // ==================== Theme & Tab ====================
             function toggleTheme() {
                 const body = document.body;
-                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
-                else { body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('vp-theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('vp-theme','dark'); }
             }
             document.addEventListener('DOMContentLoaded', function() {
-                const t = localStorage.getItem('theme') || 'light';
+                const t = localStorage.getItem('vp-theme') || 'light';
                 if (t === 'dark') document.body.setAttribute('data-theme','dark');
                 else document.body.removeAttribute('data-theme');
                 renderHeaderFields();
@@ -1062,6 +1118,97 @@
                 quizState = { currentQuestion: 0, score: 0, answered: false };
                 loadQuizQuestion();
             }
+
+            // ==================== DDS Implementation Comparison ====================
+            const DDS_IMPLEMENTATIONS = {
+                'overview': {
+                    title: 'DDS 实现总览对比',
+                    html: '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr><th>特性</th><th>Fast DDS</th><th>Cyclone DDS</th><th>Connext</th></tr><tr><td>开发商</td><td>eProsima</td><td>Eclipse / Zettascale</td><td>RTI</td></tr><tr><td>许可证</td><td>Apache 2.0 / 商业</td><td>Eclipse Public License</td><td>商业 / 免费(RTI Connext DDS Micro)</td></tr><tr><td>语言支持</td><td>C/C++/Python/Java</td><td>C/Python/Java</td><td>C/C++/Java/Python/C#</td></tr><tr><td>ROS 2 默认</td><td>Humble 之前</td><td>Humble+ 默认</td><td>可选</td></tr><tr><td>安全模块</td><td>DDS Security</td><td>DDS Security</td><td>DDS Security + 军事级</td></tr></table>'
+                },
+                'performance': {
+                    title: '性能特性对比',
+                    html: '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr><th>指标</th><th>Fast DDS</th><th>Cyclone DDS</th><th>Connext</th></tr><tr><td>最小延迟</td><td>~30μs</td><td>~25μs</td><td>~20μs</td></tr><tr><td>吞吐量</td><td>高 (零拷贝)</td><td>高 (共享内存)</td><td>极高 (优化的线协议)</td></tr><tr><td>内存占用</td><td>中等</td><td>低 (嵌入式友好)</td><td>高 (全功能)</td></tr><tr><td>启动时间</td><td>快</td><td>快</td><td>中等</td></tr><tr><td>MCU 支持</td><td>支持 (Micro XRCE)</td><td>有限</td><td>支持 (Micro)</td></tr></table>'
+                },
+                'features': {
+                    title: '功能支持对比',
+                    html: '<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr><th>功能</th><th>Fast DDS</th><th>Cyclone DDS</th><th>Connext</th></tr><tr><td>Discovery</td><td>SPDP/SEDP + 静态</td><td>SPDP/SEDP</td><td>SPDP/SEDP + WAN</td></tr><tr><td>Transport</td><td>UDP/TCP/SHM/Serial</td><td>UDP/TCP/SHM</td><td>UDP/TCP/SHM/WAN/TLS</td></tr><tr><td>QoS 策略数</td><td>全部 (22+)</td><td>全部 (22+)</td><td>全部 + 扩展</td></tr><tr><td>Type System</td><td>IDL + XTypes</td><td>IDL + XTypes</td><td>IDL + XTypes + 动态类型</td></tr><tr><td>Tools</td><td>Fast DDS Monitor</td><td>Administrator</td><td>Tools Suite (丰富)</td></tr></table>'
+                }
+            };
+
+            function compareDDSImpl() {
+                const sel = document.getElementById('ddsImplSelect');
+                const result = document.getElementById('ddsImplResult');
+                const key = sel.value;
+                if (!key) { result.innerHTML = ''; return; }
+                const impl = DDS_IMPLEMENTATIONS[key];
+                result.innerHTML = '<div style="padding:16px;background:var(--accent-bg);border-radius:8px;"><h4 style="color:var(--accent);margin-bottom:12px;">' + impl.title + '</h4>' + impl.html + '<p style="font-size:0.8rem;color:var(--text-3);margin-top:8px;">💡 ROS 2 Humble+ 默认使用 Cyclone DDS，可通过 RMW_IMPLEMENTATION 环境变量切换</p></div>';
+            }
+
+            // ==================== Demo Progress & Pause ====================
+            let demoTimers = [];
+            let isPaused = false;
+            let currentDemoType = '';
+
+            function updateProgress(current, total) {
+                const bar = document.getElementById('demoProgressBar');
+                const label = document.getElementById('demoStepLabel');
+                if (bar) bar.style.width = Math.round((current / total) * 100) + '%';
+                if (label) label.textContent = '步骤 ' + current + '/' + total;
+            }
+
+            function showProgress() {
+                const el = document.getElementById('demoProgress');
+                if (el) el.style.display = 'block';
+                const btn = document.getElementById('pauseBtn');
+                if (btn) btn.style.display = 'inline-flex';
+            }
+            function hideProgress() {
+                const el = document.getElementById('demoProgress');
+                if (el) el.style.display = 'none';
+                const btn = document.getElementById('pauseBtn');
+                if (btn) btn.style.display = 'none';
+            }
+
+            function togglePause() {
+                isPaused = !isPaused;
+                const btn = document.getElementById('pauseBtn');
+                if (btn) btn.textContent = isPaused ? '▶ 继续' : '⏸ 暂停';
+            }
+
+            function scheduleDemoStep(fn, delay, stepNum, totalSteps) {
+                const timer = setTimeout(() => {
+                    const idx = demoTimers.indexOf(timer);
+                    if (idx > -1) demoTimers.splice(idx, 1);
+                    if (!demoActive) return;
+                    const checkPause = () => {
+                        if (isPaused) {
+                            const checkTimer = setTimeout(checkPause, 100);
+                            demoTimers.push(checkTimer);
+                            return;
+                        }
+                        fn();
+                        updateProgress(stepNum, totalSteps);
+                    };
+                    checkPause();
+                }, delay);
+                demoTimers.push(timer);
+            }
+
+            function clearAllTimers() {
+                demoTimers.forEach(t => clearTimeout(t));
+                demoTimers = [];
+            }
+
+            // Override resetDemo to also clear timers and progress
+            const _origResetDemo = resetDemo;
+            resetDemo = function() {
+                clearAllTimers();
+                isPaused = false;
+                const btn = document.getElementById('pauseBtn');
+                if (btn) btn.textContent = '⏸ 暂停';
+                hideProgress();
+                _origResetDemo();
+            };
 
             // Tab button event listeners
             document.querySelectorAll('.tab-button').forEach(btn => {

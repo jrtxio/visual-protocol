@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MQTT 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 MQTT 协议学习平台 — 掌握消息队列遥测传输协议的核心原理">
+    <meta name="keywords" content="MQTT协议, 消息队列遥测传输, IoT, 发布订阅, Broker, QoS, Topic, Retained, Will Message, 车联网, 物联网">
+    <meta property="og:title" content="Visual Protocol — MQTT 协议学习平台">
+    <meta property="og:description" content="交互式 MQTT 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/mqtt/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        :root {
+            --primary-gradient-start: #BE185D;
+            --primary-gradient-end: #9D174D;
+            --pub-color: #BE185D; --sub-color: #9D174D;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --warning-color: #92400E; --warning-bg: #FEF3C7;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-gradient-start: #EC4899; --primary-gradient-end: #F472B6;
+                --pub-color: #EC4899; --sub-color: #F472B6;
+                --success-color: #86EFAC; --success-bg: #14532D;
+                --error-color: #FCA5A5; --error-bg: #7F1D1D;
+                --warning-color: #FDE68A; --warning-bg: #78350F;
+                --bg-card-light: #231F1D; --bg-light: #171412;
+                --border-light: #3D3835;
+                --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+            }
+        }
+        body[data-theme="light"] {
+            --primary-gradient-start: #BE185D; --primary-gradient-end: #9D174D;
+            --pub-color: #BE185D; --sub-color: #9D174D;
+            --bg-card-light: #FFFFFF; --bg-light: #F9F7F4;
+            --border-light: #E7E5E4;
+            --text-light-main: #1C1917; --text-light-secondary: #57534E;
+        }
+        body[data-theme="dark"] {
+            --primary-gradient-start: #EC4899; --primary-gradient-end: #F472B6;
+            --pub-color: #EC4899; --sub-color: #F472B6;
+            --bg-card-light: #231F1D; --bg-light: #171412;
+            --border-light: #3D3835;
+            --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+        }
+
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
+
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 24px 0 32px; padding: 4px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; flex-wrap: wrap;
+        }
+        .tab-button {
+            padding: 10px 20px; background: transparent; color: var(--text-2);
+            border: none; border-radius: 100px; cursor: pointer;
+            font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
+
+        .content-section {
+            display: none; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 32px; margin-bottom: 32px;
+        }
+        .content-section.active { display: block; }
+
+        .back-button, .theme-toggle, .header { display: none; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
+
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 14px 18px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em;
+            transition: all 0.15s;
+        }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-family: "SF Mono","Fira Code",monospace;
+        }
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button {
+            padding: 10px 20px; background: var(--accent); color: #FFF;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+        }
+        .tool-button:hover { opacity: 0.9; }
+        .tool-select {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-size: 0.95em; cursor: pointer;
+        }
+        .tool-select:focus { outline: none; border-color: var(--accent); }
+
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th {
+            text-align: left; padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border);
+        }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+
+        /* Device Topology - 3 node for MQTT */
+        .device-topology {
+            display: flex; align-items: center; justify-content: center;
+            margin: 32px 0; gap: 0; position: relative;
+        }
+        .device-node {
+            width: 130px; height: 90px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .device-node .device-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .device-node .device-name { font-size: 0.8rem; margin-bottom: 2px; }
+        .device-node .device-status { font-size: 0.7rem; opacity: 0.9; }
+        .device-publisher { background: linear-gradient(135deg, #BE185D, #9D174D); }
+        .device-network { background: linear-gradient(135deg, #9D174D, #831843); width: 100px; height: 60px; }
+        .device-subscriber { background: linear-gradient(135deg, #D1266F, #BE185D); }
+        .connection-line {
+            width: 60px; height: 4px;
+            background: linear-gradient(90deg, #BE185D, #9D174D);
+            border-radius: 2px; position: relative;
+        }
+        .connection-line.active { animation: connPulse 1s infinite; }
+        .packet-indicator {
+            position: absolute; width: 12px; height: 12px; background: #FFF;
+            border-radius: 50%; top: -4px; left: 0; opacity: 0;
+            box-shadow: 0 0 8px rgba(190,24,93,0.5);
+        }
+        .connection-line.active .packet-indicator {
+            opacity: 1; animation: packetMove 1.5s infinite;
+        }
+
+        .log {
+            background: #111; color: #0f0; padding: 24px;
+            border-radius: 12px; font-family: 'Courier New', monospace;
+            text-align: left; max-width: 100%; margin: 24px auto;
+            min-height: 150px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #3a3a38; font-size: 0.875rem;
+        }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; }
+        .log-warning { color: #FFD700; }
+        .log-error { color: #FF6B6B; }
+
+        .demo-controls {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px;
+            background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); cursor: pointer; transition: all 0.15s;
+            margin-bottom: 8px;
+        }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta {
+            display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3);
+        }
+
+        .concept-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg);
+        }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer {
+            color: white; padding: 12px; border-radius: 8px;
+            text-align: center; margin-bottom: 4px;
+            transition: all 0.3s; cursor: default;
+        }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white; padding: 24px; border-radius: 12px;
+            margin: 16px 0; text-align: center;
+        }
+
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        @keyframes connPulse { 0%{box-shadow:0 0 8px rgba(190,24,93,0.3)}50%{box-shadow:0 0 20px rgba(190,24,93,0.6)}100%{box-shadow:0 0 8px rgba(190,24,93,0.3)} }
+        @keyframes packetMove { 0%{left:0;opacity:1}100%{left:calc(100% - 12px);opacity:1} }
+        .device-node.pulse { animation: pulse 1s infinite; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.5em; }
+            .content-section { padding: 20px; }
+            .tab-button { padding: 8px 12px; font-size: 0.82em; }
+            .device-topology { flex-direction: column; gap: 8px; }
+            .connection-line { width: 4px; height: 40px; background: linear-gradient(180deg, #BE185D, #9D174D); }
+            .connection-line.active .packet-indicator { animation: packetMoveV 1.5s infinite; }
+            .device-network { width: 90px; height: 50px; }
+        }
+        @media (max-width: 480px) {
+            .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; }
+        }
+        @keyframes packetMoveV { 0%{top:0;left:-4px;opacity:1}100%{top:calc(100% - 12px);left:-4px;opacity:1} }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="nav-inner container-wide">
+            <a href="../../index.html" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span>Visual Protocol</span>
+            </a>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-back">返回主页</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <div class="container">
+                <header class="page-header">
+                    <h1>MQTT 协议学习</h1>
+                    <p>消息队列遥测传输 — 轻量级 IoT 通信协议 — 发布/订阅模型</p>
+                </header>
+
+                <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                    <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                    <button class="tab-button" role="tab" data-tab="frames">报文详解</button>
+                    <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                    <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                    <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+                </nav>
+
+                <!-- ===== Tab 1: 基础概念 ===== -->
+                <section id="basics-tab" class="content-section active" role="tabpanel">
+                    <h2 class="section-title">MQTT 协议基础概念</h2>
+                    <p>MQTT（Message Queuing Telemetry Transport）是 OASIS 定义的轻量级发布/订阅消息传输协议，设计目标是低带宽、高延迟网络环境下的可靠消息传递，广泛应用于物联网（IoT）、车联网、工业遥测等场景。</p>
+
+                    <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                        <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card"><h4>📡 发布/订阅模型</h4><p>MQTT 采用解耦的发布/订阅模式。发布者（Publisher）将消息发送到主题（Topic），订阅者（Subscriber）通过订阅主题接收消息。发布者和订阅者互不知道对方的存在，通过 Broker 中转。与 DDS 的去中心化 Pub/Sub 不同，MQTT 需要中心化 Broker。</p></div>
+                            <div class="concept-card"><h4>🖥️ Broker（消息代理）</h4><p>Broker 是 MQTT 的核心中枢，负责接收所有发布消息并转发给匹配的订阅者。Broker 维护订阅关系、处理 QoS、保留消息和 Will 消息。常见实现：Mosquitto、EMQX、HiveMQ。</p></div>
+                            <div class="concept-card"><h4>🏷️ Topic 主题层级</h4><p>Topic 使用 <code>/</code> 分隔层级，如 <code>vehicle/001/sensor/temperature</code>。支持通配符：<code>+</code> 匹配单层级（<code>vehicle/+/temperature</code>），<code>#</code> 匹配多层级（<code>vehicle/001/#</code>）。Topic 在订阅时指定，不是预先注册的。</p></div>
+                            <div class="concept-card"><h4>⚡ QoS 0 — 最多一次</h4><p>发送方发送消息后不等待确认，消息可能丢失。最低开销、最低延迟。适合高频传感器数据（丢失几条无影响）。</p></div>
+                            <div class="concept-card"><h4>✅ QoS 1 — 至少一次</h4><p>发送方等待 PUBACK 确认，超时重发。保证消息到达，但可能重复。适合需要可靠但不介意重复的场景（如命令下发后幂等处理）。</p></div>
+                            <div class="concept-card"><h4>🔒 QoS 2 — 恰好一次</h4><p>四步握手（PUBLISH → PUBREC → PUBREL → PUBCOMP）保证消息恰好到达一次。最高可靠性但最大延迟。适合计费、支付等不可重复的场景。</p></div>
+                            <div class="concept-card"><h4>📌 Retained Message（保留消息）</h4><p>Broker 保留每个 Topic 最新的一条 Retained 消息。新订阅者订阅时立即收到该保留消息，无需等待下一次发布。适合设备状态等"最新值"场景。</p></div>
+                            <div class="concept-card"><h4>📝 Will Message（遗嘱消息）</h4><p>客户端连接时可以注册一个 Will Message。当 Broker 检测到客户端异常断开（非 DISCONNECT）时，自动发布其 Will Message。用于通知其他客户端该设备离线。</p></div>
+                            <div class="concept-card"><h4>🔄 Clean Session</h4><p>Clean Session=1（默认）：断开后 Broker 清除所有订阅和未送达消息；Clean Session=0：Broker 保存会话状态，重连后恢复订阅和推送离线期间的消息。MQTT 5.0 中扩展为 Clean Start + Session Expiry Interval。</p></div>
+                            <div class="concept-card"><h4>📊 与 DDS 对比</h4><p>MQTT 轻量级、中心化 Broker、简单 QoS（3 级）、适合 IoT/云端通信；DDS 去中心化、丰富 QoS（22+ 策略）、适合实时/车内通信。两者都采用发布/订阅模式但定位不同。</p></div>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                        <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:12px;">MQTT 协议栈从上到下共 5 层，应用数据经 MQTT 协议封装后在 TCP/TLS 上传输。</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;">
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#BE185D,#9D174D);width:260px;"><div class="layer-name">应用层</div><div class="layer-desc">传感器数据 / 车辆遥测 / OTA 通知</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#D1266F,#BE185D);width:260px;"><div class="layer-name">MQTT</div><div class="layer-desc">发布/订阅 / QoS / Topic 路由</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#E53585,#D1266F);width:260px;"><div class="layer-name">TCP</div><div class="layer-desc">可靠传输层</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#F0449B,#E53585);width:260px;"><div class="layer-name">TLS</div><div class="layer-desc">加密传输 (可选)</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#F953AD,#F0449B);width:260px;"><div class="layer-name">IP + Ethernet</div><div class="layer-desc">网络层 + 物理介质</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 2: 报文详解 ===== -->
+                <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">📡 MQTT 报文结构详解</h2>
+                    <p>MQTT 报文由固定头（Fixed Header）+ 可变头（Variable Header）+ 负载（Payload）组成，点击卡片查看详情</p>
+
+                    <h3 style="color:var(--accent);margin:20px 0 12px;">Fixed Header 结构</h3>
+                    <div style="padding:16px;background:var(--bg);border:1px solid var(--border);border-radius:8px;margin-bottom:20px;">
+                        <p style="color:var(--text-2);font-size:0.875rem;line-height:1.7;">每个 MQTT 报文都以固定头开始。第一个字节的高 4 位是<strong>报文类型（Packet Type）</strong>，低 4 位是<strong>标志位（Flags）</strong>。从第二个字节开始是<strong>剩余长度（Remaining Length）</strong>，使用可变长度编码：每个字节的最高位为延续位，低 7 位为数值，最多 4 字节可编码最大 256MB。</p>
+                        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+                            <div style="flex:1;min-width:120px;padding:12px;background:var(--surface);border-radius:6px;text-align:center;">
+                                <div style="font-size:0.75rem;color:var(--text-3);margin-bottom:4px;">Byte 1 高 4 位</div>
+                                <div style="font-weight:600;color:var(--accent);">Packet Type</div>
+                                <div style="font-size:0.8rem;color:var(--text-2);">4 bits</div>
+                            </div>
+                            <div style="flex:1;min-width:120px;padding:12px;background:var(--surface);border-radius:6px;text-align:center;">
+                                <div style="font-size:0.75rem;color:var(--text-3);margin-bottom:4px;">Byte 1 低 4 位</div>
+                                <div style="font-weight:600;color:var(--accent);">Flags</div>
+                                <div style="font-size:0.8rem;color:var(--text-2);">4 bits</div>
+                            </div>
+                            <div style="flex:2;min-width:200px;padding:12px;background:var(--surface);border-radius:6px;text-align:center;">
+                                <div style="font-size:0.75rem;color:var(--text-3);margin-bottom:4px;">Byte 2+</div>
+                                <div style="font-weight:600;color:var(--accent);">Remaining Length</div>
+                                <div style="font-size:0.8rem;color:var(--text-2);">1-4 字节可变长度编码</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 style="color:var(--accent);margin:20px 0 12px;">报文类型</h3>
+                    <div id="packetTypesGrid"></div>
+                </section>
+
+                <!-- ===== Tab 3: 交互演示 ===== -->
+                <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🎮 MQTT 交互演示</h2>
+                    <p>观察 MQTT 发布/订阅通信的完整流程</p>
+
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo('qos0')">⚡ QoS 0 发布</button>
+                        <button class="demo-btn" onclick="startDemo('qos1')">✅ QoS 1 发布</button>
+                        <button class="demo-btn" onclick="startDemo('qos2')">🔒 QoS 2 发布</button>
+                        <button class="demo-btn" onclick="startDemo('retained')">📌 Retained + Will</button>
+                        <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                    </div>
+
+                    <div class="device-topology">
+                        <div class="device-node device-publisher" id="publisher">
+                            <div class="device-icon">📤</div>
+                            <div class="device-name">Publisher</div>
+                            <div class="device-status" id="publisherStatus">就绪</div>
+                        </div>
+                        <div class="connection-line" id="connLine1">
+                            <div class="packet-indicator"></div>
+                        </div>
+                        <div class="device-node device-network" id="broker">
+                            <div class="device-icon">🖥️</div>
+                            <div class="device-name">Broker</div>
+                            <div class="device-status" id="brokerStatus">就绪</div>
+                        </div>
+                        <div class="connection-line" id="connLine2">
+                            <div class="packet-indicator"></div>
+                        </div>
+                        <div class="device-node device-subscriber" id="subscriber">
+                            <div class="device-icon">📥</div>
+                            <div class="device-name">Subscriber</div>
+                            <div class="device-status" id="subscriberStatus">就绪</div>
+                        </div>
+                    </div>
+
+                    <div id="commLog" class="log">
+                        <div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">💡 点击上方按钮开始 MQTT 通信演示...</span></div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 4: 实用工具 ===== -->
+                <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🛠️ MQTT 实用工具集</h2>
+                    <p>为 MQTT 协议开发和调试提供专业工具支持</p>
+
+                    <div style="display:grid;gap:24px;margin:24px 0;">
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🏷️ Topic 过滤器匹配</h3>
+                            <p>输入 Topic 和 Filter（含通配符 +/#），判断是否匹配</p>
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0;">
+                                <input type="text" class="tool-input" id="topicInput" placeholder="Topic (如: vehicle/001/sensor/temp)" aria-label="Topic输入">
+                                <input type="text" class="tool-input" id="filterInput" placeholder="Filter (如: vehicle/+/temp 或 vehicle/#)" aria-label="Filter输入">
+                            </div>
+                            <button class="tool-button" onclick="matchTopic()">匹配检查</button>
+                            <div id="topicResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📦 Remaining Length 编码</h3>
+                            <p>输入数值，生成 MQTT 可变长度编码的字节序列</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="remainLenInput" placeholder="数值 (0 - 268435455)" style="flex:1;min-width:200px;" aria-label="Remaining Length输入">
+                                <button class="tool-button" onclick="encodeRemainingLength()">编码</button>
+                            </div>
+                            <div id="remainLenResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📊 QoS 级别对比</h3>
+                            <p>交互式对比 QoS 0/1/2 的消息流和特性</p>
+                            <div style="margin:12px 0;">
+                                <select class="tool-select" id="qosCompareSelect" onchange="compareQoS()" aria-label="QoS级别选择">
+                                    <option value="">— 选择 QoS 级别 —</option>
+                                    <option value="0">QoS 0 — 最多一次</option>
+                                    <option value="1">QoS 1 — 至少一次</option>
+                                    <option value="2">QoS 2 — 恰好一次</option>
+                                </select>
+                            </div>
+                            <div id="qosCompareResult" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 5: 知识测试 ===== -->
+                <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🧠 MQTT 协议知识测试</h2>
+                    <div id="questionArea"></div>
+                    <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                        <div class="results-box">
+                            <h3>🎯 测试完成！</h3>
+                            <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div>
+                            <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                        </div>
+                        <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                    </div>
+                </section>
+
+            <script>
+            // ==================== State ====================
+            let currentTab = 'basics';
+            let quizState = { currentQuestion: 0, score: 0, answered: false };
+            let demoActive = false;
+
+            // ==================== Packet Types Data ====================
+            const MQTT_PACKET_TYPES = {
+                '1': {
+                    name: 'CONNECT', code: 'Type 1', category: '连接管理',
+                    description: '客户端连接请求报文。客户端发送 CONNECT 给 Broker 以建立连接，包含 Client ID、Will Topic/Message/QoS/Retain、用户名/密码、Clean Session、Keep Alive 等字段。一个网络连接上只能发送一次 CONNECT。',
+                    fields: ['Client Identifier（客户端标识，必填）', 'Will Topic + Will Message + Will QoS + Will Retain（遗嘱消息，可选）', 'Username + Password（认证信息，可选）', 'Clean Session Flag（是否清除会话）', 'Keep Alive（心跳间隔，秒）', 'Protocol Level（协议版本：3=3.1.1, 4=5.0, 5=3.1）'],
+                    tip: 'CONNECT 是整个 MQTT 会话的起点，Broker 收到后回复 CONNACK'
+                },
+                '2': {
+                    name: 'CONNACK', code: 'Type 2', category: '连接管理',
+                    description: 'Broker 连接确认报文。Broker 回复 CONNACK 表示接受或拒绝连接。包含 Session Present 标志和返回码。返回码 0 表示连接成功，其他值表示各种错误原因。',
+                    fields: ['Session Present Flag（是否有已保存的会话）', 'Return Code / Reason Code（0=成功，1-5=协议版本/凭证错误等）'],
+                    tip: '如果 Clean Session=0 且 Broker 有保存的会话状态，Session Present=1'
+                },
+                '3': {
+                    name: 'PUBLISH', code: 'Type 3', category: '数据传输',
+                    description: '发布消息报文。携带实际的发布数据，包含 Topic Name、QoS 等级、Retain 标志、Payload。PUBLISH 可以从客户端发向 Broker，也可以从 Broker 发向客户端。',
+                    fields: ['Topic Name（主题名，UTF-8 编码）', 'Packet Identifier（QoS 1/2 时存在，报文标识符）', 'DUP Flag（是否为重发报文）', 'QoS Level（0/1/2）', 'RETAIN Flag（是否为保留消息）', 'Payload（消息负载，可为空）'],
+                    tip: 'PUBLISH 是 MQTT 中使用频率最高的报文类型'
+                },
+                '4': {
+                    name: 'PUBACK', code: 'Type 4', category: '数据传输',
+                    description: 'QoS 1 发布确认报文。接收方收到 QoS 1 的 PUBLISH 后回复 PUBACK，告知发送方消息已收到。发送方收到 PUBACK 后可以丢弃该消息（无需重发）。',
+                    fields: ['Packet Identifier（与 PUBLISH 中的标识符匹配）'],
+                    tip: '如果发送方未收到 PUBACK，会重发 PUBLISH（DUP=1）'
+                },
+                '5': {
+                    name: 'PUBREC', code: 'Type 5', category: '数据传输',
+                    description: 'QoS 2 发布接收（第一步）。接收方收到 QoS 2 的 PUBLISH 后回复 PUBREC，表示已收到并正在处理。此时消息进入"已收到但未完成"状态。',
+                    fields: ['Packet Identifier（与 PUBLISH 中的标识符匹配）'],
+                    tip: 'PUBREC 是 QoS 2 四步握手的第一步确认'
+                },
+                '6': {
+                    name: 'PUBREL', code: 'Type 6', category: '数据传输',
+                    description: 'QoS 2 发布释放（第二步）。发送方收到 PUBREC 后发送 PUBREL，告知接收方可以释放该消息（投递给应用）。接收方收到 PUBREL 后将消息投递给应用层。',
+                    fields: ['Packet Identifier（与 PUBLISH 中的标识符匹配）'],
+                    tip: 'PUBREL 是 QoS 2 四步握手的第二步，表示发送方确认接收方已安全收到'
+                },
+                '7': {
+                    name: 'PUBCOMP', code: 'Type 7', category: '数据传输',
+                    description: 'QoS 2 发布完成（第三步）。接收方在投递消息后回复 PUBCOMP，告知发送方整个 QoS 2 流程完成。发送方收到后可以安全丢弃该消息。',
+                    fields: ['Packet Identifier（与 PUBLISH 中的标识符匹配）'],
+                    tip: 'PUBCOMP 完成后，QoS 2 的四步握手彻底结束'
+                },
+                '8': {
+                    name: 'SUBSCRIBE', code: 'Type 8', category: '订阅管理',
+                    description: '订阅主题报文。客户端发送 SUBSCRIBE 给 Broker，包含一个或多个 Topic Filter（含通配符）和对应的请求 QoS 等级。Broker 根据这些 Filter 匹配并转发消息。',
+                    fields: ['Packet Identifier（报文标识符）', 'Topic Filter（主题过滤器，支持 +/# 通配符）', 'Requested QoS（请求的 QoS 等级）'],
+                    tip: '一个 SUBSCRIBE 报文可以同时订阅多个 Topic Filter'
+                },
+                '9': {
+                    name: 'SUBACK', code: 'Type 9', category: '订阅管理',
+                    description: '订阅确认报文。Broker 回复 SUBACK，为每个 Topic Filter 返回授予的 QoS 等级。如果订阅失败，返回 0x80（Failure）。',
+                    fields: ['Packet Identifier（与 SUBSCRIBE 匹配）', 'Return Code（授予的 QoS 或 0x80 失败）'],
+                    tip: '授予的 QoS 可能低于请求的 QoS（Broker 可以降级）'
+                },
+                '12': {
+                    name: 'PINGREQ / PINGRESP', code: 'Type 12/13', category: '心跳保活',
+                    description: '心跳请求/响应报文。客户端在 Keep Alive 时间内没有发送其他报文时发送 PINGREQ，Broker 回复 PINGRESP。用于保持连接活跃，检测对端是否在线。PINGREQ 不含负载。',
+                    fields: ['无负载（固定头 + Remaining Length=0 即可）'],
+                    tip: '如果在 1.5 倍 Keep Alive 时间内 Broker 未收到任何报文，将断开连接'
+                },
+                '14': {
+                    name: 'DISCONNECT', code: 'Type 14', category: '连接管理',
+                    description: '优雅断开连接报文。客户端主动发送 DISCONNECT 告知 Broker 即将断开。Broker 收到 DISCONNECT 后不会发布该客户端的 Will Message（因为是正常断开）。',
+                    fields: ['无负载（MQTT 3.1.1）', 'Reason Code（MQTT 5.0，如 0=正常断开）'],
+                    tip: 'DISCONNECT 和异常断开的区别：正常断开不触发 Will Message'
+                }
+            };
+
+            // ==================== Quiz Data ====================
+            const QUIZ_QUESTIONS = [
+                { question: 'MQTT 的核心通信模型是什么？', options: ['请求/响应 (RPC)','发布/订阅 (Pub/Sub)','客户端/服务器 (C/S)','点对点 (P2P)'], correct: 1, explanation: 'MQTT 采用发布/订阅模式，Publisher 发送消息到 Topic，Subscriber 通过订阅 Topic 接收消息，两者通过 Broker 解耦。' },
+                { question: 'MQTT 中 Broker 的核心作用是什么？', options: ['存储历史数据','接收发布消息并转发给匹配的订阅者','加密传输数据','分配 IP 地址'], correct: 1, explanation: 'Broker 是 MQTT 的核心中枢，负责接收所有发布消息、维护订阅关系，并将消息转发给匹配的订阅者。' },
+                { question: 'Topic 过滤器 <code>sensor/+/temp</code> 能匹配以下哪个 Topic？', options: ['<code>sensor/temp</code>','<code>sensor/001/temp</code>','<code>sensor/001/humidity</code>','<code>sensor/001/zone/temp</code>'], correct: 1, explanation: '<code>+</code> 通配符匹配恰好一个层级。<code>sensor/+/temp</code> 匹配 <code>sensor/任意单层级/temp</code>，如 <code>sensor/001/temp</code>。' },
+                { question: 'QoS 0 的特点是？', options: ['保证消息恰好到达一次','保证消息至少到达一次','发送后不等待确认，可能丢失','需要四步握手'], correct: 2, explanation: 'QoS 0（最多一次）发送消息后不等待确认，消息可能丢失。特点是最低开销和最低延迟。' },
+                { question: 'QoS 2 使用了几步握手来保证消息恰好到达一次？', options: ['两步','三步','四步','五步'], correct: 2, explanation: 'QoS 2 使用四步握手：PUBLISH → PUBREC → PUBREL → PUBCOMP，保证消息恰好到达一次。' },
+                { question: 'Retained Message（保留消息）的作用是什么？', options: ['永久保存所有历史消息','让新订阅者立即收到 Topic 的最新值','提高消息传输速度','加密消息内容'], correct: 1, explanation: 'Broker 保留每个 Topic 最新的一条 Retained 消息，新订阅者订阅时立即收到该保留消息，无需等待下一次发布。' },
+                { question: 'Will Message（遗嘱消息）在什么时候会被发布？', options: ['客户端正常发送 DISCONNECT 时','Broker 重启时','客户端异常断开连接时','消息发布失败时'], correct: 2, explanation: '当 Broker 检测到客户端异常断开（非 DISCONNECT 报文断开）时，自动发布该客户端注册的 Will Message。' },
+                { question: 'Clean Session=0 意味着什么？', options: ['连接时不发送任何数据','Broker 保存会话状态，重连后恢复订阅','每次连接都创建新的 Client ID','禁用 QoS 机制'], correct: 1, explanation: 'Clean Session=0 时，Broker 保存该客户端的订阅关系和未送达消息（QoS 1/2），客户端重连后恢复订阅并收到离线消息。' },
+                { question: 'MQTT 和 DDS 的核心架构差异是什么？', options: ['MQTT 使用 UDP，DDS 使用 TCP','MQTT 需要中心化 Broker，DDS 去中心化','MQTT 只支持小数据，DDS 支持大数据','两者架构完全相同'], correct: 1, explanation: 'MQTT 需要中心化的 Broker 作为消息中转，DDS 是去中心化的发布/订阅，参与者之间直接通信。' },
+                { question: 'CONNECT 报文中必须包含哪个字段？', options: ['Username 和 Password','Will Topic 和 Will Message','Client Identifier','Retain Flag'], correct: 2, explanation: 'Client Identifier 是 CONNECT 报文的必填字段，用于唯一标识客户端。Username/Password 和 Will Message 都是可选的。' },
+                { question: 'MQTT 报文中 Remaining Length 使用什么编码方式？', options: ['固定 4 字节整数','ASCII 字符串','可变长度编码（每字节高 1 位为延续位）','十六进制字符串'], correct: 2, explanation: 'Remaining Length 使用可变长度编码：每个字节的最高位（bit 7）为延续位，低 7 位为数值部分，最多 4 字节可编码最大 256MB。' },
+                { question: 'MQTT Keep Alive 机制的作用是什么？', options: ['设置消息过期时间','检测连接是否仍然活跃','控制消息发送速率','分配 Topic 名称'], correct: 1, explanation: 'Keep Alive 定义了客户端发送报文的最大时间间隔。如果在 1.5 倍 Keep Alive 时间内没有收到任何报文，Broker 将断开连接并可能发布 Will Message。' }
+            ];
+
+            // ==================== Theme & Tab ====================
+            function toggleTheme() {
+                const body = document.body;
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('vp-theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('vp-theme','dark'); }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const t = localStorage.getItem('vp-theme') || 'light';
+                if (t === 'dark') document.body.setAttribute('data-theme','dark');
+                else document.body.removeAttribute('data-theme');
+                renderPacketTypes();
+                loadQuizQuestion();
+            });
+            function showTab(tabName) {
+                document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.hidden = true; });
+                document.querySelectorAll('.tab-button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+                const sec = document.getElementById(tabName + '-tab');
+                if (sec) { sec.classList.add('active'); sec.hidden = false; }
+                const btn = document.querySelector(`[data-tab="${tabName}"]`);
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+                currentTab = tabName;
+            }
+
+            // ==================== Render Packet Types ====================
+            function renderPacketTypes() {
+                const grid = document.getElementById('packetTypesGrid');
+                if (!grid) return;
+                let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">';
+                Object.entries(MQTT_PACKET_TYPES).forEach(([code, pkt]) => {
+                    const catColor = pkt.category === '数据传输' ? '#BE185D' : pkt.category === '订阅管理' ? '#9D174D' : pkt.category === '连接管理' ? '#D1266F' : '#E53585';
+                    html += `<div class="frame-field-card" onclick="showPacketModal('${code}')">
+                        <h4 style="color:${catColor};">${pkt.code} ${pkt.name}</h4>
+                        <p>${pkt.description.substring(0, 80)}...</p>
+                        <div class="field-meta"><span>📂 ${pkt.category}</span><span>📋 点击查看详情</span></div>
+                    </div>`;
+                });
+                html += '</div>';
+                grid.innerHTML = html;
+            }
+
+            function showPacketModal(code) {
+                const pkt = MQTT_PACKET_TYPES[code];
+                if (!pkt) return;
+                let fieldsHtml = pkt.fields.map(f => `<li style="margin-bottom:4px;">${f}</li>`).join('');
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${pkt.code} — ${pkt.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:4px;font-size:0.85rem;">📂 ${pkt.category}</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${pkt.description}</p>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">字段说明</h4>
+                    <ul style="margin:0 0 16px 20px;padding:0;font-size:0.9rem;color:var(--text-2);">${fieldsHtml}</ul>
+                    <div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${pkt.tip}</div>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            // ==================== Demo Functions ====================
+            function addLog(msg, type) {
+                const log = document.getElementById('commLog');
+                const now = new Date();
+                const ts = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+                const cls = type === 'warning' ? 'log-warning' : type === 'error' ? 'log-error' : 'log-info';
+                log.innerHTML += `<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${msg}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+            function setStatus(id, text) {
+                const el = document.getElementById(id + 'Status');
+                if (el) el.textContent = text;
+            }
+            function resetDemo() {
+                demoActive = false;
+                ['publisher','broker','subscriber'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove('pulse');
+                    setStatus(id, '就绪');
+                });
+                ['connLine1','connLine2'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove('active');
+                });
+                const log = document.getElementById('commLog');
+                log.innerHTML = '<div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">🔄 演示已重置，点击按钮开始新的演示</span></div>';
+            }
+
+            function startDemo(type) {
+                if (demoActive) return;
+                demoActive = true;
+                resetDemo();
+                demoActive = true;
+                ['connLine1','connLine2'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add('active');
+                });
+
+                if (type === 'qos0') demoQoS0();
+                else if (type === 'qos1') demoQoS1();
+                else if (type === 'qos2') demoQoS2();
+                else if (type === 'retained') demoRetainedWill();
+            }
+
+            function demoQoS0() {
+                addLog('⚡ QoS 0 发布演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', '发布中...');
+                    addLog('📤 [Publisher] PUBLISH QoS 0 → Topic: "sensor/temp"', 'info');
+                    addLog('   → Payload: {"value": 23.5, "unit": "°C"}', 'info');
+                    addLog('   → QoS=0, 无需确认', 'info');
+                }, 500);
+                setTimeout(() => {
+                    const b = document.getElementById('broker');
+                    if (b) b.classList.add('pulse');
+                    setStatus('broker', '转发中...');
+                    addLog('🖥️ [Broker] 收到消息，匹配订阅者...', 'info');
+                }, 1200);
+                setTimeout(() => {
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    setStatus('subscriber', '已接收');
+                    addLog('📥 [Subscriber] 收到消息', 'info');
+                    addLog('   → Topic: sensor/temp', 'info');
+                    addLog('   → Payload: {"value": 23.5, "unit": "°C"}', 'info');
+                }, 2000);
+                setTimeout(() => {
+                    ['publisher','broker','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    setStatus('publisher', '完成'); setStatus('broker', '就绪'); setStatus('subscriber', '完成');
+                    addLog('✅ QoS 0 完成！无确认、最低延迟，但消息可能丢失', 'warning');
+                    demoActive = false;
+                }, 3200);
+            }
+
+            function demoQoS1() {
+                addLog('✅ QoS 1 发布演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', '发布中...');
+                    addLog('📤 [Publisher] PUBLISH QoS 1 → Topic: "cmd/door/lock"', 'info');
+                    addLog('   → Packet ID: 42', 'info');
+                    addLog('   → Payload: {"action": "LOCK", "door": "FL"}', 'info');
+                }, 500);
+                setTimeout(() => {
+                    const b = document.getElementById('broker');
+                    if (b) b.classList.add('pulse');
+                    setStatus('broker', '接收中...');
+                    addLog('🖥️ [Broker] 收到 PUBLISH (ID=42)', 'info');
+                }, 1200);
+                setTimeout(() => {
+                    addLog('📤 [Broker] → PUBACK (ID=42) → Publisher', 'info');
+                }, 1800);
+                setTimeout(() => {
+                    setStatus('publisher', '已确认');
+                    addLog('📥 [Publisher] 收到 PUBACK，消息送达确认 ✓', 'info');
+                }, 2400);
+                setTimeout(() => {
+                    addLog('🖥️ [Broker] 转发消息给匹配的订阅者...', 'info');
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    setStatus('subscriber', '接收中...');
+                    addLog('📤 [Broker] PUBLISH QoS 1 (ID=43) → Subscriber', 'info');
+                }, 3200);
+                setTimeout(() => {
+                    addLog('📥 [Subscriber] 收到消息', 'info');
+                    addLog('📤 [Subscriber] → PUBACK (ID=43) → Broker', 'info');
+                }, 4000);
+                setTimeout(() => {
+                    setStatus('subscriber', '已确认');
+                    ['publisher','broker','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    addLog('✅ QoS 1 完成！保证消息到达，但可能重复', 'info');
+                    demoActive = false;
+                }, 5000);
+            }
+
+            function demoQoS2() {
+                addLog('🔒 QoS 2 发布演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', 'Step 1/4...');
+                    addLog('=== QoS 2 四步握手 ===', 'warning');
+                    addLog('📤 [Step 1] Publisher → Broker: PUBLISH QoS 2 (ID=100)', 'info');
+                    addLog('   → Topic: "billing/charge"', 'info');
+                    addLog('   → Payload: {"amount": 99.00, "txnId": "TXN-001"}', 'info');
+                }, 500);
+                setTimeout(() => {
+                    const b = document.getElementById('broker');
+                    if (b) b.classList.add('pulse');
+                    setStatus('broker', 'Step 2/4...');
+                    addLog('📥 [Step 2] Broker → Publisher: PUBREC (ID=100)', 'info');
+                    addLog('   → Broker 已收到，暂存消息等待 PUBREL', 'info');
+                }, 1800);
+                setTimeout(() => {
+                    setStatus('publisher', 'Step 3/4...');
+                    addLog('📤 [Step 3] Publisher → Broker: PUBREL (ID=100)', 'info');
+                    addLog('   → Publisher 确认可以投递消息', 'info');
+                }, 3200);
+                setTimeout(() => {
+                    setStatus('broker', '转发中...');
+                    addLog('🖥️ [Broker] 收到 PUBREL，投递消息给订阅者', 'info');
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    setStatus('subscriber', 'Step 4/4...');
+                    addLog('📤 [Step 4] Broker → Publisher: PUBCOMP (ID=100)', 'info');
+                    addLog('   → 四步握手完成，消息恰好到达一次 ✓', 'info');
+                }, 4600);
+                setTimeout(() => {
+                    addLog('📥 [Subscriber] 收到消息（QoS 2 端到端同样需要四步）', 'info');
+                    ['publisher','broker','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    setStatus('publisher', '完成'); setStatus('broker', '就绪'); setStatus('subscriber', '完成');
+                    addLog('✅ QoS 2 完成！消息恰好到达一次，最高可靠性', 'info');
+                    demoActive = false;
+                }, 6000);
+            }
+
+            function demoRetainedWill() {
+                addLog('📌 Retained + Will Message 演示开始', 'warning');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', 'Retained...');
+                    addLog('=== 场景 1: Retained Message ===', 'warning');
+                    addLog('📤 [Publisher] PUBLISH Retained=1 → Topic: "device/status"', 'info');
+                    addLog('   → Payload: {"status": "online", "ip": "192.168.1.10"}', 'info');
+                    addLog('   → Retained Flag=1, Broker 保留此消息', 'info');
+                }, 500);
+                setTimeout(() => {
+                    const b = document.getElementById('broker');
+                    if (b) b.classList.add('pulse');
+                    setStatus('broker', '保留消息...');
+                    addLog('🖥️ [Broker] 存储 Retained Message for Topic "device/status"', 'info');
+                }, 1500);
+                setTimeout(() => {
+                    addLog('📥 [Broker] 转发 Retained 消息给已有订阅者', 'info');
+                }, 2200);
+                setTimeout(() => {
+                    addLog('=== 场景 2: 新订阅者加入 ===', 'warning');
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    setStatus('subscriber', '新加入...');
+                    addLog('📤 [Subscriber] SUBSCRIBE "device/status"', 'info');
+                    addLog('📥 [Subscriber] 立即收到 Retained 消息!', 'info');
+                    addLog('   → {"status": "online", "ip": "192.168.1.10"}', 'info');
+                }, 3200);
+                setTimeout(() => {
+                    setStatus('subscriber', '已订阅');
+                    addLog('=== 场景 3: 异常断线 → Will Message ===', 'warning');
+                    setStatus('publisher', '断线!');
+                    addLog('⚠️ Publisher 网络异常断开!', 'error');
+                    addLog('   → 未发送 DISCONNECT 报文', 'error');
+                }, 4500);
+                setTimeout(() => {
+                    addLog('🖥️ [Broker] 检测到 Publisher 异常断开', 'error');
+                    addLog('📤 [Broker] 发布 Will Message!', 'warning');
+                    addLog('   → Topic: "device/status"', 'info');
+                    addLog('   → Payload: {"status": "offline", "reason": "connection lost"}', 'info');
+                }, 5500);
+                setTimeout(() => {
+                    addLog('📥 [Subscriber] 收到 Will Message: 设备离线', 'warning');
+                    ['publisher','broker','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    setStatus('publisher', '已离线'); setStatus('broker', '就绪'); setStatus('subscriber', '完成');
+                    addLog('✅ Retained + Will 演示完成！', 'info');
+                    demoActive = false;
+                }, 6800);
+            }
+
+            // ==================== Tool Functions ====================
+            function mqttTopicMatch(topic, filter) {
+                const tParts = topic.split('/');
+                const fParts = filter.split('/');
+                for (let i = 0; i < fParts.length; i++) {
+                    if (fParts[i] === '#') return true;
+                    if (i >= tParts.length) return false;
+                    if (fParts[i] !== '+' && fParts[i] !== tParts[i]) return false;
+                }
+                return tParts.length === fParts.length;
+            }
+
+            function matchTopic() {
+                const topic = document.getElementById('topicInput').value.trim();
+                const filter = document.getElementById('filterInput').value.trim();
+                const result = document.getElementById('topicResult');
+                if (!topic || !filter) {
+                    result.innerHTML = '<p style="color:#dc3545;">请输入 Topic 和 Filter</p>';
+                    return;
+                }
+                const matched = mqttTopicMatch(topic, filter);
+                if (matched) {
+                    result.innerHTML = `<div style="padding:16px;background:#d4edda;border:1px solid #28a745;border-radius:8px;">
+                        <h4 style="color:#166534;">✅ 匹配成功</h4>
+                        <p style="margin-top:8px;">Topic: <code>${topic}</code></p>
+                        <p>Filter: <code>${filter}</code></p>
+                        <p style="margin-top:8px;font-size:0.85rem;color:var(--text-2);">订阅者使用此 Filter 可以收到该 Topic 的消息</p>
+                    </div>`;
+                } else {
+                    result.innerHTML = `<div style="padding:16px;background:#f8d7da;border:1px solid #dc3545;border-radius:8px;">
+                        <h4 style="color:#991B1B;">❌ 不匹配</h4>
+                        <p style="margin-top:8px;">Topic: <code>${topic}</code></p>
+                        <p>Filter: <code>${filter}</code></p>
+                        <p style="margin-top:8px;font-size:0.85rem;color:var(--text-2);">该 Filter 无法匹配此 Topic</p>
+                    </div>`;
+                }
+            }
+
+            function encodeRemainingLength() {
+                const input = document.getElementById('remainLenInput').value.trim();
+                const result = document.getElementById('remainLenResult');
+                const value = parseInt(input);
+                if (isNaN(value) || value < 0 || value > 268435455) {
+                    result.innerHTML = '<p style="color:#dc3545;">请输入 0 到 268435455 之间的数值</p>';
+                    return;
+                }
+                const bytes = [];
+                let remaining = value;
+                do {
+                    let encodedByte = remaining % 128;
+                    remaining = Math.floor(remaining / 128);
+                    if (remaining > 0) encodedByte |= 128;
+                    bytes.push(encodedByte);
+                } while (remaining > 0);
+
+                const hexBytes = bytes.map(b => '0x' + b.toString(16).toUpperCase().padStart(2, '0'));
+                const binBytes = bytes.map(b => b.toString(2).padStart(8, '0'));
+
+                let html = `<div style="padding:16px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<h4 style="color:var(--accent);margin-bottom:12px;">Remaining Length 编码结果</h4>`;
+                html += `<p>原始值: <strong>${value}</strong> (0x${value.toString(16).toUpperCase()})</p>`;
+                html += `<p>编码字节数: <strong>${bytes.length}</strong> 字节</p>`;
+                html += `<div style="margin-top:12px;overflow-x:auto;">`;
+                html += `<table style="width:100%;border-collapse:collapse;">`;
+                html += `<tr><th style="text-align:left;padding:8px;background:var(--surface);">字节序号</th><th style="text-align:left;padding:8px;background:var(--surface);">十六进制</th><th style="text-align:left;padding:8px;background:var(--surface);">二进制</th><th style="text-align:left;padding:8px;background:var(--surface);">说明</th></tr>`;
+                bytes.forEach((b, i) => {
+                    const cont = (b & 128) ? '延续位=1 (还有后续字节)' : '延续位=0 (最后一个字节)';
+                    html += `<tr><td style="padding:8px;border-bottom:1px solid var(--border);">${i + 1}</td><td style="padding:8px;border-bottom:1px solid var(--border);"><code>${hexBytes[i]}</code></td><td style="padding:8px;border-bottom:1px solid var(--border);"><code>${binBytes[i]}</code></td><td style="padding:8px;border-bottom:1px solid var(--border);font-size:0.85rem;">${cont}</td></tr>`;
+                });
+                html += `</table></div>`;
+                html += `<p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 编码规则：每字节低 7 位为数值部分，最高位（bit 7）为延续位</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function compareQoS() {
+                const sel = document.getElementById('qosCompareSelect');
+                const result = document.getElementById('qosCompareResult');
+                const val = sel.value;
+                if (!val) { result.innerHTML = ''; return; }
+
+                const qosData = {
+                    '0': {
+                        name: 'QoS 0 — 最多一次 (At most once)',
+                        flow: ['Publisher → Broker: PUBLISH (QoS 0)', 'Broker → Subscriber: PUBLISH (QoS 0)'],
+                        features: [
+                            ['确认机制', '无确认，发送即忘'],
+                            ['消息丢失', '可能丢失'],
+                            ['消息重复', '不会重复'],
+                            ['延迟', '最低'],
+                            ['带宽开销', '最小'],
+                            ['适用场景', '高频传感器数据，丢失几条无影响']
+                        ]
+                    },
+                    '1': {
+                        name: 'QoS 1 — 至少一次 (At least once)',
+                        flow: ['Publisher → Broker: PUBLISH (QoS 1, ID=42)', 'Broker → Publisher: PUBACK (ID=42)', 'Broker → Subscriber: PUBLISH (QoS 1, ID=43)', 'Subscriber → Broker: PUBACK (ID=43)'],
+                        features: [
+                            ['确认机制', 'PUBACK 确认，超时重发'],
+                            ['消息丢失', '不会丢失'],
+                            ['消息重复', '可能重复'],
+                            ['延迟', '较低'],
+                            ['带宽开销', '中等'],
+                            ['适用场景', '命令下发（幂等处理），状态更新']
+                        ]
+                    },
+                    '2': {
+                        name: 'QoS 2 — 恰好一次 (Exactly once)',
+                        flow: ['Publisher → Broker: PUBLISH (QoS 2, ID=100)', 'Broker → Publisher: PUBREC (ID=100)', 'Publisher → Broker: PUBREL (ID=100)', 'Broker → Publisher: PUBCOMP (ID=100)'],
+                        features: [
+                            ['确认机制', '四步握手（PUBLISH→PUBREC→PUBREL→PUBCOMP）'],
+                            ['消息丢失', '不会丢失'],
+                            ['消息重复', '不会重复'],
+                            ['延迟', '最高'],
+                            ['带宽开销', '最大'],
+                            ['适用场景', '计费、支付、不可重复的关键操作']
+                        ]
+                    }
+                };
+
+                const d = qosData[val];
+                let flowHtml = d.flow.map((f, i) => `<div style="padding:8px 12px;background:var(--surface);border-left:3px solid var(--accent);margin-bottom:4px;font-size:0.85rem;">${i + 1}. ${f}</div>`).join('');
+                let featuresHtml = d.features.map(f => `<tr><td style="padding:8px;border-bottom:1px solid var(--border);font-weight:500;">${f[0]}</td><td style="padding:8px;border-bottom:1px solid var(--border);">${f[1]}</td></tr>`).join('');
+
+                result.innerHTML = `<div style="padding:16px;background:var(--accent-bg);border-radius:8px;">
+                    <h4 style="color:var(--accent);margin-bottom:12px;">${d.name}</h4>
+                    <h5 style="margin-bottom:8px;">消息流</h5>
+                    ${flowHtml}
+                    <h5 style="margin:16px 0 8px;">特性对比</h5>
+                    <table style="width:100%;border-collapse:collapse;">
+                        <tr><th style="text-align:left;padding:8px;background:var(--surface);">特性</th><th style="text-align:left;padding:8px;background:var(--surface);">说明</th></tr>
+                        ${featuresHtml}
+                    </table>
+                </div>`;
+            }
+
+            // ==================== Quiz Functions ====================
+            function loadQuizQuestion() {
+                const area = document.getElementById('questionArea');
+                if (!area) return;
+                if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                    document.getElementById('quizResults').style.display = 'block';
+                    area.style.display = 'none';
+                    const pct = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+                    document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('percentage').textContent = pct + '%';
+                    return;
+                }
+                quizState.answered = false;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                let html = `<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}</div>`;
+                html += `<div style="display:flex;gap:4px;margin-bottom:16px;">`;
+                QUIZ_QUESTIONS.forEach((_, i) => { html += `<div style="flex:1;height:4px;border-radius:2px;background:${i < quizState.currentQuestion ? 'var(--accent)' : 'var(--border)'};"></div>`; });
+                html += `</div>`;
+                html += `<h3 style="margin-bottom:16px;font-size:1.1em;">${q.question}</h3>`;
+                q.options.forEach((opt, i) => {
+                    html += `<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${opt}</button>`;
+                });
+                html += `<div id="quizFeedback" style="margin-top:12px;"></div>`;
+                area.innerHTML = html;
+                area.style.display = 'block';
+                document.getElementById('quizResults').style.display = 'none';
+            }
+
+            function answerQuiz(idx) {
+                if (quizState.answered) return;
+                quizState.answered = true;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                const feedback = document.getElementById('quizFeedback');
+                for (let i = 0; i < q.options.length; i++) {
+                    const btn = document.getElementById('qopt' + i);
+                    if (i === q.correct) btn.classList.add('correct');
+                    if (i === idx && i !== q.correct) btn.classList.add('wrong');
+                    btn.classList.add('disabled');
+                }
+                if (idx === q.correct) {
+                    quizState.score++;
+                    feedback.innerHTML = `<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;
+                } else {
+                    feedback.innerHTML = `<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;
+                }
+                setTimeout(() => { quizState.currentQuestion++; loadQuizQuestion(); }, 2500);
+            }
+
+            function restartQuiz() {
+                quizState = { currentQuestion: 0, score: 0, answered: false };
+                loadQuizQuestion();
+            }
+
+            // Tab button event listeners
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => showTab(btn.dataset.tab));
+            });
+            </script>
+
+            <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>

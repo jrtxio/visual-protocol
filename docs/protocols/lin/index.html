@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LIN 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 LIN 协议学习平台 — 掌握局域互联网络的核心原理">
+    <meta name="keywords" content="LIN协议, 局域互联网络, Local Interconnect Network, 车载网络, 主从通信">
+    <meta property="og:title" content="Visual Protocol — LIN 协议学习平台">
+    <meta property="og:description" content="交互式 LIN 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/lin/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        :root {
+            --primary-gradient-start: #D97706;
+            --primary-gradient-end: #B45309;
+            --client-color: #D97706; --server-color: #6B7280; --bus-color: #F59E0B;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-gradient-start: #F59E0B; --primary-gradient-end: #FBBF24;
+                --client-color: #F59E0B; --server-color: #9CA3AF;
+                --success-color: #86EFAC; --success-bg: #14532D;
+                --error-color: #FCA5A5; --error-bg: #7F1D1D;
+                --bg-card-light: #231F1D; --bg-light: #171412;
+                --border-light: #3D3835;
+                --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+            }
+        }
+        body[data-theme="light"] {
+            --primary-gradient-start: #D97706; --primary-gradient-end: #B45309;
+            --client-color: #D97706; --server-color: #6B7280;
+            --bg-card-light: #FFFFFF; --bg-light: #F9F7F4;
+            --border-light: #E7E5E4;
+            --text-light-main: #1C1917; --text-light-secondary: #57534E;
+        }
+        body[data-theme="dark"] {
+            --primary-gradient-start: #F59E0B; --primary-gradient-end: #FBBF24;
+            --client-color: #F59E0B; --server-color: #9CA3AF;
+            --bg-card-light: #231F1D; --bg-light: #171412;
+            --border-light: #3D3835;
+            --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+        }
+
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
+
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 24px 0 32px; padding: 4px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; flex-wrap: wrap;
+        }
+        .tab-button {
+            padding: 10px 20px; background: transparent; color: var(--text-2);
+            border: none; border-radius: 100px; cursor: pointer;
+            font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
+
+        .content-section {
+            display: none; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 32px; margin-bottom: 32px;
+        }
+        .content-section.active { display: block; }
+
+        .back-button, .theme-toggle, .header { display: none; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
+
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 14px 18px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em;
+            transition: all 0.15s;
+        }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-family: "SF Mono","Fira Code",monospace;
+        }
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button {
+            padding: 10px 20px; background: var(--accent); color: #FFF;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+        }
+        .tool-button:hover { opacity: 0.9; }
+
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th {
+            text-align: left; padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border);
+        }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+
+        /* LIN Topology */
+        .bus-topology {
+            display: flex; flex-direction: column; align-items: center;
+            margin: 32px 0; gap: 0;
+        }
+        .ecu-row {
+            display: flex; justify-content: center; gap: 60px; margin-bottom: 0;
+        }
+        .ecu-node {
+            width: 120px; height: 80px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); position: relative;
+        }
+        .ecu-node .ecu-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .ecu-node .ecu-name { font-size: 0.8rem; margin-bottom: 2px; }
+        .ecu-node .ecu-status { font-size: 0.7rem; opacity: 0.9; }
+        .ecu1 { background: linear-gradient(135deg, #D97706, #B45309); }
+        .ecu2 { background: linear-gradient(135deg, #6B7280, #4B5563); }
+        .ecu3 { background: linear-gradient(135deg, #92400E, #78350F); }
+        .ecu-connector { width: 2px; height: 20px; background: #b0aea5; margin: 0 auto; }
+        .bus-bar {
+            width: 80%; max-width: 500px; height: 8px;
+            background: linear-gradient(90deg, #F59E0B, #FBBF24, #F59E0B);
+            border-radius: 4px; position: relative;
+            box-shadow: 0 0 12px rgba(245,158,11,0.3);
+        }
+        .bus-bar.active { animation: busPulse 1s infinite; }
+
+        .log {
+            background: #111; color: #0f0; padding: 24px;
+            border-radius: 12px; font-family: 'Courier New', monospace;
+            text-align: left; max-width: 100%; margin: 24px auto;
+            min-height: 150px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #3a3a38; font-size: 0.875rem;
+        }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; }
+        .log-warning { color: #FFD700; }
+        .log-error { color: #FF6B6B; }
+
+        .demo-controls {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px;
+            background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); cursor: pointer; transition: all 0.15s;
+            margin-bottom: 8px;
+        }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta {
+            display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3);
+        }
+
+        .concept-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg);
+        }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer {
+            color: white; padding: 12px; border-radius: 8px;
+            text-align: center; margin-bottom: 4px;
+            transition: all 0.3s; cursor: default;
+        }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white; padding: 24px; border-radius: 12px;
+            margin: 16px 0; text-align: center;
+        }
+
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        @keyframes busPulse { 0%{box-shadow:0 0 8px rgba(245,158,11,0.3)}50%{box-shadow:0 0 20px rgba(245,158,11,0.6)}100%{box-shadow:0 0 8px rgba(245,158,11,0.3)} }
+        .ecu-node.pulse { animation: pulse 1s infinite; }
+        .ecu-node.blink { animation: pulse 0.5s infinite; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.5em; }
+            .content-section { padding: 20px; }
+            .tab-button { padding: 8px 12px; font-size: 0.82em; }
+            .ecu-row { gap: 24px; }
+            .ecu-node { width: 90px; height: 65px; }
+        }
+        @media (max-width: 480px) {
+            .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; }
+            .ecu-row { gap: 12px; flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="nav-inner container-wide">
+            <a href="../../index.html" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span>Visual Protocol</span>
+            </a>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-back">返回主页</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <div class="container">
+                <header class="page-header">
+                    <h1>LIN 协议学习</h1>
+                    <p>局域互联网络 — Local Interconnect Network — 从主从调度到信号通信</p>
+                </header>
+
+                <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                    <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                    <button class="tab-button" role="tab" data-tab="frames">报文详解</button>
+                    <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                    <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                    <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+                </nav>
+
+                <!-- ===== Tab 1: 基础概念 ===== -->
+                <section id="basics-tab" class="content-section active" role="tabpanel">
+                    <h2 class="section-title">LIN 协议基础概念</h2>
+                    <p>LIN（Local Interconnect Network）是一种低成本的单主多从串行通信协议，广泛应用于汽车车身电子系统中。</p>
+
+                    <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                        <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card"><h4>👑 主从架构</h4><p>LIN 采用单主多从架构，一个 Master 节点控制所有通信时序，最多 15 个 Slave 节点。Master 发送 Header，指定 Slave 响应。</p></div>
+                            <div class="concept-card"><h4>📋 调度表 (Schedule Table)</h4><p>Master 按预设的调度表轮询各 Slave 节点。调度表定义了帧的发送顺序和时隙，支持无条件帧、事件触发帧和偶发帧三种调度方式。</p></div>
+                            <div class="concept-card"><h4>📨 帧类型</h4><p>无条件帧（Unconditional）：固定周期收发；事件触发帧（Event-triggered）：数据变化时才响应；偶发帧（Sporadic）：仅当信号可用时发送；诊断帧（Diagnostic）：用于配置和诊断。</p></div>
+                            <div class="concept-card"><h4>⚡ Break Field</h4><p>帧起始标志，由至少 13 位显性电平（低电平）+ 1 位隐性电平（高电平）组成。Break 是 LIN 帧与普通 UART 数据的区别标志，用于唤醒总线和同步从节点。</p></div>
+                            <div class="concept-card"><h4>🔑 Protected Identifier (PID)</h4><p>6 位标识符 + 2 位奇偶校验位组成。ID 0-59 为信号帧，60-61 为诊断帧，62 为保留，63 为用户定义。校验位 P0 = ID0&#8853;ID1&#8853;ID2&#8853;ID4，P1 = &#172;(ID1&#8853;ID3&#8853;ID4&#8853;ID5)。</p></div>
+                            <div class="concept-card"><h4>🛡️ Checksum</h4><p>两种校验类型：Classic（仅校验数据字段，兼容 LIN 1.x）和 Enhanced（校验 PID + 数据字段，LIN 2.x 推荐）。使用反向校验和（模 256 取反）。</p></div>
+                            <div class="concept-card"><h4>🗺️ 信号映射</h4><p>LIN 使用信号定义来描述数据字段中每一位的含义。通过 LDF（LIN Description File）配置信号的起始位、长度和编码类型（逻辑值、物理值、BCD 等）。</p></div>
+                            <div class="concept-card"><h4>🔄 与 CAN 对比</h4><p>LIN 是 CAN 的低成本替代方案：单线（1 线 vs CAN 双线）、低速（19.2 kbps vs CAN 1 Mbps）、主从（vs CAN 多主）、无仲裁机制、无错误检测（仅校验和）。LIN 适用于车门、座椅、空调等低成本场景。</p></div>
+                            <div class="concept-card"><h4>📄 LDF 配置文件</h4><p>LIN Description File 定义了整个 LIN 网络的配置：节点属性、信号定义、帧定义、调度表。相当于 LIN 的"数据库"，工具链根据 LDF 自动生成代码。</p></div>
+                            <div class="concept-card"><h4>🏗️ 协议栈结构</h4><p>5 层：应用层（信号/诊断）&#8594; LIN 传输层（帧调度）&#8594; LIN 协议层（帧结构）&#8594; UART（串行通信）&#8594; 物理层（单线总线）。</p></div>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                        <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:12px;">LIN 协议遵循简化的五层模型，基于标准 UART 硬件实现，各层协同确保主从节点间的可靠通信。</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;">
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#D97706,#B45309);width:240px;"><div class="layer-name">应用层</div><div class="layer-desc">信号读写 / 诊断服务</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#E8A838,#C88818);width:240px;"><div class="layer-name">LIN 传输层</div><div class="layer-desc">调度表 / 帧调度</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#D97706,#92400E);width:240px;"><div class="layer-name">LIN 协议层</div><div class="layer-desc">Break + Sync + PID + Data + Checksum</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#6B7280,#4B5563);width:240px;"><div class="layer-name">UART</div><div class="layer-desc">8-N-1 串行通信</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#4B5563,#374151);width:240px;"><div class="layer-name">物理层</div><div class="layer-desc">单线总线 (12V)</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 2: 报文详解 ===== -->
+                <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">📡 LIN 帧结构详解</h2>
+                    <p>逐字段解析 LIN 协议帧结构，点击卡片查看详细信息</p>
+                    <div id="frameFieldsGrid"></div>
+                </section>
+
+                <!-- ===== Tab 3: 交互演示 ===== -->
+                <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🎮 LIN 总线交互演示</h2>
+                    <p>观察 LIN 协议在主从节点间的完整通信流程</p>
+
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo('unconditional')">📨 无条件帧</button>
+                        <button class="demo-btn" onclick="startDemo('event')">⚡ 事件触发帧</button>
+                        <button class="demo-btn" onclick="startDemo('diagnostic')">🔧 诊断帧</button>
+                        <button class="demo-btn" onclick="startDemo('schedule')">📋 完整调度</button>
+                        <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                    </div>
+
+                    <div class="bus-topology">
+                        <div class="ecu-row">
+                            <div>
+                                <div class="ecu-node ecu1" id="ecu1"><div class="ecu-icon">👑</div><div class="ecu-name">Master</div><div class="ecu-status" id="ecu1Status">就绪</div></div>
+                                <div class="ecu-connector"></div>
+                            </div>
+                            <div>
+                                <div class="ecu-node ecu2" id="ecu2"><div class="ecu-icon">🔧</div><div class="ecu-name">Slave 1</div><div class="ecu-status" id="ecu2Status">就绪</div></div>
+                                <div class="ecu-connector"></div>
+                            </div>
+                            <div>
+                                <div class="ecu-node ecu3" id="ecu3"><div class="ecu-icon">⚙️</div><div class="ecu-name">Slave 2</div><div class="ecu-status" id="ecu3Status">就绪</div></div>
+                                <div class="ecu-connector"></div>
+                            </div>
+                        </div>
+                        <div class="bus-bar" id="busBar"></div>
+                        <div style="margin-top:8px;color:var(--text-3);font-size:0.8rem;">LIN 总线 (单线, 最高 19.2 kbps)</div>
+                    </div>
+
+                    <div id="commLog" class="log">
+                        <div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">💡 点击上方按钮开始 LIN 总线通信演示...</span></div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 4: 实用工具 ===== -->
+                <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🛠️ LIN 实用工具集</h2>
+                    <p>为 LIN 协议开发和调试提供专业工具支持</p>
+
+                    <div style="display:grid;gap:24px;margin:24px 0;">
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔑 PID 计算器</h3>
+                            <p>输入 LIN ID (0-63)，自动计算 P0、P1 和完整 PID</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="pidIdInput" placeholder="输入 LIN ID (0-63)" style="flex:1;min-width:200px;" aria-label="LIN ID输入">
+                                <button class="tool-button" onclick="calcPID()">计算</button>
+                            </div>
+                            <div id="pidResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🛡️ Checksum 计算器</h3>
+                            <p>选择 Classic 或 Enhanced 模式，输入数据字节，计算 LIN 校验和</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <select class="tool-input" id="checksumType" style="flex:0 0 auto;width:160px;" aria-label="校验类型">
+                                    <option value="classic">Classic</option>
+                                    <option value="enhanced">Enhanced</option>
+                                </select>
+                                <input type="text" class="tool-input" id="checksumDataInput" placeholder="输入数据字节 (如: 01 02 03 04)" style="flex:1;min-width:200px;" aria-label="数据字节输入">
+                                <button class="tool-button" onclick="calcChecksum()">计算</button>
+                            </div>
+                            <div id="checksumResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📋 帧构造器</h3>
+                            <p>选择帧类型、输入 ID 和数据，生成完整 LIN 帧的十六进制表示</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <select class="tool-input" id="frameType" style="flex:0 0 auto;width:180px;" aria-label="帧类型">
+                                    <option value="unconditional">无条件帧</option>
+                                    <option value="event">事件触发帧</option>
+                                    <option value="diagnostic">诊断帧</option>
+                                </select>
+                                <input type="text" class="tool-input" id="frameIdInput" placeholder="LIN ID (0-63)" style="flex:0 0 auto;width:120px;" aria-label="帧ID输入">
+                                <input type="text" class="tool-input" id="frameDataInput" placeholder="数据字节 (如: 01 02)" style="flex:1;min-width:160px;" aria-label="帧数据输入">
+                                <button class="tool-button" onclick="buildFrame()">构造</button>
+                            </div>
+                            <div id="frameResult" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 5: 知识测试 ===== -->
+                <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🧠 LIN 协议知识测试</h2>
+                    <div id="questionArea"></div>
+                    <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                        <div class="results-box">
+                            <h3>🎯 测试完成！</h3>
+                            <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div>
+                            <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                        </div>
+                        <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                    </div>
+                </section>
+
+            <script>
+            // ==================== State ====================
+            let currentTab = 'basics';
+            let quizState = { currentQuestion: 0, score: 0, answered: false };
+            let demoActive = false;
+
+            // ==================== LIN Frame Field Data ====================
+            const LIN_FRAME_FIELDS = {
+                'break': {
+                    name: 'Break Field', bits: '13+ bits',
+                    description: '帧起始标志，由至少 13 位显性电平（低电平）+ 1 位隐性电平（高电平）组成。Break 是 LIN 帧与普通 UART 数据的区别标志，用于唤醒总线和同步从节点。',
+                    details: ['至少 13 位显性电平（0），通常使用 14 位','1 位隐性电平（1）作为 Break 定界符','持续时间必须超过正常字符的帧错误检测阈值','用于从节点检测帧起始和总线唤醒'],
+                    examples: ['Break: 00000000000000 1 (14位显性 + 1位隐性)'],
+                    tip: 'Break 的长度是区分 LIN 帧和 UART 帧错误的关键——普通 UART 字符最长 10 位（起始+8数据+停止），Break 至少 13 位确保被识别为帧起始'
+                },
+                'sync': {
+                    name: 'Sync Byte', bits: '8 bits',
+                    description: '固定值 0x55（二进制 01010101），交替 0-1 模式用于从节点自动测量位时间，实现波特率同步。从节点通过测量 Sync Byte 的边沿间隔来校准本地时钟。',
+                    details: ['固定值 0x55 (01010101)','提供 7 个下降沿用于测量位时间','从节点据此自动调整波特率','允许从节点使用精度较低的 RC 振荡器'],
+                    examples: ['Sync Byte = 0x55 = 01010101b'],
+                    tip: '正是有了 Sync Byte，LIN 从节点可以使用便宜的 RC 振荡器（精度 ±2%），而不需要昂贵的晶振'
+                },
+                'pid': {
+                    name: 'Protected Identifier (PID)', bits: '8 bits',
+                    description: '6 位标识符 (ID0-ID5) + 2 位奇偶校验位 (P0, P1) 组成。ID 0-59 为信号帧，60-61 为诊断帧，62 为保留，63 为用户定义。',
+                    details: ['ID0-ID5: 6 位标识符，范围 0-63','P0 = ID0 ⊕ ID1 ⊕ ID2 ⊕ ID4','P1 = ¬(ID1 ⊕ ID3 ⊕ ID4 ⊕ ID5)','ID 0-59: 信号帧, 60-61: 诊断帧, 62: 保留, 63: 用户定义','完整 PID = [P1, P0, ID5, ID4, ID3, ID2, ID1, ID0]'],
+                    examples: ['ID=0x01: P0=1, P1=0 → PID=0x81','ID=0x02: P0=0, P1=1 → PID=0x42','ID=0x3C(60): 诊断请求帧'],
+                    tip: '奇偶校验位确保了即使总线上有干扰，从节点也能检测到错误的 ID，避免错误响应'
+                },
+                'data': {
+                    name: 'Data Field', bits: '8-64 bits (1-8 字节)',
+                    description: '承载实际有效数据，1-8 字节，高位在前（MSB first）。数据内容由 LDF 文件中定义的信号映射解析。',
+                    details: ['长度 1-8 字节','高位在前 (MSB first)','信号由 LDF 文件定义起始位和长度','支持逻辑值、物理值、BCD 等编码','数据字节顺序由发布节点决定'],
+                    examples: ['1 字节: [01] 表示开关状态','2 字节: [0A 1E] 表示温度值','8 字节: 完整的状态数据'],
+                    tip: 'LIN 数据字段中每个信号按位或字节映射，一个 LIN 帧可以承载多个信号'
+                },
+                'checksum': {
+                    name: 'Checksum', bits: '8 bits',
+                    description: '两种校验类型：Classic（仅校验数据字段，兼容 LIN 1.x）和 Enhanced（校验 PID + 数据字段，LIN 2.x 推荐）。使用反向校验和（模 256 取反）。',
+                    details: ['Classic: 仅对 Data Field 各字节求和取反','Enhanced: 对 PID + Data Field 各字节求和取反','计算方式: sum 对 256 取模后取反','LIN 2.x 推荐使用 Enhanced 校验','校验失败时从节点不更新信号值'],
+                    examples: ['Classic: Data=[01 02], sum=0x03, ~sum=0xFC','Enhanced: PID=0x81, Data=[01 02], sum=0x84, ~sum=0x7B'],
+                    tip: 'Enhanced 校验将 PID 纳入计算，可以检测到 ID 被篡改的情况，安全性更高'
+                }
+            };
+
+            // ==================== Quiz Data ====================
+            const QUIZ_QUESTIONS = [
+                { question: 'LIN 协议采用什么网络架构？', options: ['多主多从','单主多从','对等网络','令牌环'], correct: 1, explanation: 'LIN 采用单主多从架构，一个 Master 节点控制所有通信时序，最多支持 15 个 Slave 节点。Master 发送 Header，指定 Slave 响应。' },
+                { question: 'LIN 总线的最高传输速率是多少？', options: ['1 Mbps','19.2 kbps','500 kbps','100 kbps'], correct: 1, explanation: 'LIN 总线最高传输速率为 19.2 kbps，远低于 CAN 的 1 Mbps。低速设计降低了线束和节点成本。' },
+                { question: 'LIN 的 Sync Byte 固定值是什么？', options: ['0xAA','0x00','0xFF','0x55'], correct: 3, explanation: 'Sync Byte 固定为 0x55（二进制 01010101），交替的 0-1 模式用于从节点自动测量位时间，实现波特率同步。' },
+                { question: 'LIN PID 中 ID 值 60-61 用于什么类型帧？', options: ['信号帧','保留帧','诊断帧','用户定义帧'], correct: 2, explanation: 'ID 0-59 为信号帧，60-61 为诊断帧（Master Request/Slave Response），62 为保留，63 为用户定义。' },
+                { question: 'LIN Enhanced Checksum 与 Classic Checksum 的区别是什么？', options: ['Enhanced 使用 CRC 算法','Enhanced 将 PID 纳入校验计算','Classic 校验范围更大','两者完全相同'], correct: 1, explanation: 'Classic 仅校验 Data Field，而 Enhanced 将 PID 也纳入校验计算，可以检测到 ID 被篡改的情况，LIN 2.x 推荐使用 Enhanced。' },
+                { question: 'LIN 最多支持多少个 Slave 节点？', options: ['8 个','16 个','15 个','32 个'], correct: 2, explanation: 'LIN 协议最多支持 15 个 Slave 节点（ID 0-59 可分配，但总线物理限制实际节点数通常不超过 15 个）。' },
+                { question: 'LIN Break Field 至少需要多少位显性电平？', options: ['8 位','10 位','11 位','13 位'], correct: 3, explanation: 'Break Field 由至少 13 位显性电平（低电平）+ 1 位隐性电平（高电平）组成，超过 UART 最大字符长度以区分帧起始。' },
+                { question: 'LDF 文件的作用是什么？', options: ['存储诊断日志','定义整个 LIN 网络配置','记录总线错误','存储固件代码'], correct: 1, explanation: 'LDF（LIN Description File）定义了整个 LIN 网络的配置：节点属性、信号定义、帧定义、调度表，相当于 LIN 的"数据库"。' },
+                { question: 'LIN 事件触发帧（Event-triggered）的特点是什么？', options: ['固定周期发送','数据变化时才响应','仅诊断时使用','Master 主动推送数据'], correct: 1, explanation: '事件触发帧仅在 Slave 检测到数据变化时才响应数据，无变化时发送固定值，有效减少总线负载。' },
+                { question: 'LIN 与 CAN 相比，以下哪项是 LIN 的特点？', options: ['双线差分传输','支持多主竞争','单线总线传输','波特率达 1 Mbps'], correct: 2, explanation: 'LIN 使用单线总线传输（CAN 使用双线差分），这是 LIN 成本低于 CAN 的主要原因之一。LIN 波特率仅 19.2 kbps，采用主从架构。' },
+                { question: 'LIN 奇偶校验位 P0 的计算方式是什么？', options: ['P0 = ID0 ⊕ ID3 ⊕ ID4 ⊕ ID5','P0 = ID0 ⊕ ID1 ⊕ ID2 ⊕ ID4','P0 = ID0 ⊕ ID1 ⊕ ID3 ⊕ ID5','P0 = ID2 ⊕ ID3 ⊕ ID4 ⊕ ID5'], correct: 1, explanation: 'P0 = ID0 ⊕ ID1 ⊕ ID2 ⊕ ID4，P1 = ¬(ID1 ⊕ ID3 ⊕ ID4 ⊕ ID5)。两位奇偶校验确保 PID 的传输可靠性。' },
+                { question: 'LIN 调度表（Schedule Table）的功能是什么？', options: ['记录错误日志','定义帧的发送顺序和时隙','配置从节点硬件地址','管理总线供电'], correct: 1, explanation: '调度表由 Master 按预设顺序轮询各 Slave 节点，定义了帧的发送顺序和时隙，支持无条件帧、事件触发帧和偶发帧三种调度方式。' }
+            ];
+
+            // ==================== Theme & Tab ====================
+            function toggleTheme() {
+                const body = document.body;
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('vp-theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('vp-theme','dark'); }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const t = localStorage.getItem('vp-theme') || 'light';
+                if (t === 'dark') document.body.setAttribute('data-theme','dark');
+                else document.body.removeAttribute('data-theme');
+                renderFrameFields();
+                loadQuizQuestion();
+            });
+            function showTab(tabName) {
+                document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.hidden = true; });
+                document.querySelectorAll('.tab-button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+                const sec = document.getElementById(tabName + '-tab');
+                if (sec) { sec.classList.add('active'); sec.hidden = false; }
+                const btn = document.querySelector(`[data-tab="${tabName}"]`);
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+                currentTab = tabName;
+            }
+
+            // ==================== Render Frame Fields ====================
+            function renderFrameFields() {
+                const grid = document.getElementById('frameFieldsGrid');
+                if (!grid) return;
+                let html = '';
+                Object.entries(LIN_FRAME_FIELDS).forEach(([key, field]) => {
+                    html += `<div class="frame-field-card" onclick="showFieldModal('${key}')">
+                        <h4>${field.name}</h4>
+                        <p>${field.description.substring(0, 80)}...</p>
+                        <div class="field-meta"><span>📐 ${field.bits}</span><span>📋 点击查看详情</span></div>
+                    </div>`;
+                });
+                grid.innerHTML = html;
+            }
+
+            function showFieldModal(key) {
+                const f = LIN_FRAME_FIELDS[key];
+                if (!f) return;
+                let detailsHtml = f.details.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('');
+                let examplesHtml = f.examples.map(e => `<li style="margin-bottom:4px;"><code style="background:rgba(217,119,6,0.1);padding:2px 6px;border-radius:4px;">${e}</code></li>`).join('');
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${f.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:16px;font-size:0.85rem;">📐 ${f.bits}</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${f.description}</p>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">功能详情</h4>
+                    <ul style="margin:0 0 16px 20px;padding:0;font-size:0.9rem;color:var(--text-2);">${detailsHtml}</ul>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">示例</h4>
+                    <ul style="margin:0 0 16px 20px;padding:0;font-size:0.85rem;">${examplesHtml}</ul>
+                    <div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${f.tip}</div>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            // ==================== Demo Functions ====================
+            function addLog(msg, type) {
+                const log = document.getElementById('commLog');
+                const now = new Date();
+                const ts = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+                const cls = type === 'warning' ? 'log-warning' : type === 'error' ? 'log-error' : 'log-info';
+                log.innerHTML += `<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${msg}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+            function setEcuStatus(id, text) {
+                const el = document.getElementById(id + 'Status');
+                if (el) el.textContent = text;
+            }
+            function resetDemo() {
+                demoActive = false;
+                ['ecu1','ecu2','ecu3'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) { el.classList.remove('pulse','blink'); }
+                    setEcuStatus(id, '就绪');
+                });
+                const bus = document.getElementById('busBar');
+                if (bus) bus.classList.remove('active');
+                const log = document.getElementById('commLog');
+                log.innerHTML = '<div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">🔄 演示已重置，点击按钮开始新的演示</span></div>';
+            }
+
+            function startDemo(type) {
+                if (demoActive) return;
+                demoActive = true;
+                resetDemo();
+                demoActive = true;
+                const bus = document.getElementById('busBar');
+                if (bus) bus.classList.add('active');
+
+                if (type === 'unconditional') demoUnconditional();
+                else if (type === 'event') demoEvent();
+                else if (type === 'diagnostic') demoDiagnostic();
+                else if (type === 'schedule') demoSchedule();
+            }
+
+            function demoUnconditional() {
+                addLog('📨 无条件帧演示：Master 轮询 Slave 1 (ID=0x01)', 'info');
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.add('pulse');
+                    setEcuStatus('ecu1','发送 Header...');
+                    addLog('📤 [Master] 发送 Break Field (13位显性+1位隐性)','info');
+                }, 500);
+                setTimeout(() => {
+                    addLog('📤 [Master] 发送 Sync Byte = 0x55','info');
+                }, 1200);
+                setTimeout(() => {
+                    addLog('📤 [Master] 发送 PID: ID=0x01, P0=1, P1=0 → PID=0x81','info');
+                }, 1900);
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.remove('pulse');
+                    const s = document.getElementById('ecu2'); if(s) s.classList.add('pulse');
+                    setEcuStatus('ecu1','等待响应'); setEcuStatus('ecu2','响应数据...');
+                    addLog('📥 [Slave 1] 识别 PID=0x81，准备响应数据','info');
+                }, 2600);
+                setTimeout(() => {
+                    addLog('📤 [Slave 1] 发送 Data: [0x0A 0x1E] (2字节) + Enhanced Checksum: 0xB7','info');
+                }, 3300);
+                setTimeout(() => {
+                    const s = document.getElementById('ecu2'); if(s) s.classList.remove('pulse');
+                    setEcuStatus('ecu1','帧完成'); setEcuStatus('ecu2','响应完成');
+                    addLog('✅ [Master] 校验通过，信号更新完成','info');
+                    demoActive = false;
+                }, 4200);
+            }
+
+            function demoEvent() {
+                addLog('⚡ 事件触发帧演示：Master 轮询 Slave 1 (ID=0x10)', 'info');
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.add('pulse');
+                    setEcuStatus('ecu1','发送 Header...');
+                    addLog('📤 [Master] 发送 Header: Break + Sync + PID=0x10','info');
+                }, 500);
+                setTimeout(() => {
+                    const s = document.getElementById('ecu2'); if(s) s.classList.add('pulse');
+                    setEcuStatus('ecu2','检测数据变化...');
+                    addLog('🔍 [Slave 1] 检测数据是否变化...','warning');
+                }, 1500);
+                setTimeout(() => {
+                    addLog('📊 [Slave 1] 数据发生变化！旧值=0x03, 新值=0x07','warning');
+                    addLog('📤 [Slave 1] 发送响应: Data=[0x07] + Enhanced Checksum','info');
+                    setEcuStatus('ecu2','数据变化，响应中');
+                }, 2500);
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.remove('pulse');
+                    const s = document.getElementById('ecu2'); if(s) s.classList.remove('pulse');
+                    setEcuStatus('ecu1','帧完成'); setEcuStatus('ecu2','响应完成');
+                    addLog('✅ 事件触发帧完成，数据已更新','info');
+                    demoActive = false;
+                }, 3500);
+            }
+
+            function demoDiagnostic() {
+                addLog('🔧 诊断帧演示：Master Request (ID=60) + Slave Response (ID=61)', 'info');
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.add('pulse');
+                    setEcuStatus('ecu1','发送诊断请求...');
+                    addLog('📤 [Master] 发送 Header: PID=0x3C (诊断请求, ID=60)','info');
+                }, 500);
+                setTimeout(() => {
+                    addLog('📤 [Master] 发送诊断数据: Data=[0x01 0x3E 0x00 0x00 0x00 0x00 0x00 0x00]','info');
+                    addLog('📋 诊断请求: Service 0x3E (Tester Present)','info');
+                }, 1500);
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.remove('pulse');
+                    addLog('✅ [Slave] 收到诊断请求，处理中...','info');
+                }, 2500);
+                setTimeout(() => {
+                    addLog('📤 [Master] 发送 Header: PID=0x7D (诊断响应, ID=61)','info');
+                }, 3200);
+                setTimeout(() => {
+                    const s = document.getElementById('ecu2'); if(s) s.classList.add('pulse');
+                    setEcuStatus('ecu2','发送诊断响应...');
+                    addLog('📤 [Slave 1] 发送诊断响应: Data=[0x7E 0x00 ...]','info');
+                }, 4000);
+                setTimeout(() => {
+                    const s = document.getElementById('ecu2'); if(s) s.classList.remove('pulse');
+                    setEcuStatus('ecu1','诊断完成'); setEcuStatus('ecu2','响应完成');
+                    addLog('✅ 诊断通信完成','info');
+                    demoActive = false;
+                }, 4800);
+            }
+
+            function demoSchedule() {
+                addLog('📋 完整调度演示：Master 按 Schedule Table 轮询多个帧', 'info');
+                // Frame 1: ID=0x01 -> Slave 1
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.add('pulse');
+                    setEcuStatus('ecu1','调度帧 #1...');
+                    addLog('📋 [调度表] 时隙 1: 无条件帧 ID=0x01 → Slave 1','info');
+                    addLog('📤 [Master] Header: Break + Sync + PID=0x81','info');
+                }, 500);
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.remove('pulse');
+                    const s = document.getElementById('ecu2'); if(s) s.classList.add('pulse');
+                    setEcuStatus('ecu2','响应 ID=0x01...');
+                    addLog('📤 [Slave 1] Data=[0x15 0x2A] + Checksum','info');
+                }, 1500);
+                setTimeout(() => {
+                    const s = document.getElementById('ecu2'); if(s) s.classList.remove('pulse');
+                    addLog('✅ 帧 #1 完成','info');
+                }, 2200);
+                // Frame 2: ID=0x02 -> Slave 2
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.add('pulse');
+                    setEcuStatus('ecu1','调度帧 #2...');
+                    addLog('📋 [调度表] 时隙 2: 无条件帧 ID=0x02 → Slave 2','info');
+                    addLog('📤 [Master] Header: Break + Sync + PID=0x42','info');
+                }, 3000);
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.remove('pulse');
+                    const s = document.getElementById('ecu3'); if(s) s.classList.add('pulse');
+                    setEcuStatus('ecu3','响应 ID=0x02...');
+                    addLog('📤 [Slave 2] Data=[0x00 0xFF] + Checksum','info');
+                }, 4000);
+                setTimeout(() => {
+                    const s = document.getElementById('ecu3'); if(s) s.classList.remove('pulse');
+                    addLog('✅ 帧 #2 完成','info');
+                }, 4700);
+                // Frame 3: event-triggered
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.add('pulse');
+                    setEcuStatus('ecu1','调度帧 #3...');
+                    addLog('📋 [调度表] 时隙 3: 事件触发帧 ID=0x10','info');
+                    addLog('📤 [Master] Header: Break + Sync + PID (0x10)','warning');
+                }, 5500);
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.remove('pulse');
+                    const s = document.getElementById('ecu2'); if(s) s.classList.add('pulse');
+                    addLog('🔍 [Slave 1] 数据无变化，发送未更改标志','info');
+                    addLog('📤 [Slave 1] Data=[0xFF] (无变化标志)','info');
+                }, 6500);
+                setTimeout(() => {
+                    const m = document.getElementById('ecu1'); if(m) m.classList.remove('pulse');
+                    const s = document.getElementById('ecu2'); if(s) s.classList.remove('pulse');
+                    const s3 = document.getElementById('ecu3'); if(s3) s3.classList.remove('pulse');
+                    setEcuStatus('ecu1','调度完成'); setEcuStatus('ecu2','就绪'); setEcuStatus('ecu3','就绪');
+                    addLog('📋 调度表一轮完成，等待下一轮','info');
+                    addLog('🔄 Schedule Table 将循环执行...','info');
+                    demoActive = false;
+                }, 7500);
+            }
+
+            // ==================== Tool Functions ====================
+            function calcPID() {
+                const input = document.getElementById('pidIdInput').value.trim();
+                const result = document.getElementById('pidResult');
+                const id = parseInt(input);
+                if (isNaN(id) || id < 0 || id > 63) {
+                    result.innerHTML = '<p style="color:var(--error-color);">请输入有效的 LIN ID (0-63)</p>';
+                    return;
+                }
+                const id0 = (id >> 0) & 1;
+                const id1 = (id >> 1) & 1;
+                const id2 = (id >> 2) & 1;
+                const id3 = (id >> 3) & 1;
+                const id4 = (id >> 4) & 1;
+                const id5 = (id >> 5) & 1;
+                const p0 = id0 ^ id1 ^ id2 ^ id4;
+                const p1 = (id1 ^ id3 ^ id4 ^ id5) ^ 1;
+                const pid = (p1 << 7) | (p0 << 6) | id;
+                let frameType = '信号帧';
+                if (id >= 60 && id <= 61) frameType = '诊断帧';
+                else if (id === 62) frameType = '保留帧';
+                else if (id === 63) frameType = '用户定义帧';
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<p><strong>LIN ID:</strong> ${id} (0x${id.toString(16).toUpperCase().padStart(2,'0')})</p>`;
+                html += `<p><strong>帧类型:</strong> ${frameType}</p>`;
+                html += `<p><strong>ID 二进制:</strong> ${id5}${id4}${id3}${id2}${id1}${id0}</p>`;
+                html += `<hr style="border-color:var(--border);margin:8px 0;">`;
+                html += `<p><strong>P0</strong> = ID0 ⊕ ID1 ⊕ ID2 ⊕ ID4 = ${id0} ⊕ ${id1} ⊕ ${id2} ⊕ ${id4} = <strong>${p0}</strong></p>`;
+                html += `<p><strong>P1</strong> = ¬(ID1 ⊕ ID3 ⊕ ID4 ⊕ ID5) = ¬(${id1} ⊕ ${id3} ⊕ ${id4} ⊕ ${id5}) = <strong>${p1}</strong></p>`;
+                html += `<hr style="border-color:var(--border);margin:8px 0;">`;
+                html += `<p style="font-size:1.2em;color:var(--accent);font-weight:700;">PID = 0x${pid.toString(16).toUpperCase().padStart(2,'0')} (${pid})</p>`;
+                html += `<p style="font-size:0.85rem;color:var(--text-3);">二进制: ${p1}${p0}_${id5}${id4}${id3}${id2}${id1}${id0} = ${pid.toString(2).padStart(8,'0')}</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function calcChecksum() {
+                const type = document.getElementById('checksumType').value;
+                const input = document.getElementById('checksumDataInput').value.trim();
+                const result = document.getElementById('checksumResult');
+                if (!input) {
+                    result.innerHTML = '<p style="color:var(--error-color);">请输入数据字节</p>';
+                    return;
+                }
+                const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                if (!bytes || bytes.length === 0) {
+                    result.innerHTML = '<p style="color:var(--error-color);">格式错误，请输入十六进制数据字节 (如: 01 02 03)</p>';
+                    return;
+                }
+                let sum = 0;
+                let calcDetail = '';
+                if (type === 'enhanced') {
+                    // Need PID - prompt for it
+                    const pidStr = document.getElementById('pidIdInput').value.trim();
+                    const pidId = parseInt(pidStr);
+                    if (isNaN(pidId) || pidId < 0 || pidId > 63) {
+                        result.innerHTML = '<p style="color:var(--error-color);">Enhanced 模式需要先在 PID 计算器中输入有效的 LIN ID</p>';
+                        return;
+                    }
+                    // Calculate PID
+                    const id = pidId;
+                    const id0=(id>>0)&1, id1=(id>>1)&1, id2=(id>>2)&1, id3=(id>>3)&1, id4=(id>>4)&1, id5=(id>>5)&1;
+                    const p0 = id0^id1^id2^id4;
+                    const p1 = (id1^id3^id4^id5)^1;
+                    const pid = (p1<<7)|(p0<<6)|id;
+                    sum = pid;
+                    calcDetail = `PID=0x${pid.toString(16).toUpperCase().padStart(2,'0')} (${pid})`;
+                }
+                bytes.forEach((b, i) => {
+                    const val = parseInt(b, 16);
+                    if (isNaN(val)) return;
+                    if (calcDetail) calcDetail += ' + ';
+                    calcDetail += `0x${val.toString(16).toUpperCase().padStart(2,'0')}`;
+                    sum += val;
+                });
+                const checksum = (~sum) & 0xFF;
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<p><strong>校验类型:</strong> ${type === 'classic' ? 'Classic (LIN 1.x)' : 'Enhanced (LIN 2.x)'}</p>`;
+                html += `<p><strong>计算过程:</strong> ${calcDetail}</p>`;
+                html += `<p><strong>累加和:</strong> 0x${(sum & 0xFF).toString(16).toUpperCase().padStart(2,'0')} (${sum & 0xFF})</p>`;
+                html += `<p style="font-size:1.2em;color:var(--accent);font-weight:700;">Checksum = ~sum & 0xFF = 0x${checksum.toString(16).toUpperCase().padStart(2,'0')} (${checksum})</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function buildFrame() {
+                const frameType = document.getElementById('frameType').value;
+                const idInput = document.getElementById('frameIdInput').value.trim();
+                const dataInput = document.getElementById('frameDataInput').value.trim();
+                const result = document.getElementById('frameResult');
+                const id = parseInt(idInput);
+                if (isNaN(id) || id < 0 || id > 63) {
+                    result.innerHTML = '<p style="color:var(--error-color);">请输入有效的 LIN ID (0-63)</p>';
+                    return;
+                }
+                // Calculate PID
+                const id0=(id>>0)&1, id1=(id>>1)&1, id2=(id>>2)&1, id3=(id>>3)&1, id4=(id>>4)&1, id5=(id>>5)&1;
+                const p0 = id0^id1^id2^id4;
+                const p1 = (id1^id3^id4^id5)^1;
+                const pid = (p1<<7)|(p0<<6)|id;
+                // Parse data bytes
+                let dataBytes = [];
+                if (dataInput) {
+                    const matches = dataInput.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                    if (matches) dataBytes = matches.map(b => parseInt(b, 16)).filter(n => !isNaN(n));
+                }
+                if (dataBytes.length === 0) {
+                    result.innerHTML = '<p style="color:var(--error-color);">请输入至少 1 个数据字节</p>';
+                    return;
+                }
+                if (dataBytes.length > 8) {
+                    result.innerHTML = '<p style="color:var(--error-color);">LIN 数据字段最多 8 字节</p>';
+                    return;
+                }
+                // Calculate enhanced checksum
+                let sum = pid;
+                dataBytes.forEach(b => { sum += b; });
+                const checksum = (~sum) & 0xFF;
+                // Build frame hex
+                let frameHex = [];
+                frameHex.push('55'); // Sync Byte
+                frameHex.push(pid.toString(16).toUpperCase().padStart(2,'0'));
+                dataBytes.forEach(b => frameHex.push(b.toString(16).toUpperCase().padStart(2,'0')));
+                frameHex.push(checksum.toString(16).toUpperCase().padStart(2,'0'));
+                const typeLabels = { unconditional: '无条件帧', event: '事件触发帧', diagnostic: '诊断帧' };
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<p><strong>帧类型:</strong> ${typeLabels[frameType]}</p>`;
+                html += `<p><strong>LIN ID:</strong> ${id} (0x${id.toString(16).toUpperCase().padStart(2,'0')})</p>`;
+                html += `<p><strong>PID:</strong> 0x${pid.toString(16).toUpperCase().padStart(2,'0')}</p>`;
+                html += `<p><strong>数据:</strong> ${dataBytes.map(b => '0x'+b.toString(16).toUpperCase().padStart(2,'0')).join(' ')}</p>`;
+                html += `<hr style="border-color:var(--border);margin:8px 0;">`;
+                html += `<p><strong>完整帧 (不含 Break):</strong></p>`;
+                html += `<div style="display:flex;gap:4px;flex-wrap:wrap;margin:8px 0;">`;
+                html += `<div style="padding:6px 10px;background:var(--primary-gradient-start);color:#fff;border-radius:4px;font-family:monospace;font-size:0.85rem;">Sync=0x55</div>`;
+                html += `<div style="padding:6px 10px;background:var(--primary-gradient-end);color:#fff;border-radius:4px;font-family:monospace;font-size:0.85rem;">PID=0x${pid.toString(16).toUpperCase().padStart(2,'0')}</div>`;
+                dataBytes.forEach((b, i) => {
+                    html += `<div style="padding:6px 10px;background:#6B7280;color:#fff;border-radius:4px;font-family:monospace;font-size:0.85rem;">D${i}=0x${b.toString(16).toUpperCase().padStart(2,'0')}</div>`;
+                });
+                html += `<div style="padding:6px 10px;background:#28a745;color:#fff;border-radius:4px;font-family:monospace;font-size:0.85rem;">CKS=0x${checksum.toString(16).toUpperCase().padStart(2,'0')}</div>`;
+                html += `</div>`;
+                html += `<p style="font-family:monospace;font-size:0.9rem;color:var(--accent);">HEX: ${frameHex.join(' ')}</p>`;
+                html += `<p style="font-size:0.8rem;color:var(--text-3);">💡 实际传输时前面还需要加上 Break Field (13+ 位显性电平)</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            // ==================== Quiz Functions ====================
+            function loadQuizQuestion() {
+                const area = document.getElementById('questionArea');
+                if (!area) return;
+                if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                    document.getElementById('quizResults').style.display = 'block';
+                    area.style.display = 'none';
+                    const pct = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+                    document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('percentage').textContent = pct + '%';
+                    return;
+                }
+                quizState.answered = false;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                let html = `<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}</div>`;
+                html += `<div style="display:flex;gap:4px;margin-bottom:16px;">`;
+                QUIZ_QUESTIONS.forEach((_, i) => { html += `<div style="flex:1;height:4px;border-radius:2px;background:${i < quizState.currentQuestion ? 'var(--accent)' : 'var(--border)'};"></div>`; });
+                html += `</div>`;
+                html += `<h3 style="margin-bottom:16px;font-size:1.1em;">${q.question}</h3>`;
+                q.options.forEach((opt, i) => {
+                    html += `<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${opt}</button>`;
+                });
+                html += `<div id="quizFeedback" style="margin-top:12px;"></div>`;
+                area.innerHTML = html;
+                area.style.display = 'block';
+                document.getElementById('quizResults').style.display = 'none';
+            }
+
+            function answerQuiz(idx) {
+                if (quizState.answered) return;
+                quizState.answered = true;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                const feedback = document.getElementById('quizFeedback');
+                for (let i = 0; i < q.options.length; i++) {
+                    const btn = document.getElementById('qopt' + i);
+                    if (i === q.correct) btn.classList.add('correct');
+                    if (i === idx && i !== q.correct) btn.classList.add('wrong');
+                    btn.classList.add('disabled');
+                }
+                if (idx === q.correct) {
+                    quizState.score++;
+                    feedback.innerHTML = `<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;
+                } else {
+                    feedback.innerHTML = `<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;
+                }
+                setTimeout(() => { quizState.currentQuestion++; loadQuizQuestion(); }, 2500);
+            }
+
+            function restartQuiz() {
+                quizState = { currentQuestion: 0, score: 0, answered: false };
+                loadQuizQuestion();
+            }
+
+            // Tab button event listeners
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => showTab(btn.dataset.tab));
+            });
+            </script>
+
+            <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>

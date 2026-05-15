@@ -1,0 +1,908 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCP 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 TCP 协议学习平台 — 掌握传输控制协议的核心原理">
+    <meta name="keywords" content="TCP, 传输控制协议, 三次握手, 四次挥手, 滑动窗口, 拥塞控制, 流量控制">
+    <meta property="og:title" content="Visual Protocol — TCP 协议学习平台">
+    <meta property="og:description" content="交互式 TCP 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/tcp/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        :root {
+            --primary-gradient-start: #4338CA;
+            --primary-gradient-end: #3730A3;
+            --client-color: #4338CA; --server-color: #3730A3;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-gradient-start: #6366F1; --primary-gradient-end: #818CF8;
+                --client-color: #6366F1; --server-color: #818CF8;
+                --success-color: #86EFAC; --success-bg: #14532D;
+                --error-color: #FCA5A5; --error-bg: #7F1D1D;
+                --bg-card-light: #231F1D; --bg-light: #171412;
+                --border-light: #3D3835;
+                --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+            }
+        }
+        body[data-theme="light"] {
+            --primary-gradient-start: #4338CA; --primary-gradient-end: #3730A3;
+            --client-color: #4338CA; --server-color: #3730A3;
+            --bg-card-light: #FFFFFF; --bg-light: #F9F7F4;
+            --border-light: #E7E5E4;
+            --text-light-main: #1C1917; --text-light-secondary: #57534E;
+        }
+        body[data-theme="dark"] {
+            --primary-gradient-start: #6366F1; --primary-gradient-end: #818CF8;
+            --client-color: #6366F1; --server-color: #818CF8;
+            --bg-card-light: #231F1D; --bg-light: #171412;
+            --border-light: #3D3835;
+            --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+        }
+
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
+
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 24px 0 32px; padding: 4px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; flex-wrap: wrap;
+        }
+        .tab-button {
+            padding: 10px 20px; background: transparent; color: var(--text-2);
+            border: none; border-radius: 100px; cursor: pointer;
+            font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
+
+        .content-section {
+            display: none; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 32px; margin-bottom: 32px;
+        }
+        .content-section.active { display: block; }
+
+        .back-button, .theme-toggle, .header { display: none; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
+
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 14px 18px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em;
+            transition: all 0.15s;
+        }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-family: "SF Mono","Fira Code",monospace;
+        }
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button {
+            padding: 10px 20px; background: var(--accent); color: #FFF;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+        }
+        .tool-button:hover { opacity: 0.9; }
+
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th {
+            text-align: left; padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border);
+        }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+
+        /* Device Topology */
+        .device-topology {
+            display: flex; align-items: center; justify-content: center;
+            margin: 32px 0; gap: 0; position: relative;
+        }
+        .device-node {
+            width: 140px; height: 90px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .device-node .device-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .device-node .device-name { font-size: 0.85rem; margin-bottom: 2px; }
+        .device-node .device-status { font-size: 0.7rem; opacity: 0.9; }
+        .device-client { background: linear-gradient(135deg, #4338CA, #3730A3); }
+        .device-server { background: linear-gradient(135deg, #3730A3, #2E2690); }
+        .connection-line {
+            width: 120px; height: 4px;
+            background: linear-gradient(90deg, #4338CA, #3730A3);
+            border-radius: 2px; position: relative;
+        }
+        .connection-line.active { animation: connPulse 1s infinite; }
+        .packet-indicator {
+            position: absolute; width: 12px; height: 12px; background: #FFF;
+            border-radius: 50%; top: -4px; left: 0; opacity: 0;
+            box-shadow: 0 0 8px rgba(67,56,202,0.5);
+        }
+        .connection-line.active .packet-indicator {
+            opacity: 1; animation: packetMove 1.5s infinite;
+        }
+
+        .log {
+            background: #111; color: #0f0; padding: 24px;
+            border-radius: 12px; font-family: 'Courier New', monospace;
+            text-align: left; max-width: 100%; margin: 24px auto;
+            min-height: 150px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #3a3a38; font-size: 0.875rem;
+        }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; }
+        .log-warning { color: #FFD700; }
+        .log-error { color: #FF6B6B; }
+
+        .demo-controls {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px;
+            background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); cursor: pointer; transition: all 0.15s;
+            margin-bottom: 8px;
+        }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta {
+            display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3);
+        }
+
+        .concept-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg);
+        }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer {
+            color: white; padding: 12px; border-radius: 8px;
+            text-align: center; margin-bottom: 4px;
+            transition: all 0.3s; cursor: default;
+        }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white; padding: 24px; border-radius: 12px;
+            margin: 16px 0; text-align: center;
+        }
+
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        @keyframes connPulse { 0%{box-shadow:0 0 8px rgba(67,56,202,0.3)}50%{box-shadow:0 0 20px rgba(67,56,202,0.6)}100%{box-shadow:0 0 8px rgba(67,56,202,0.3)} }
+        @keyframes packetMove { 0%{left:0;opacity:1}100%{left:calc(100% - 12px);opacity:1} }
+        .device-node.pulse { animation: pulse 1s infinite; }
+
+        /* State Machine */
+        .state-machine-container { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 16px 0; }
+        .state-node {
+            display: inline-flex; align-items: center; justify-content: center;
+            padding: 8px 16px; border-radius: 8px; font-size: 0.85rem; font-weight: 600;
+            border: 2px solid var(--border); background: var(--surface); color: var(--text);
+            cursor: pointer; transition: all 0.2s; min-width: 120px; text-align: center;
+        }
+        .state-node:hover { border-color: var(--accent); }
+        .state-node.highlight { border-color: var(--accent); background: var(--accent-bg); color: var(--accent); }
+        .state-arrow { color: var(--text-3); font-size: 0.8rem; }
+
+        /* Congestion Chart */
+        .cwnd-chart { background: #111; border-radius: 12px; padding: 20px; margin: 16px 0; border: 1px solid #3a3a38; }
+        body[data-theme="dark"] .cwnd-chart { background: #000; border-color: #444; }
+        .cwnd-chart canvas { width: 100%; height: 200px; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.5em; }
+            .content-section { padding: 20px; }
+            .tab-button { padding: 8px 12px; font-size: 0.82em; }
+            .device-topology { flex-direction: column; gap: 8px; }
+            .connection-line { width: 4px; height: 40px; }
+            .connection-line.active .packet-indicator { animation: packetMoveV 1.5s infinite; }
+            .device-node { width: 120px; height: 80px; }
+        }
+        @media (max-width: 480px) {
+            .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; }
+        }
+        @keyframes packetMoveV { 0%{top:0;left:-4px;opacity:1}100%{top:calc(100% - 12px);left:-4px;opacity:1} }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="nav-inner container-wide">
+            <a href="../../index.html" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span>Visual Protocol</span>
+            </a>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-back">返回主页</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <div class="container">
+                <header class="page-header">
+                    <h1>TCP 协议学习</h1>
+                    <p>Transmission Control Protocol — 从连接建立到可靠传输</p>
+                </header>
+
+                <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                    <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                    <button class="tab-button" role="tab" data-tab="frames">报文详解</button>
+                    <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                    <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                    <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+                </nav>
+
+                <!-- ===== Tab 1: 基础概念 ===== -->
+                <section id="basics-tab" class="content-section active" role="tabpanel">
+                    <h2 class="section-title">TCP 协议基础概念</h2>
+                    <p>TCP（Transmission Control Protocol，传输控制协议）是面向连接的可靠传输层协议，为应用层提供可靠的字节流传输服务，保证数据按序到达、无丢失、无重复。</p>
+
+                    <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                        <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card"><h4>🔗 面向连接</h4><p>TCP 在数据传输前必须建立连接（三次握手），传输后释放连接（四次挥手）。提供可靠的字节流传输服务，保证数据按序到达、无丢失、无重复。</p></div>
+                            <div class="concept-card"><h4>🤝 三次握手</h4><p>建立连接的三步：① Client 发送 SYN（seq=x）→ ② Server 回复 SYN+ACK（seq=y, ack=x+1）→ ③ Client 发送 ACK（ack=y+1）。确保双方都具备收发能力。</p></div>
+                            <div class="concept-card"><h4>👋 四次挥手</h4><p>断开连接的四步：① 主动方发送 FIN → ② 被动方回复 ACK → ③ 被动方发送 FIN → ④ 主动方回复 ACK。双方各发一个 FIN 确认关闭，确保数据全部传输完毕。</p></div>
+                            <div class="concept-card"><h4>🪟 滑动窗口</h4><p>TCP 使用滑动窗口机制实现流量控制。发送方维护一个发送窗口，只能发送窗口内的数据；接收方通过 ACK 中的 Window 字段通知发送方可用的接收缓冲区大小。</p></div>
+                            <div class="concept-card"><h4>🚦 拥塞控制</h4><p>四个核心算法：慢启动（指数增长 cwnd）、拥塞避免（线性增长 cwnd）、快重传（收到 3 个重复 ACK 立即重传）、快恢复（cwnd 减半而非重置为 1）。防止网络过载。</p></div>
+                            <div class="concept-card"><h4>🔢 序列号与确认</h4><p>TCP 为每个字节分配序列号（Sequence Number），接收方通过确认号（Acknowledgment Number）告知发送方已收到的字节位置。实现可靠传输和按序交付。</p></div>
+                            <div class="concept-card"><h4>⏱️ 超时重传</h4><p>发送方启动定时器等待 ACK，超时未收到则重传数据段。RTO（Retransmission Timeout）基于 RTT（Round-Trip Time）动态计算，适应不同网络延迟。</p></div>
+                            <div class="concept-card"><h4>📊 流量控制</h4><p>接收方通过 TCP 头部的 Window 字段通告自己的接收缓冲区剩余空间。发送方据此控制发送速率，防止接收方缓冲区溢出。Window=0 时触发零窗口探测机制。</p></div>
+                            <div class="concept-card"><h4>⚡ 与 UDP 对比</h4><p>TCP 面向连接、可靠传输、有序交付、有流量/拥塞控制，适合文件传输/Web/邮件等；UDP 无连接、尽力传输、无序交付、无拥塞控制，适合实时音视频/DNS/DDS 等低延迟场景。</p></div>
+                            <div class="concept-card"><h4>🏗️ 协议栈结构</h4><p>在车载场景中 TCP 的位置：应用层（诊断 UDS 等）→ DoIP（诊断传输）→ TCP → IP → Ethernet → 物理链路。DoIP 使用 TCP 传输大数据量的诊断数据。</p></div>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                        <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:12px;">TCP 位于传输层，为上层应用协议提供可靠的字节流传输，在车载诊断场景中承载 DoIP 等协议。</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;">
+                            <div class="protocol-stack-layer" style="background:#4338CA;width:260px;"><div class="layer-name">应用层</div><div class="layer-desc">HTTP / DoIP / FTP / SMTP</div></div>
+                            <div class="protocol-stack-layer" style="background:#5B52D5;width:260px;"><div class="layer-name">TCP</div><div class="layer-desc">可靠字节流传输</div></div>
+                            <div class="protocol-stack-layer" style="background:#6D68E0;width:260px;"><div class="layer-name">IP</div><div class="layer-desc">网络层路由</div></div>
+                            <div class="protocol-stack-layer" style="background:#7C78EA;width:260px;"><div class="layer-name">Ethernet</div><div class="layer-desc">数据链路层</div></div>
+                            <div class="protocol-stack-layer" style="background:#8B87F0;width:260px;"><div class="layer-name">物理链路</div><div class="layer-desc">100BASE-T1 / 物理介质</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 2: 报文详解 ===== -->
+                <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">📡 TCP 报文段结构详解</h2>
+                    <p>TCP 报文段由固定头部（20-60 字节）+ 可选数据组成，点击卡片查看各字段详细信息</p>
+                    <div id="frameFieldsGrid"></div>
+                </section>
+
+                <!-- ===== Tab 3: 交互演示 ===== -->
+                <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🎮 TCP 协议交互演示</h2>
+                    <p>观察 TCP 连接建立、数据传输和连接释放的完整过程</p>
+
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo('handshake')">🤝 三次握手</button>
+                        <button class="demo-btn" onclick="startDemo('transfer')">📦 数据传输</button>
+                        <button class="demo-btn" onclick="startDemo('teardown')">👋 四次挥手</button>
+                        <button class="demo-btn" onclick="startDemo('congestion')">🚦 拥塞控制</button>
+                        <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                    </div>
+
+                    <div class="device-topology">
+                        <div class="device-node device-client" id="clientNode">
+                            <div class="device-icon">🖥️</div>
+                            <div class="device-name">Client</div>
+                            <div class="device-status" id="clientStatus">CLOSED</div>
+                        </div>
+                        <div class="connection-line" id="connLine">
+                            <div class="packet-indicator"></div>
+                        </div>
+                        <div class="device-node device-server" id="serverNode">
+                            <div class="device-icon">🖧</div>
+                            <div class="device-name">Server</div>
+                            <div class="device-status" id="serverStatus">LISTEN</div>
+                        </div>
+                    </div>
+
+                    <div id="commLog" class="log">
+                        <div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">💡 点击上方按钮开始 TCP 通信演示...</span></div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 4: 实用工具 ===== -->
+                <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🛠️ TCP 实用工具集</h2>
+                    <p>为 TCP 协议开发和调试提供专业工具支持</p>
+
+                    <div style="display:grid;gap:24px;margin:24px 0;">
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🏁 Flags 解析器</h3>
+                            <p>输入十六进制 flags 字节，解析各控制标志位（URG/ACK/PSH/RST/SYN/FIN）</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="flagsInput" placeholder="输入十六进制 (如: 0x12, 0x02, 0x11)" style="flex:1;min-width:200px;" aria-label="Flags输入">
+                                <button class="tool-button" onclick="parseFlags()">解析</button>
+                            </div>
+                            <div id="flagsResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔢 TCP Checksum 计算器</h3>
+                            <p>输入伪头部 + TCP 段数据（十六进制），计算 TCP 校验和</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="checksumInput" placeholder="输入十六进制数据 (伪头部 + TCP 段)" style="flex:1;min-width:200px;" aria-label="Checksum输入">
+                                <button class="tool-button" onclick="calcChecksum()">计算</button>
+                            </div>
+                            <div id="checksumResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔄 连接状态机</h3>
+                            <p>可视化 TCP 连接的 11 个状态转换，点击状态查看说明</p>
+                            <div id="stateMachineResult" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 5: 知识测试 ===== -->
+                <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🧠 TCP 协议知识测试</h2>
+                    <div id="questionArea"></div>
+                    <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                        <div class="results-box">
+                            <h3>🎯 测试完成！</h3>
+                            <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div>
+                            <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                        </div>
+                        <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                    </div>
+                </section>
+
+            <script>
+            // ==================== State ====================
+            let currentTab = 'basics';
+            let quizState = { currentQuestion: 0, score: 0, answered: false };
+            let demoActive = false;
+
+            // ==================== TCP Frame Fields Data ====================
+            const TCP_FRAME_FIELDS = {
+                'src_port': {
+                    name: 'Source Port（源端口号）', bytes: '2 字节',
+                    description: '标识发送方的端口号，范围 0-65535。Client 通常使用临时端口（ephemeral port，1024-65535），Server 使用知名端口（如 HTTP 80、DoIP 13400、FTP 21、SMTP 25）。',
+                    details: ['长度：16 bit，范围 0-65535', 'Client 使用临时端口（1024-65535）', 'Server 使用知名端口（如 80、443、13400）', '端口号 0 保留不使用', '与目标端口共同标识一个 TCP 连接'],
+                    examples: ['HTTP Client: 51234 → Server: 80', 'DoIP Tester: 49152 → Gateway: 13400'],
+                    tip: '源端口号与目标端口号的组合，加上 IP 地址，唯一标识一个 TCP 连接（四元组）'
+                },
+                'dst_port': {
+                    name: 'Destination Port（目标端口号）', bytes: '2 字节',
+                    description: '标识接收方的端口号，范围 0-65535。Server 端监听固定端口等待连接请求。TCP 端口与 UDP 端口相互独立，同一端口号可同时被 TCP 和 UDP 使用。',
+                    details: ['长度：16 bit，范围 0-65535', '知名端口：0-1023（如 HTTP=80, HTTPS=443, FTP=21）', '注册端口：1024-49151', '动态/私有端口：49152-65535', 'TCP 端口与 UDP 端口独立编号'],
+                    examples: ['SSH: 22', 'HTTP: 80', 'HTTPS: 443', 'DoIP: 13400'],
+                    tip: 'TCP 和 UDP 的端口号空间是独立的，TCP:80 和 UDP:80 是不同的端口'
+                },
+                'seq_num': {
+                    name: 'Sequence Number（序列号）', bytes: '4 字节',
+                    description: '标识从 TCP 发送方到接收方的数据流中的字节位置。SYN 标志为 1 时，此值为初始序列号（ISN），后续第一个数据字节的序列号为 ISN+1。不为数据段中的第一个字节的序列号。',
+                    details: ['长度：32 bit，范围 0-4294967295，循环使用', 'SYN=1 时：此值为初始序列号（ISN）', 'SYN=0 时：此值为本段数据第一个字节的序列号', 'ISN 由时钟和计数器生成，防止序列号攻击', '序列号按字节递增（非按段递增）'],
+                    examples: ['SYN 段: seq=100（ISN=100）', '第一个数据段: seq=101', '携带 100 字节数据: seq=101, 下一段 seq=201'],
+                    tip: '序列号是基于字节的，而非基于报文段的。每发送一个字节，序列号加 1'
+                },
+                'ack_num': {
+                    name: 'Acknowledgment Number（确认号）', bytes: '4 字节',
+                    description: '接收方期望收到的下一个字节的序列号。只有 ACK 标志为 1 时才有效。确认号为 N 表示序列号 N-1 及之前的所有数据已正确收到。',
+                    details: ['长度：32 bit', '只有 ACK=1 时才有效', '值为期望收到的下一个字节序列号', '确认号 = 收到的序列号 + 数据长度', '累积确认：确认号之前的所有数据都已正确收到'],
+                    examples: ['收到 seq=100, 数据 50 字节 → ACK=150', '三次握手最后一步: ack=y+1'],
+                    tip: 'TCP 使用累积确认机制：确认号 N 表示 N 之前的所有字节都已成功收到'
+                },
+                'data_offset': {
+                    name: 'Data Offset（数据偏移）', bytes: '4 bit',
+                    description: '指出 TCP 头部的长度（以 4 字节为单位）。因为 TCP 头部包含可变长度的选项字段，所以需要数据偏移字段来确定数据开始的位置。最小值 5（20 字节），最大值 15（60 字节）。',
+                    details: ['长度：4 bit', '以 4 字节（32 bit）为单位', '最小值 5 → TCP 头部 20 字节（无选项）', '最大值 15 → TCP 头部 60 字节', '相当于 IP 头部的 IHL 字段'],
+                    examples: ['无选项: Data Offset=5 (20字节)', '含 10 字节选项: Data Offset=7 (28字节)'],
+                    tip: 'Data Offset * 4 = TCP 头部的实际字节数'
+                },
+                'flags': {
+                    name: 'Flags（控制标志位）', bytes: '6 bit',
+                    description: 'TCP 定义了 6 个控制标志位，用于控制连接状态和数据传输。URG 紧急指针有效、ACK 确认号有效、PSH 接收方应尽快推送数据、RST 重置连接、SYN 同步序列号、FIN 发送方完成发送。',
+                    details: ['URG (1bit): 紧急指针有效', 'ACK (1bit): 确认号有效（连接建立后始终为 1）', 'PSH (1bit): 接收方应尽快将数据推送至应用层', 'RST (1bit): 重置/异常关闭连接', 'SYN (1bit): 同步序列号，用于建立连接', 'FIN (1bit): 发送方完成发送，用于关闭连接'],
+                    examples: ['SYN=1: 建立连接请求', 'SYN+ACK: 连接确认', 'ACK+PSH: 携带数据并推送', 'FIN+ACK: 请求关闭连接'],
+                    tip: '连接建立后，ACK 标志始终为 1。SYN 和 FIN 各消耗一个序列号'
+                },
+                'window': {
+                    name: 'Window（窗口大小）', bytes: '2 字节',
+                    description: '用于流量控制，通告接收方的接收缓冲区剩余空间（字节数）。发送方根据此值控制发送窗口大小，避免接收方缓冲区溢出。Window=0 时发送方暂停发送，触发零窗口探测。',
+                    details: ['长度：16 bit，最大 65535 字节', '滑动窗口机制的核心字段', '值 = 接收缓冲区剩余空间', 'Window=0 触发零窗口探测', '配合 Window Scale 选项可扩展到 1GB'],
+                    examples: ['Window=65535: 接收缓冲区有 64KB 空间', 'Window=0: 接收缓冲区已满'],
+                    tip: 'TCP 使用 Window 字段实现端到端的流量控制，与拥塞控制的 cwnd 不同'
+                },
+                'checksum': {
+                    name: 'Checksum（校验和）', bytes: '2 字节',
+                    description: '覆盖 TCP 头部和数据的校验和，用于检测传输中的比特错误。TCP 校验和还需要计算一个 12 字节的伪头部（包含源/目标 IP 地址、协议号、TCP 长度），确保数据正确送达目标。',
+                    details: ['覆盖范围：伪头部 + TCP 头部 + TCP 数据', '伪头部：源IP(4B) + 目标IP(4B) + 保留(1B) + 协议(1B) + TCP长度(2B)', 'TCP 协议号 = 6', '校验和为 0 时表示不计算（IPv4 可选，IPv6 必须）', '接收方验证失败则静默丢弃'],
+                    examples: ['伪头部: C0A80001 C0A80002 0006 0014', '校验和计算与 UDP 类似'],
+                    tip: 'TCP 校验和必须包含伪头部，它将传输层与网络层绑定，防止错误路由'
+                },
+                'urgent_ptr': {
+                    name: 'Urgent Pointer（紧急指针）', bytes: '2 字节',
+                    description: '当 URG 标志为 1 时，此字段指出紧急数据末尾在序列号之后的偏移量。TCP 的紧急机制允许发送方标记数据流中的紧急数据位置，接收方可优先处理。',
+                    details: ['长度：16 bit', '只有 URG=1 时才有效', '值为紧急数据末尾相对于序列号的偏移', '紧急数据在普通数据流中内嵌传输', '现代应用很少使用（Telnet 等旧协议使用）'],
+                    examples: ['seq=100, urgent_ptr=10 → 紧急数据末尾在字节 110'],
+                    tip: 'URG 机制主要用于 Telnet 等交互式协议中断信号传输，现代应用基本不用'
+                }
+            };
+
+            // ==================== Quiz Data ====================
+            const QUIZ_QUESTIONS = [
+                { question: 'TCP 三次握手的正确顺序是什么？', options: ['SYN → ACK → SYN+ACK','SYN → SYN+ACK → ACK','ACK → SYN → SYN+ACK','SYN+ACK → SYN → ACK'], correct: 1, explanation: '三次握手的正确流程：① Client 发送 SYN → ② Server 回复 SYN+ACK → ③ Client 发送 ACK。三次交互确保双方都确认了对方的收发能力。' },
+                { question: 'TCP 四次挥手中，为什么需要四次而不是三次？', options: ['因为 TCP 是全双工的，每个方向需要单独关闭','因为需要确认序列号','因为需要等待超时','因为需要释放端口'], correct: 0, explanation: 'TCP 是全双工通信，每个方向需要独立关闭。被动方收到 FIN 后可能还有数据未发完，所以先回复 ACK，等数据发完再发自己的 FIN，因此需要四步。' },
+                { question: 'TCP 滑动窗口机制的主要作用是什么？', options: ['拥塞控制','流量控制','差错检测','路由选择'], correct: 1, explanation: '滑动窗口机制用于流量控制：接收方通过 Window 字段通告接收缓冲区剩余空间，发送方据此控制发送速率，防止接收方缓冲区溢出。' },
+                { question: 'TCP 拥塞控制的四个算法按执行顺序是？', options: ['慢启动→快重传→拥塞避免→快恢复','慢启动→拥塞避免→快重传→快恢复','快重传→慢启动→快恢复→拥塞避免','拥塞避免→慢启动→快恢复→快重传'], correct: 1, explanation: '正常流程：慢启动（指数增长 cwnd）→ 拥塞避免（线性增长）。当检测到拥塞时：快重传（收到 3 个重复 ACK 立即重传）→ 快恢复（cwnd 减半）。' },
+                { question: 'TCP 头部中 SYN 标志的作用是什么？', options: ['表示数据传输结束','表示紧急数据','同步序列号，用于建立连接','重置连接'], correct: 2, explanation: 'SYN（Synchronize）标志用于在建立连接时同步双方的初始序列号（ISN）。SYN=1 时，序列号字段为初始序列号。' },
+                { question: 'TCP 序列号（Sequence Number）是基于什么编号的？', options: ['基于报文段编号','基于字节编号','基于比特编号','基于时间戳'], correct: 1, explanation: 'TCP 序列号是基于字节的：每个字节分配一个序列号。发送一段数据后，序列号增加的值等于数据的字节数。' },
+                { question: '以下哪个不是 TCP 相比 UDP 的特点？', options: ['面向连接','可靠传输','有序交付','固定头部长度'], correct: 3, explanation: 'UDP 头部固定 8 字节，TCP 头部为 20-60 字节（可变长度，含选项字段）。TCP 是面向连接、可靠传输、有序交付的，但头部长度不固定。' },
+                { question: 'TCP 流量控制中 Window=0 意味着什么？', options: ['连接已关闭','接收方缓冲区已满','发送方停止发送','网络拥塞'], correct: 1, explanation: 'Window=0 表示接收方的接收缓冲区已满，发送方应暂停发送数据。发送方会启动零窗口探测（Zero Window Probe）机制，定期探测接收方缓冲区是否恢复。' },
+                { question: 'TCP 连接建立后，哪个标志始终为 1？', options: ['SYN','FIN','PSH','ACK'], correct: 3, explanation: '连接建立成功后，ACK 标志始终为 1。所有后续的 TCP 段（包括数据传输和连接关闭）都携带有效的确认号。' },
+                { question: 'TCP 知名端口号的范围是？', options: ['0-1023','1024-49151','49152-65535','0-65535'], correct: 0, explanation: '端口号分为三段：知名端口 0-1023（如 HTTP=80, HTTPS=443, FTP=21）、注册端口 1024-49151、动态/私有端口 49152-65535。' },
+                { question: 'TCP 校验和的计算范围包括什么？', options: ['仅 TCP 头部','仅 TCP 数据','TCP 头部 + 数据','伪头部 + TCP 头部 + 数据'], correct: 3, explanation: 'TCP 校验和覆盖三部分：12 字节伪头部（含源/目标 IP 地址、协议号、TCP 长度）+ TCP 头部 + TCP 数据。伪头部确保数据正确送达目标。' },
+                { question: 'TIME_WAIT 状态的持续时间通常为？', options: ['30 秒','1 分钟','2MSL（约 60 秒）','5 分钟'], correct: 2, explanation: 'TIME_WAIT 状态持续 2MSL（Maximum Segment Lifetime，最大报文生存时间），通常约 60 秒。在此期间确保最后一个 ACK 能到达对方，以及网络中残留的延迟报文消失。' }
+            ];
+
+            // ==================== TCP States Data ====================
+            const TCP_STATES = {
+                'CLOSED': { desc: '连接关闭状态，无连接存在', color: '#78909C', transitions: ['→ SYN_SENT (主动打开, 发送 SYN)', '→ LISTEN (被动打开)'] },
+                'LISTEN': { desc: '服务器等待来自客户端的 SYN 连接请求', color: '#4338CA', transitions: ['→ SYN_RCVD (收到 SYN, 发送 SYN+ACK)'] },
+                'SYN_SENT': { desc: '客户端已发送 SYN，等待服务器的 SYN+ACK', color: '#5B52D5', transitions: ['→ ESTABLISHED (收到 SYN+ACK, 发送 ACK)'] },
+                'SYN_RCVD': { desc: '服务器已发送 SYN+ACK，等待客户端的 ACK', color: '#6D68E0', transitions: ['→ ESTABLISHED (收到 ACK)'] },
+                'ESTABLISHED': { desc: '连接已建立，可以传输数据', color: '#28a745', transitions: ['→ FIN_WAIT_1 (主动关闭, 发送 FIN)', '→ CLOSE_WAIT (收到 FIN, 发送 ACK)'] },
+                'FIN_WAIT_1': { desc: '主动关闭方已发送 FIN，等待 ACK', color: '#FF9800', transitions: ['→ FIN_WAIT_2 (收到 ACK)', '→ CLOSING (同时收到 FIN)'] },
+                'FIN_WAIT_2': { desc: '半关闭状态，已收到 ACK，等待对方的 FIN', color: '#FFC107', transitions: ['→ TIME_WAIT (收到 FIN, 发送 ACK)'] },
+                'CLOSING': { desc: '双方同时发起关闭，已发 FIN，收到 FIN 未收到 ACK', color: '#FF5722', transitions: ['→ TIME_WAIT (收到 ACK)'] },
+                'TIME_WAIT': { desc: '等待 2MSL 确保最后一个 ACK 到达对方', color: '#E91E63', transitions: ['→ CLOSED (2MSL 超时)'] },
+                'CLOSE_WAIT': { desc: '被动关闭方收到 FIN 已回复 ACK，等待应用层关闭', color: '#FF9800', transitions: ['→ LAST_ACK (应用层关闭, 发送 FIN)'] },
+                'LAST_ACK': { desc: '被动关闭方已发送 FIN，等待最后的 ACK', color: '#FF5722', transitions: ['→ CLOSED (收到 ACK)'] }
+            };
+
+            // ==================== Theme & Tab ====================
+            function toggleTheme() {
+                const body = document.body;
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('vp-theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('vp-theme','dark'); }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const t = localStorage.getItem('vp-theme') || 'light';
+                if (t === 'dark') document.body.setAttribute('data-theme','dark');
+                else document.body.removeAttribute('data-theme');
+                renderFrameFields();
+                loadQuizQuestion();
+                renderStateMachine();
+            });
+            function showTab(tabName) {
+                document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.hidden = true; });
+                document.querySelectorAll('.tab-button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+                const s = document.getElementById(tabName + '-tab');
+                if (s) { s.classList.add('active'); s.hidden = false; }
+                const b = document.querySelector(`[data-tab="${tabName}"]`);
+                if (b) { b.classList.add('active'); b.setAttribute('aria-selected','true'); }
+                currentTab = tabName;
+            }
+            document.querySelectorAll('.tab-button').forEach(b => { b.addEventListener('click', () => showTab(b.dataset.tab)); });
+
+            // ==================== Render Frame Fields ====================
+            function renderFrameFields() {
+                const g = document.getElementById('frameFieldsGrid');
+                if (!g) return;
+                let h = '';
+                Object.entries(TCP_FRAME_FIELDS).forEach(([k, f]) => {
+                    h += `<div class="frame-field-card" onclick="showFieldModal('${k}')"><h4>${f.name}</h4><p>${f.description.substring(0, 80)}...</p><div class="field-meta"><span>📐 ${f.bytes}</span><span>📋 点击查看详情</span></div></div>`;
+                });
+                g.innerHTML = h;
+            }
+            function showFieldModal(key) {
+                const f = TCP_FRAME_FIELDS[key];
+                if (!f) return;
+                const o = document.createElement('div');
+                o.className = 'modal-overlay active';
+                o.innerHTML = `<div class="modal"><button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button><h3 style="color:var(--accent);margin-bottom:4px;">${f.name}</h3><p style="color:var(--text-3);font-size:0.85rem;margin-bottom:16px;">📐 ${f.bytes}</p><p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${f.description}</p><h4 style="color:var(--accent);margin-bottom:8px;">功能详情</h4><ul style="margin:0 0 16px 20px;font-size:0.9rem;color:var(--text-2);">${f.details.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('')}</ul>${f.examples && f.examples.length ? `<h4 style="color:var(--accent);margin-bottom:8px;">示例</h4><ul style="margin:0 0 16px 20px;font-size:0.9rem;color:var(--text-2);font-family:'SF Mono','Fira Code',monospace;">${f.examples.map(e => `<li style="margin-bottom:4px;">${e}</li>`).join('')}</ul>` : ''}<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${f.tip}</div></div>`;
+                o.addEventListener('click', function(e) { if (e.target === o) o.remove(); });
+                document.body.appendChild(o);
+            }
+
+            // ==================== Demo ====================
+            function addLog(m, t) {
+                const l = document.getElementById('commLog');
+                const n = new Date();
+                const ts = `[${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')}]`;
+                const cls = t === 'warning' ? 'log-warning' : t === 'error' ? 'log-error' : 'log-info';
+                l.innerHTML += `<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${m}</span></div>`;
+                l.scrollTop = l.scrollHeight;
+            }
+            function setStatus(id, t) { const e = document.getElementById(id); if (e) e.textContent = t; }
+            function activateLine() { const l = document.getElementById('connLine'); if (l) l.classList.add('active'); }
+            function deactivateLine() { const l = document.getElementById('connLine'); if (l) l.classList.remove('active'); }
+            function resetDemo() {
+                demoActive = false;
+                ['clientNode','serverNode'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('pulse'); });
+                setStatus('clientStatus', 'CLOSED');
+                setStatus('serverStatus', 'LISTEN');
+                deactivateLine();
+                const l = document.getElementById('commLog');
+                l.innerHTML = '<div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">🔄 已重置，点击按钮开始演示</span></div>';
+            }
+            function startDemo(type) {
+                if (demoActive) return;
+                resetDemo();
+                demoActive = true;
+                if (type === 'handshake') demoHandshake();
+                else if (type === 'transfer') demoTransfer();
+                else if (type === 'teardown') demoTeardown();
+                else if (type === 'congestion') demoCongestion();
+            }
+
+            function demoHandshake() {
+                addLog('🤝 三次握手演示：建立 TCP 连接', 'info');
+                setTimeout(() => {
+                    const e = document.getElementById('clientNode'); if (e) e.classList.add('pulse');
+                    setStatus('clientStatus', 'SYN_SENT');
+                    activateLine();
+                    addLog('📤 [Client → Server] SYN, seq=100', 'info');
+                    addLog('   Flags: SYN=1, seq=100', 'info');
+                }, 500);
+                setTimeout(() => {
+                    const e = document.getElementById('serverNode'); if (e) e.classList.add('pulse');
+                    setStatus('serverStatus', 'SYN_RCVD');
+                    addLog('📥 [Server → Client] SYN+ACK, seq=300, ack=101', 'info');
+                    addLog('   Flags: SYN=1 ACK=1, seq=300, ack=101', 'info');
+                }, 2000);
+                setTimeout(() => {
+                    setStatus('clientStatus', 'ESTABLISHED');
+                    addLog('📤 [Client → Server] ACK, seq=101, ack=301', 'info');
+                    addLog('   Flags: ACK=1, seq=101, ack=301', 'info');
+                }, 3500);
+                setTimeout(() => {
+                    setStatus('serverStatus', 'ESTABLISHED');
+                    deactivateLine();
+                    addLog('✅ 三次握手完成！TCP 连接已建立 (ESTABLISHED)', 'info');
+                    addLog('   Client ISN=100, Server ISN=300', 'info');
+                    demoActive = false;
+                }, 5000);
+            }
+
+            function demoTransfer() {
+                addLog('📦 数据传输演示：TCP 可靠字节流传输', 'info');
+                setStatus('clientStatus', 'ESTABLISHED');
+                setStatus('serverStatus', 'ESTABLISHED');
+                activateLine();
+                setTimeout(() => {
+                    const e = document.getElementById('clientNode'); if (e) e.classList.add('pulse');
+                    setStatus('clientStatus', '发送数据...');
+                    addLog('📤 [Client → Server] Data, seq=101, len=100', 'info');
+                    addLog('   Flags: ACK=1 PSH=1, seq=101, ack=301, win=65535', 'info');
+                }, 500);
+                setTimeout(() => {
+                    addLog('📥 [Server → Client] ACK, ack=201', 'info');
+                    addLog('   确认收到 seq=101~200 的 100 字节数据', 'info');
+                }, 2000);
+                setTimeout(() => {
+                    addLog('📤 [Client → Server] Data, seq=201, len=50', 'info');
+                    addLog('   Flags: ACK=1 PSH=1, seq=201, ack=301, len=50', 'info');
+                }, 3000);
+                setTimeout(() => {
+                    addLog('📥 [Server → Client] ACK, ack=251', 'info');
+                    addLog('   确认收到 seq=201~250 的 50 字节数据', 'info');
+                }, 4500);
+                setTimeout(() => {
+                    setStatus('clientStatus', 'ESTABLISHED');
+                    setStatus('serverStatus', 'ESTABLISHED');
+                    addLog('✅ 数据传输完成！共发送 150 字节 (seq=101~250)', 'info');
+                    addLog('   累积确认机制确保所有数据被正确接收', 'info');
+                    demoActive = false;
+                }, 6000);
+            }
+
+            function demoTeardown() {
+                addLog('👋 四次挥手演示：关闭 TCP 连接', 'info');
+                setStatus('clientStatus', 'ESTABLISHED');
+                setStatus('serverStatus', 'ESTABLISHED');
+                activateLine();
+                setTimeout(() => {
+                    setStatus('clientStatus', 'FIN_WAIT_1');
+                    addLog('📤 [Client → Server] FIN+ACK, seq=251, ack=301', 'info');
+                    addLog('   Flags: FIN=1 ACK=1, Client 请求关闭连接', 'info');
+                }, 500);
+                setTimeout(() => {
+                    setStatus('serverStatus', 'CLOSE_WAIT');
+                    setStatus('clientStatus', 'FIN_WAIT_2');
+                    addLog('📥 [Server → Client] ACK, ack=252', 'info');
+                    addLog('   Server 确认收到 FIN，半关闭状态', 'info');
+                }, 2000);
+                setTimeout(() => {
+                    setStatus('serverStatus', 'LAST_ACK');
+                    addLog('📤 [Server → Server] FIN+ACK, seq=301, ack=252', 'info');
+                    addLog('   Flags: FIN=1 ACK=1, Server 也完成发送', 'info');
+                }, 3500);
+                setTimeout(() => {
+                    setStatus('clientStatus', 'TIME_WAIT');
+                    setStatus('serverStatus', 'CLOSED');
+                    addLog('📥 [Client → Server] ACK, ack=302', 'info');
+                    addLog('   Client 确认收到 Server 的 FIN', 'info');
+                }, 5000);
+                setTimeout(() => {
+                    setStatus('clientStatus', 'CLOSED');
+                    deactivateLine();
+                    addLog('✅ 四次挥手完成！连接已关闭', 'info');
+                    addLog('   Client 进入 TIME_WAIT 状态，等待 2MSL 后变为 CLOSED', 'info');
+                    demoActive = false;
+                }, 6500);
+            }
+
+            function demoCongestion() {
+                addLog('🚦 拥塞控制演示：cwnd 变化过程', 'info');
+                setStatus('clientStatus', 'ESTABLISHED');
+                setStatus('serverStatus', 'ESTABLISHED');
+                let cwnd = 1, ssthresh = 16, rtt = 0;
+                const steps = [];
+                // Slow start phase
+                while (cwnd < ssthresh && rtt < 20) {
+                    steps.push({ rtt: rtt, cwnd: cwnd, phase: '慢启动', action: `cwnd=${cwnd} (指数增长)` });
+                    cwnd *= 2;
+                    rtt++;
+                }
+                // Congestion avoidance phase
+                while (rtt < 28) {
+                    steps.push({ rtt: rtt, cwnd: cwnd, phase: '拥塞避免', action: `cwnd=${cwnd} (线性增长)` });
+                    cwnd += 1;
+                    rtt++;
+                }
+                // Loss detected
+                steps.push({ rtt: rtt, cwnd: cwnd, phase: '丢包检测', action: `收到 3 个重复 ACK! cwnd ${cwnd} → ${Math.floor(cwnd/2)}` });
+                ssthresh = Math.floor(cwnd / 2);
+                cwnd = ssthresh;
+                rtt++;
+                // Fast recovery
+                steps.push({ rtt: rtt, cwnd: cwnd, phase: '快恢复', action: `cwnd=${cwnd}, ssthresh=${ssthresh}` });
+                rtt++;
+                // Congestion avoidance again
+                while (rtt < 38) {
+                    steps.push({ rtt: rtt, cwnd: cwnd, phase: '拥塞避免', action: `cwnd=${cwnd} (线性增长)` });
+                    cwnd += 1;
+                    rtt++;
+                }
+
+                let delay = 500;
+                steps.forEach((step, i) => {
+                    setTimeout(() => {
+                        const color = step.phase === '慢启动' ? 'info' : step.phase === '丢包检测' ? 'error' : step.phase === '快恢复' ? 'warning' : 'info';
+                        addLog(`RTT=${step.rtt} | ${step.phase}: ${step.action}`, color);
+                    }, delay + i * 600);
+                });
+                setTimeout(() => {
+                    addLog('✅ 拥塞控制演示完成！展示了完整的慢启动→拥塞避免→丢包→快恢复流程', 'info');
+                    demoActive = false;
+                }, delay + steps.length * 600);
+            }
+
+            // ==================== Tools ====================
+            function parseFlags() {
+                const input = document.getElementById('flagsInput').value.trim();
+                const r = document.getElementById('flagsResult');
+                let val = input.replace(/0x/i, '');
+                const num = parseInt(val, 16);
+                if (isNaN(num) || num < 0 || num > 0x3F) {
+                    r.innerHTML = '<p style="color:#dc3545;">请输入有效的 flags 值 (0x00 - 0x3F)</p>';
+                    return;
+                }
+                const flags = [
+                    { bit: 'URG', mask: 0x20, desc: '紧急指针有效' },
+                    { bit: 'ACK', mask: 0x10, desc: '确认号有效' },
+                    { bit: 'PSH', mask: 0x08, desc: '接收方应尽快推送数据' },
+                    { bit: 'RST', mask: 0x04, desc: '重置连接' },
+                    { bit: 'SYN', mask: 0x02, desc: '同步序列号' },
+                    { bit: 'FIN', mask: 0x01, desc: '发送方完成发送' }
+                ];
+                let h = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                h += `<p><strong>输入值:</strong> 0x${num.toString(16).toUpperCase().padStart(2,'0')} (二进制: ${num.toString(2).padStart(6,'0')})</p>`;
+                h += `<table style="width:100%;margin-top:12px;"><tr><th>标志</th><th>值</th><th>说明</th></tr>`;
+                flags.forEach(f => {
+                    const on = (num & f.mask) !== 0;
+                    h += `<tr style="${on ? 'font-weight:600;background:rgba(67,56,202,0.1);' : ''}"><td>${f.bit}</td><td>${on ? '1 ✓' : '0'}</td><td>${f.desc}</td></tr>`;
+                });
+                h += `</table>`;
+                // Identify common patterns
+                const patterns = [];
+                if ((num & 0x02) && !(num & 0x10) && !(num & 0x01)) patterns.push('SYN — 连接建立请求');
+                if ((num & 0x12) === 0x12) patterns.push('SYN+ACK — 连接建立确认');
+                if ((num & 0x10) && !(num & 0x02) && !(num & 0x01)) patterns.push('ACK — 确认或数据传输');
+                if ((num & 0x18) === 0x18) patterns.push('ACK+PSH — 携带数据并推送');
+                if ((num & 0x11) === 0x11) patterns.push('FIN+ACK — 请求关闭连接');
+                if ((num & 0x14) === 0x14) patterns.push('RST+ACK — 重置连接');
+                if ((num & 0x04) && !(num & 0x10)) patterns.push('RST — 异常重置');
+                if (patterns.length) {
+                    h += `<p style="margin-top:12px;"><strong>常见场景:</strong></p><ul style="margin:4px 0 0 20px;">`;
+                    patterns.forEach(p => { h += `<li>${p}</li>`; });
+                    h += `</ul>`;
+                }
+                h += `</div>`;
+                r.innerHTML = h;
+            }
+
+            function calcChecksum() {
+                const input = document.getElementById('checksumInput').value.trim();
+                const r = document.getElementById('checksumResult');
+                if (!input) {
+                    r.innerHTML = '<p style="color:#dc3545;">请输入十六进制数据（伪头部 + TCP 段）</p>';
+                    return;
+                }
+                const hex = input.replace(/0x/gi, '').replace(/[\s,:\-]/g, '');
+                if (!/^[0-9a-fA-F]*$/.test(hex) || hex.length % 2 !== 0) {
+                    r.innerHTML = '<p style="color:#dc3545;">请输入有效的偶数长度十六进制字符串</p>';
+                    return;
+                }
+                const bytes = [];
+                for (let i = 0; i < hex.length; i += 2) bytes.push(parseInt(hex.substr(i, 2), 16));
+                // RFC 1071 checksum
+                let sum = 0;
+                for (let i = 0; i < bytes.length; i += 2) {
+                    const word = (i + 1 < bytes.length) ? (bytes[i] << 8) | bytes[i + 1] : bytes[i] << 8;
+                    sum += word;
+                }
+                while (sum > 0xFFFF) sum = (sum & 0xFFFF) + (sum >> 16);
+                const checksum = (~sum) & 0xFFFF;
+                r.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;font-family:monospace;">
+                    <p><strong>数据长度:</strong> ${bytes.length} 字节</p>
+                    <p><strong>TCP Checksum:</strong> 0x${checksum.toString(16).toUpperCase().padStart(4,'0')}</p>
+                    <p style="font-size:0.8rem;color:var(--text-3);margin-top:8px;">提示：计算前请将 TCP 头部中 Checksum 字段置为 0000。输入数据需包含 12 字节伪头部 + TCP 头部 + TCP 数据。</p>
+                </div>`;
+            }
+
+            function renderStateMachine() {
+                const container = document.getElementById('stateMachineResult');
+                if (!container) return;
+                let h = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:12px;">';
+                Object.entries(TCP_STATES).forEach(([name, info]) => {
+                    h += `<div class="state-node" onclick="showStateModal('${name}')" style="border-color:${info.color};">
+                        <div style="font-size:0.95rem;">${name}</div>
+                    </div>`;
+                });
+                h += '</div>';
+                h += '<p style="margin-top:12px;font-size:0.85rem;color:var(--text-3);">点击状态节点查看详细说明和状态转换</p>';
+                container.innerHTML = h;
+            }
+            function showStateModal(stateName) {
+                const info = TCP_STATES[stateName];
+                if (!info) return;
+                const o = document.createElement('div');
+                o.className = 'modal-overlay active';
+                o.innerHTML = `<div class="modal"><button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button><h3 style="color:${info.color};margin-bottom:8px;">${stateName}</h3><p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${info.desc}</p><h4 style="color:var(--accent);margin-bottom:8px;">状态转换</h4><ul style="margin:0 0 16px 20px;font-size:0.9rem;color:var(--text-2);">${info.transitions.map(t => `<li style="margin-bottom:4px;font-family:'SF Mono','Fira Code',monospace;">${t}</li>`).join('')}</ul></div>`;
+                o.addEventListener('click', function(e) { if (e.target === o) o.remove(); });
+                document.body.appendChild(o);
+            }
+
+            // ==================== Quiz ====================
+            function loadQuizQuestion() {
+                const a = document.getElementById('questionArea');
+                if (!a) return;
+                if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                    document.getElementById('quizResults').style.display = 'block';
+                    a.style.display = 'none';
+                    const p = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+                    document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('percentage').textContent = p + '%';
+                    return;
+                }
+                quizState.answered = false;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                let h = `<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}</div>`;
+                h += '<div style="display:flex;gap:4px;margin-bottom:16px;">';
+                QUIZ_QUESTIONS.forEach((_, i) => {
+                    h += `<div style="flex:1;height:4px;border-radius:2px;background:${i < quizState.currentQuestion ? 'var(--accent)' : 'var(--border)'};"></div>`;
+                });
+                h += '</div>';
+                h += `<h3 style="margin-bottom:16px;">${q.question}</h3>`;
+                q.options.forEach((o, i) => {
+                    h += `<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${o}</button>`;
+                });
+                h += '<div id="quizFeedback" style="margin-top:12px;"></div>';
+                a.innerHTML = h;
+                a.style.display = 'block';
+                document.getElementById('quizResults').style.display = 'none';
+            }
+            function answerQuiz(idx) {
+                if (quizState.answered) return;
+                quizState.answered = true;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                const fb = document.getElementById('quizFeedback');
+                for (let i = 0; i < q.options.length; i++) {
+                    const b = document.getElementById('qopt' + i);
+                    if (i === q.correct) b.classList.add('correct');
+                    if (i === idx && i !== q.correct) b.classList.add('wrong');
+                    b.classList.add('disabled');
+                }
+                if (idx === q.correct) {
+                    quizState.score++;
+                    fb.innerHTML = `<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;
+                } else {
+                    fb.innerHTML = `<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;
+                }
+                setTimeout(() => { quizState.currentQuestion++; loadQuizQuestion(); }, 2500);
+            }
+            function restartQuiz() {
+                quizState = { currentQuestion: 0, score: 0, answered: false };
+                loadQuizQuestion();
+            }
+            </script>
+            <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </aside>
+        </div>
+    </div>
+</body>
+</html>
