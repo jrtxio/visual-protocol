@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DDS 协议学习 — Visual Protocol</title>
     <meta name="description" content="交互式 DDS 协议学习平台 — 掌握数据分发服务的核心原理">
-    <meta name="keywords" content="DDS协议, 数据分发服务, OMG DDS, 发布订阅, ROS 2, 自动驾驶, ADAS">
+    <meta name="keywords" content="DDS协议, 数据分发服务, OMG DDS, 发布订阅, ROS 2, 自动驾驶, ADAS, DCPS, QoS, RTPS, IDL">
     <meta property="og:title" content="Visual Protocol — DDS 协议学习平台">
     <meta property="og:description" content="交互式 DDS 协议学习平台">
     <meta property="og:type" content="website">
@@ -19,58 +19,245 @@
     <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
     <link rel="stylesheet" href="../../assets/css/main.css">
     <style>
-        .coming-soon {
-            text-align: center;
-            padding: 80px 24px;
+        :root {
+            --primary-gradient-start: #2E8B8B;
+            --primary-gradient-end: #1A6B6B;
+            --pub-color: #2E8B8B; --sub-color: #1A6B6B;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --warning-color: #92400E; --warning-bg: #FEF3C7;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
         }
-        .coming-soon-icon {
-            width: 80px; height: 80px;
-            margin: 0 auto 24px;
-            background: var(--accent-bg);
-            border-radius: 20px;
-            display: flex; align-items: center; justify-content: center;
-            color: var(--accent);
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-gradient-start: #3CA0A0; --primary-gradient-end: #5BC0C0;
+                --pub-color: #3CA0A0; --sub-color: #5BC0C0;
+                --success-color: #86EFAC; --success-bg: #14532D;
+                --error-color: #FCA5A5; --error-bg: #7F1D1D;
+                --warning-color: #FDE68A; --warning-bg: #78350F;
+                --bg-card-light: #231F1D; --bg-light: #171412;
+                --border-light: #3D3835;
+                --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+            }
         }
-        .coming-soon-icon svg { width: 40px; height: 40px; }
-        .coming-soon h1 {
-            font-size: 2em; font-weight: 700; margin-bottom: 8px;
+        body[data-theme="light"] {
+            --primary-gradient-start: #2E8B8B; --primary-gradient-end: #1A6B6B;
+            --pub-color: #2E8B8B; --sub-color: #1A6B6B;
+            --bg-card-light: #FFFFFF; --bg-light: #F9F7F4;
+            --border-light: #E7E5E4;
+            --text-light-main: #1C1917; --text-light-secondary: #57534E;
         }
-        .coming-soon .subtitle {
-            color: var(--text-3); font-size: 1.05em; margin-bottom: 32px;
+        body[data-theme="dark"] {
+            --primary-gradient-start: #3CA0A0; --primary-gradient-end: #5BC0C0;
+            --pub-color: #3CA0A0; --sub-color: #5BC0C0;
+            --bg-card-light: #231F1D; --bg-light: #171412;
+            --border-light: #3D3835;
+            --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
         }
-        .coming-badge {
-            display: inline-flex; align-items: center; gap: 6px;
-            padding: 6px 16px; border-radius: 100px;
-            background: var(--accent-bg); color: var(--accent);
-            font-size: 0.88em; font-weight: 600; margin-bottom: 40px;
+
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
+
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 24px 0 32px; padding: 4px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; flex-wrap: wrap;
         }
-        .preview-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-            gap: 16px; text-align: left; max-width: 800px; margin: 0 auto;
+        .tab-button {
+            padding: 10px 20px; background: transparent; color: var(--text-2);
+            border: none; border-radius: 100px; cursor: pointer;
+            font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif;
+            transition: all 0.15s; white-space: nowrap;
         }
-        .preview-card {
-            padding: 24px; background: var(--surface);
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
+
+        .content-section {
+            display: none; background: var(--surface);
             border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 32px; margin-bottom: 32px;
         }
-        .preview-card h3 {
-            font-size: 1.05em; margin-bottom: 8px; color: var(--accent);
+        .content-section.active { display: block; }
+
+        .back-button, .theme-toggle, .header { display: none; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; align-items: center; justify-content: center;
         }
-        .preview-card p {
-            font-size: 0.9em; color: var(--text-2); line-height: 1.6;
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
         }
-        .comparison-table {
-            width: 100%; border-collapse: collapse; margin: 24px 0;
-            text-align: left;
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
+
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 14px 18px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em;
+            transition: all 0.15s;
         }
-        .comparison-table th {
-            padding: 12px; background: var(--accent-bg);
-            color: var(--accent); font-weight: 600;
-            border-bottom: 2px solid var(--border);
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-family: "SF Mono","Fira Code",monospace;
         }
-        .comparison-table td {
-            padding: 12px; border-bottom: 1px solid var(--border);
-            color: var(--text-2); font-size: 0.9em;
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button {
+            padding: 10px 20px; background: var(--accent); color: #FFF;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
         }
+        .tool-button:hover { opacity: 0.9; }
+        .tool-select {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-size: 0.95em; cursor: pointer;
+        }
+        .tool-select:focus { outline: none; border-color: var(--accent); }
+
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th {
+            text-align: left; padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border);
+        }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+
+        /* Device Topology - 3 node for DDS */
+        .device-topology {
+            display: flex; align-items: center; justify-content: center;
+            margin: 32px 0; gap: 0; position: relative;
+        }
+        .device-node {
+            width: 130px; height: 90px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .device-node .device-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .device-node .device-name { font-size: 0.8rem; margin-bottom: 2px; }
+        .device-node .device-status { font-size: 0.7rem; opacity: 0.9; }
+        .device-publisher { background: linear-gradient(135deg, #2E8B8B, #1A6B6B); }
+        .device-network { background: linear-gradient(135deg, #3D6B8E, #2D5A7A); width: 100px; height: 60px; }
+        .device-subscriber { background: linear-gradient(135deg, #1A6B6B, #0E5555); }
+        .connection-line {
+            width: 60px; height: 4px;
+            background: linear-gradient(90deg, #2E8B8B, #3D6B8E);
+            border-radius: 2px; position: relative;
+        }
+        .connection-line.active { animation: connPulse 1s infinite; }
+        .packet-indicator {
+            position: absolute; width: 12px; height: 12px; background: #FFF;
+            border-radius: 50%; top: -4px; left: 0; opacity: 0;
+            box-shadow: 0 0 8px rgba(46,139,139,0.5);
+        }
+        .connection-line.active .packet-indicator {
+            opacity: 1; animation: packetMove 1.5s infinite;
+        }
+
+        .log {
+            background: #111; color: #0f0; padding: 24px;
+            border-radius: 12px; font-family: 'Courier New', monospace;
+            text-align: left; max-width: 100%; margin: 24px auto;
+            min-height: 150px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #3a3a38; font-size: 0.875rem;
+        }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; }
+        .log-warning { color: #FFD700; }
+        .log-error { color: #FF6B6B; }
+
+        .demo-controls {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px;
+            background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); cursor: pointer; transition: all 0.15s;
+            margin-bottom: 8px;
+        }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta {
+            display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3);
+        }
+
+        .concept-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg);
+        }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer {
+            color: white; padding: 12px; border-radius: 8px;
+            text-align: center; margin-bottom: 4px;
+            transition: all 0.3s; cursor: default;
+        }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white; padding: 24px; border-radius: 12px;
+            margin: 16px 0; text-align: center;
+        }
+
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        @keyframes connPulse { 0%{box-shadow:0 0 8px rgba(46,139,139,0.3)}50%{box-shadow:0 0 20px rgba(46,139,139,0.6)}100%{box-shadow:0 0 8px rgba(46,139,139,0.3)} }
+        @keyframes packetMove { 0%{left:0;opacity:1}100%{left:calc(100% - 12px);opacity:1} }
+        .device-node.pulse { animation: pulse 1s infinite; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.5em; }
+            .content-section { padding: 20px; }
+            .tab-button { padding: 8px 12px; font-size: 0.82em; }
+            .device-topology { flex-direction: column; gap: 8px; }
+            .connection-line { width: 4px; height: 40px; background: linear-gradient(180deg, #2E8B8B, #3D6B8E); }
+            .connection-line.active .packet-indicator { animation: packetMoveV 1.5s infinite; }
+            .device-network { width: 90px; height: 50px; }
+        }
+        @media (max-width: 480px) {
+            .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; }
+        }
+        @keyframes packetMoveV { 0%{top:0;left:-4px;opacity:1}100%{top:calc(100% - 12px);left:-4px;opacity:1} }
     </style>
 </head>
 <body>
@@ -98,62 +285,789 @@
 
         <div class="page-body">
             <div class="container">
-                <div class="coming-soon">
-                    <div class="coming-soon-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-                            <circle cx="12" cy="12" r="3"/>
-                            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
-                        </svg>
-                    </div>
+                <header class="page-header">
                     <h1>DDS 协议学习</h1>
-                    <p class="subtitle">数据分发服务 — OMG DDS 标准 — 发布/订阅中间件</p>
-                    <div class="coming-badge">开发中</div>
+                    <p>数据分发服务 — OMG DDS 标准 — 发布/订阅中间件</p>
+                </header>
 
-                    <div class="preview-grid">
-                        <div class="preview-card">
-                            <h3>什么是 DDS？</h3>
-                            <p>DDS（Data Distribution Service）是 OMG 组织定义的发布/订阅模式中间件标准。提供去中心化、低延迟、高可靠的数据分发能力，广泛用于自动驾驶、航空航天、工业控制等实时系统。</p>
+                <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                    <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                    <button class="tab-button" role="tab" data-tab="frames">报文详解</button>
+                    <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                    <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                    <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+                </nav>
+
+                <!-- ===== Tab 1: 基础概念 ===== -->
+                <section id="basics-tab" class="content-section active" role="tabpanel">
+                    <h2 class="section-title">DDS 协议基础概念</h2>
+                    <p>DDS（Data Distribution Service）是 OMG 组织定义的发布/订阅模式数据分发中间件标准，提供去中心化、低延迟、高可靠的数据通信能力，广泛用于自动驾驶、航空航天、工业控制等实时系统。</p>
+
+                    <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                        <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card"><h4>📡 DCPS 模型</h4><p>数据为中心的发布/订阅模型（Data-Centric Publish-Subscribe）。DDS 的核心抽象层，定义了 Domain、Participant、Publisher、Subscriber、DataWriter、DataReader、Topic 七个核心实体，构成完整的数据分发拓扑。</p></div>
+                            <div class="concept-card"><h4>🌐 Domain（域）</h4><p>DDS 通信的逻辑隔离边界。同一 Domain 内的参与者可以发现并通信，不同 Domain 之间完全隔离。Domain 由 Domain ID 标识，映射到 UDP 多播端口。典型车载场景：Domain 0 用于控制信号，Domain 10 用于传感器数据。</p></div>
+                            <div class="concept-card"><h4>👤 Participant（参与者）</h4><p>Domain 中的通信节点，一个进程通常对应一个 Participant。每个 Participant 拥有唯一的 GUID（Global Unique Identifier），包含主机地址、进程 ID 和实体序号。是 Publisher、Subscriber 和 Topic 的容器。</p></div>
+                            <div class="concept-card"><h4>📝 Topic（主题）</h4><p>数据的类型标识和内容描述。Topic 由名称 + 数据类型定义，是 Publisher 和 Subscriber 之间的匹配纽带。例如 "SensorData" 主题定义了传感器数据的结构和语义，Publisher 向此主题写数据，Subscriber 从此主题读数据。</p></div>
+                            <div class="concept-card"><h4>✍️ DataWriter / DataReader</h4><p>DataWriter 是应用向 DDS 写入数据的接口，应用调用 write() 方法将数据发布到 Topic；DataReader 是应用从 DDS 读取数据的接口，通过 take() 或 read() 获取数据。两者都受 QoS 策略约束。</p></div>
+                            <div class="concept-card"><h4>⚙️ QoS 策略</h4><p>服务质量策略（Quality of Service），DDS 提供超过 22 种 QoS 策略来精细控制通信行为：Reliability（可靠/尽力）、Durability（持久性）、History（历史深度）、Deadline（截止时间）、Liveliness（活跃检测）等。QoS 匹配是 Publisher 和 Subscriber 建立关联的前提。</p></div>
+                            <div class="concept-card"><h4>🔍 发现协议</h4><p>DDS 通过 RTPS 发现协议自动发现网络中的参与者：SPDP（Simple Participant Discovery Protocol）发现对端参与者，SEDP（Simple Endpoint Discovery Protocol）交换端点（DataWriter/DataReader）的 Topic、QoS 等信息。基于 UDP 多播实现，无需中心化注册服务。</p></div>
+                            <div class="concept-card"><h4>🤖 ROS 2 集成</h4><p>ROS 2 的 rmw（ROS Middleware）层默认使用 DDS 作为底层通信机制。ROS 2 节点对应 DDS Participant，话题对应 Topic，服务通过 Topic + Request/Reply IDL 实现。切换 DDS 实现（Fast DDS、Cyclone DDS、Connext）只需改环境变量，应用代码无需修改。</p></div>
+                            <div class="concept-card"><h4>📄 IDL 接口定义</h4><p>IDL（Interface Definition Language）是 DDS 定义数据类型的语言，独立于编程语言。用 IDL 定义 struct、enum、union 等数据结构后，DDS 工具链自动生成 C/C++/Java/Python 的类型代码和序列化/反序列化逻辑，确保多语言互操作。</p></div>
+                            <div class="concept-card"><h4>🔄 vs SOME/IP</h4><p>同属中间件层但模式不同：SOME/IP 采用请求/响应模式（RPC），服务于 AUTOSAR 生态的 ECU 间通信；DDS 采用发布/订阅模式，强调去中心化、QoS 控制和多对多通信，服务于 ROS 2 生态的自动驾驶和机器人场景。两者可共存于同一车载以太网。</p></div>
                         </div>
-                        <div class="preview-card">
-                            <h3>为什么学 DDS？</h3>
-                            <p>ROS 2 的底层通信采用 DDS 实现。随着自动驾驶和 ADAS 架构演进，DDS 正在从研究领域走向量产车载平台，成为 SOME/IP 的重要互补方案。</p>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                        <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:12px;">DDS 协议栈从上到下共 5 层，应用数据经 DCPS API 写入后通过 RTPS 线协议在 UDP 上传输。</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;">
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#2E8B8B,#1A6B6B);width:260px;"><div class="layer-name">应用层</div><div class="layer-desc">用户数据 / 业务逻辑</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#3CA0A0,#2E8B8B);width:260px;"><div class="layer-name">DCPS</div><div class="layer-desc">发布/订阅 API / QoS 控制</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#4A7BA0,#3D6B8E);width:260px;"><div class="layer-name">RTPS</div><div class="layer-desc">线协议 / 发现 / 可靠性</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#E8A838,#C88818);width:260px;"><div class="layer-name">UDP</div><div class="layer-desc">传输层 (多播 + 单播)</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#607D8B,#455A64);width:260px;"><div class="layer-name">Ethernet</div><div class="layer-desc">物理链路 (100BASE-T1)</div></div>
                         </div>
-                        <div class="preview-card">
-                            <h3>DDS vs SOME/IP</h3>
-                            <p>两者同属中间件层但模式不同：SOME/IP 采用请求/响应模式，服务于 AUTOSAR 生态；DDS 采用发布/订阅模式，强调去中心化和 QoS 控制，服务于 ROS 2 生态。</p>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 2: 报文详解 ===== -->
+                <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">📡 RTPS 报文结构详解</h2>
+                    <p>RTPS 消息由固定 Header + 可变 Submessages 组成，点击卡片查看详细字段</p>
+                    <div id="messageTypesGrid"></div>
+                </section>
+
+                <!-- ===== Tab 3: 交互演示 ===== -->
+                <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🎮 DDS 交互演示</h2>
+                    <p>观察 DDS 参与者发现、端点发现和数据发布的完整流程</p>
+
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo('spdp')">🔍 参与者发现</button>
+                        <button class="demo-btn" onclick="startDemo('sedp')">🔗 端点发现</button>
+                        <button class="demo-btn" onclick="startDemo('publish')">📡 数据发布</button>
+                        <button class="demo-btn" onclick="startDemo('qos')">⚙️ QoS 匹配</button>
+                        <button class="demo-btn" onclick="startDemo('fullflow')">📋 完整流程</button>
+                        <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                    </div>
+
+                    <div class="device-topology">
+                        <div class="device-node device-publisher" id="publisher">
+                            <div class="device-icon">📡</div>
+                            <div class="device-name">Publisher</div>
+                            <div class="device-status" id="publisherStatus">就绪</div>
                         </div>
-                        <div class="preview-card">
-                            <h3>将包含的内容</h3>
-                            <p>基础概念（DCPS 模型、QoS 策略）、IDL 接口定义、RTPS 线协议、发现协议、与 ROS 2 的关系、交互演示、知识测试等完整学习模块。</p>
+                        <div class="connection-line" id="connLine1">
+                            <div class="packet-indicator"></div>
+                        </div>
+                        <div class="device-node device-network" id="network">
+                            <div class="device-icon">🌐</div>
+                            <div class="device-name">Domain</div>
+                            <div class="device-status" id="networkStatus">就绪</div>
+                        </div>
+                        <div class="connection-line" id="connLine2">
+                            <div class="packet-indicator"></div>
+                        </div>
+                        <div class="device-node device-subscriber" id="subscriber">
+                            <div class="device-icon">📥</div>
+                            <div class="device-name">Subscriber</div>
+                            <div class="device-status" id="subscriberStatus">就绪</div>
                         </div>
                     </div>
 
-                    <div style="max-width:800px;margin:40px auto 0;text-align:left;">
-                        <h3 style="margin-bottom:16px;color:var(--text);">DDS 与 SOME/IP 对比</h3>
-                        <table class="comparison-table">
-                            <thead>
-                                <tr>
-                                    <th>维度</th>
-                                    <th>SOME/IP</th>
-                                    <th>DDS</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td>通信模式</td><td>请求/响应 + 事件通知</td><td>发布/订阅</td></tr>
-                                <tr><td>生态绑定</td><td>AUTOSAR</td><td>OMG / ROS 2</td></tr>
-                                <tr><td>发现机制</td><td>SD (Service Discovery)</td><td>DPDP / SPDP</td></tr>
-                                <tr><td>QoS 控制</td><td>有限</td><td>丰富（22+ 种策略）</td></tr>
-                                <tr><td>典型应用</td><td>车载 ECU 通信</td><td>自动驾驶 / 机器人</td></tr>
-                                <tr><td>传输协议</td><td>UDP/TCP</td><td>UDP (RTPS)</td></tr>
-                                <tr><td>标准组织</td><td>AUTOSAR</td><td>OMG</td></tr>
-                            </tbody>
-                        </table>
+                    <div id="commLog" class="log">
+                        <div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">💡 点击上方按钮开始 DDS 通信演示...</span></div>
                     </div>
+                </section>
 
-                    <div style="margin-top:40px;">
-                        <a href="../../index.html" class="btn btn-secondary">返回主页</a>
+                <!-- ===== Tab 4: 实用工具 ===== -->
+                <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🛠️ DDS 实用工具集</h2>
+                    <p>为 DDS 协议开发和调试提供专业工具支持</p>
+
+                    <div style="display:grid;gap:24px;margin:24px 0;">
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">⚙️ QoS 策略速查</h3>
+                            <p>选择 QoS 策略，查看详细参数和兼容规则</p>
+                            <div style="margin:12px 0;">
+                                <select class="tool-select" id="qosSelect" onchange="lookupQoS()" aria-label="QoS策略选择">
+                                    <option value="">— 选择 QoS 策略 —</option>
+                                </select>
+                            </div>
+                            <div id="qosResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📄 IDL 代码示例</h3>
+                            <p>选择数据类型，生成对应的 IDL 接口定义</p>
+                            <div style="margin:12px 0;">
+                                <select class="tool-select" id="idlSelect" onchange="generateIDL()" aria-label="IDL类型选择">
+                                    <option value="">— 选择数据类型 —</option>
+                                    <option value="sensor">传感器数据</option>
+                                    <option value="vehicle_state">车辆状态</option>
+                                    <option value="command">控制指令</option>
+                                    <option value="diagnostic">诊断信息</option>
+                                </select>
+                            </div>
+                            <div id="idlResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📦 RTPS 消息解析器</h3>
+                            <p>解析十六进制格式的 RTPS 消息，显示 Header 和 Submessage 结构</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="rtpsMsgInput" placeholder="输入十六进制 (如: 52 54 50 53 02 01 01 0C ...)" style="flex:1;min-width:200px;" aria-label="RTPS消息输入">
+                                <button class="tool-button" onclick="parseRtpsMessage()">解析</button>
+                            </div>
+                            <div id="parseResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔢 Domain ID 端口映射</h3>
+                            <p>查看 Domain ID 与 UDP 端口号的映射关系</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="domainIdInput" placeholder="Domain ID (0-232)" style="flex:1;min-width:200px;" aria-label="Domain ID输入">
+                                <button class="tool-button" onclick="lookupDomainPorts()">查询</button>
+                            </div>
+                            <div id="domainResult" style="margin-top:12px;"></div>
+                        </div>
                     </div>
-                </div>
+                </section>
+
+                <!-- ===== Tab 5: 知识测试 ===== -->
+                <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🧠 DDS 协议知识测试</h2>
+                    <div id="questionArea"></div>
+                    <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                        <div class="results-box">
+                            <h3>🎯 测试完成！</h3>
+                            <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div>
+                            <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                        </div>
+                        <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                    </div>
+                </section>
+
+            <script>
+            // ==================== State ====================
+            let currentTab = 'basics';
+            let quizState = { currentQuestion: 0, score: 0, answered: false };
+            let demoActive = false;
+
+            // ==================== RTPS Data ====================
+            const RTPS_HEADER_FIELDS = {
+                'Magic': {
+                    name: 'Magic (协议标识)', bytes: '4',
+                    description: 'RTPS 消息的魔数标识，固定为 "RTPS" 的 ASCII 码 (0x52 0x54 0x50 0x53)。接收方通过此字段确认这是 RTPS 协议消息。',
+                    details: ['固定值: 0x52 0x54 0x50 0x53 ("RTPS")','所有 RTPS 实现必须检查此字段','错误值表示消息格式损坏或非 RTPS 协议'],
+                    tip: 'RTPS 魔数与 HTTP 的 "HTTP" 类似，用于快速识别协议类型'
+                },
+                'Protocol Version': {
+                    name: 'Protocol Version (协议版本)', bytes: '2',
+                    description: 'RTPS 协议版本号。格式为主版本号(1B) + 次版本号(1B)。DDS 1.4 对应 RTPS 2.1，DDS 2.5+ 对应 RTPS 2.2+。版本不匹配会导致兼容性问题。',
+                    details: ['当前主流版本: 2.1 (DDS 1.4) 或 2.2 (DDS 2.5+)','主版本=2, 次版本=1 → 十六进制 0x02 0x01','版本协商在 SPDP 发现阶段进行'],
+                    tip: 'RTPS 2.1 和 2.2 在某些 Submessage 行为上有差异，跨版本通信需注意'
+                },
+                'Vendor ID': {
+                    name: 'Vendor ID (供应商标识)', bytes: '2',
+                    description: 'DDS 实现供应商的标识码。由 OMG 分配，前字节标识供应商，后字节标识变体。用于诊断多供应商环境下的互操作性问题。',
+                    details: ['0x01 0x01: RTI Connext','0x01 0x0A: eProsima Fast DDS','0x01 0x07: Eclipse Cyclone DDS','0x01 0x0F: OpenSplice','前字节 0x01 表示 OMG 注册供应商'],
+                    tip: '调试互操作问题时，先检查 Vendor ID 确认各端使用的 DDS 实现'
+                },
+                'GUID Prefix': {
+                    name: 'GUID Prefix (全局标识前缀)', bytes: '12',
+                    description: '参与者 GUID 的前缀部分，与 Submessage 中的 EntityId 组合成完整的 16 字节 GUID。GUID Prefix 包含 Host ID(4B) + App ID(4B) + Instance ID(4B)，全局唯一标识一个 Participant。',
+                    details: ['Host ID: 标识主机，通常取自 IP 地址或 MAC 地址','App ID: 标识应用程序进程','Instance ID: 标识 Participant 实例','与 Submessage Header 中的 writerId/readerId 的 EntityId 组合使用'],
+                    tip: 'GUID Prefix 对 SPDP 发现至关重要，通过多播发送供其他参与者识别'
+                }
+            };
+
+            const RTPS_SUBMESSAGE_TYPES = {
+                '0x06': { name: 'ACKNACK', category: '确认', description: '确认收到的数据序列号，并请求重传丢失的数据。DataReader 发送给 DataWriter，包含已收到的最高序列号位图和未收到的序列号位图。是 RTPS 可靠性机制的核心。', direction: 'Subscriber → Publisher' },
+                '0x07': { name: 'DATA', category: '数据', description: '携带实际发布数据的子消息。DataWriter 发送数据给 DataReader，包含序列号、writer ID 和可选的内联 QoS。DATA 是 DDS 数据分发的核心载体，负载数据紧随其后。', direction: 'Publisher → Subscriber(s)' },
+                '0x08': { name: 'HEARTBEAT', category: '控制', description: 'DataWriter 告知 DataReader 其可用的数据序列号范围。DataReader 据此判断是否有数据缺失，需要通过 ACKNACK 请求重传。HEARTBEAT 是可靠通信的基础。', direction: 'Publisher → Subscriber(s)' },
+                '0x09': { name: 'GAP', category: '控制', description: 'DataWriter 通知 DataReader 某些序列号的数据不再可用（已被 History QoS 淘汰）。避免 DataReader 无限等待不可能收到的数据，是流量控制的重要补充。', direction: 'Publisher → Subscriber(s)' },
+                '0x0A': { name: 'INFO_TS', category: '元信息', description: '消息时间戳信息。携带消息发送的源时间戳，用于 Timestamp QoS 和基于时间的过滤。可以出现在消息级别（适用于后续所有子消息）或子消息级别。', direction: '双向' },
+                '0x0C': { name: 'INFO_SRC', category: '元信息', description: '标识消息的源参与者。包含源 Participant 的 GUID Prefix，用于接收端确定消息来源。在多参与者通信场景中用于区分消息来源。', direction: '双向' },
+                '0x0D': { name: 'INFO_DST', category: '元信息', description: '标识消息的目标参与者。包含目标 Participant 的 GUID Prefix，用于点对点通信时指定消息接收者。在 SEDP 单播交换中使用。', direction: '双向' },
+                '0x0E': { name: 'INFO_REPLY', category: '元信息', description: '指定回复的目标地址和端口。用于多播通信场景下指示接收方回复的地址。', direction: '双向' },
+                '0x12': { name: 'DATA_FRAG', category: '数据', description: '分段数据子消息。当数据负载超过单个 RTPS 消息的最大长度时，使用 DATA_FRAG 将大数据拆分为多个片段传输。包含片段序号和总片段数。', direction: 'Publisher → Subscriber(s)' },
+                '0x14': { name: 'NACK_FRAG', category: '确认', description: '请求重传特定的数据片段。与 ACKNACK 类似但针对分段数据，精确指定需要重传的片段序号。', direction: 'Subscriber → Publisher' }
+            };
+
+            // ==================== QoS Data ====================
+            const QOS_POLICIES = {
+                'ReliabilityQosPolicy': { kind: 'Reliability', values: ['BEST_EFFORT', 'RELIABLE'], desc: '控制数据传输的可靠性级别。BEST_EFFORT 不保证送达，低延迟；RELIABLE 通过重传保证送达，延迟较高。', compat: 'Publisher 必须 ≥ Subscriber（即 Pub=RELIABLE 可匹配 Sub=BEST_EFFORT 或 RELIABLE，但 Pub=BEST_EFFORT 只能匹配 Sub=BEST_EFFORT）', impact: 'RELIABLE 启用 HEARTBEAT/ACKNACK 机制，BEST_EFFORT 仅发送 DATA' },
+                'DurabilityQosPolicy': { kind: 'Durability', values: ['VOLATILE', 'TRANSIENT_LOCAL', 'TRANSIENT', 'PERSISTENT'], desc: '控制数据在 DataWriter 端的持久化程度。VOLATILE 不保留历史数据；TRANSIENT_LOCAL 保留在 DataWriter 生命周期内；TRANSIENT 通过 DataReader 保留；PERSISTENT 持久化到存储。', compat: 'Publisher 必须 ≤ Subscriber（即 Pub=TRANSIENT_LOCAL 可匹配 Sub=TRANSIENT_LOCAL 或更高，但 Pub=PERSISTENT 只能匹配 Sub=PERSISTENT）', impact: '影响迟加入的 Subscriber 是否能收到历史数据' },
+                'HistoryQosPolicy': { kind: 'History', values: ['KEEP_LAST(N)', 'KEEP_ALL'], desc: '控制 DataWriter/DataReader 保留的历史数据样本数。KEEP_LAST 保留最近 N 个样本；KEEP_ALL 保留所有样本（受 ResourceLimits 限制）。', compat: '不强制兼容，但建议 Publisher 和 Subscriber 使用一致的 History 策略', impact: 'KEEP_LAST(1) 只保留最新值，适合传感器数据；KEEP_ALL 适合事件流' },
+                'DeadlineQosPolicy': { kind: 'Deadline', values: ['时间段'], desc: '期望数据更新的最大时间间隔。DataWriter 必须在该时间内至少写入一次数据，否则触发 DeadlineMissed 回调。', compat: 'Publisher 的 Deadline 必须 ≤ Subscriber 的 Deadline', impact: '用于检测数据源故障或通信延迟异常' },
+                'LivelinessQosPolicy': { kind: 'Liveliness', values: ['AUTOMATIC', 'MANUAL_BY_PARTICIPANT', 'MANUAL_BY_TOPIC'], desc: '检测参与者或端点是否仍然活跃的机制。AUTOMATIC 由 DDS 自动检测（基于 HEARTBEAT），MANUAL 需要应用主动声明。', compat: 'Publisher 的 Liveliness 类型必须 ≥ Subscriber 的类型严格度', impact: '活跃丢失时触发回调，用于检测节点故障' },
+                'DurabilityServiceQosPolicy': { kind: 'DurabilityService', values: ['历史+清理延迟+最大样本数等'], desc: '当 Durability=TRANSIENT 或 PERSISTENT 时，控制历史数据的存储行为。包括 History、CleanupDelay、MaxSamples 等参数。', compat: '仅当 Durability ≥ TRANSIENT 时有效', impact: '影响持久化数据的存储资源消耗' },
+                'ResourceLimitsQosPolicy': { kind: 'ResourceLimits', values: ['最大样本数/实例数/实例样本数'], desc: '限制 DataWriter/DataReader 使用的内存资源。设置 max_samples、max_instances、max_samples_per_instance 上限。', compat: '无强制兼容规则，但过低的限制可能导致数据丢弃', impact: '防止 DDS 实体消耗过多内存，嵌入式场景需严格配置' },
+                'TransportPriorityQosPolicy': { kind: 'TransportPriority', values: ['优先级值'], desc: '设置传输层的优先级。影响底层传输（如 TSN）的调度策略，高优先级数据包可获得更低的传输延迟。', compat: '无强制兼容规则', impact: '配合 TSN 使用可实现确定性低延迟传输' },
+                'LifespanQosPolicy': { kind: 'Lifespan', values: ['时间段'], desc: '数据样本的有效期。超过有效期后数据被丢弃，即使尚未被读取。适合传感器数据等时效性数据。', compat: '无强制兼容规则', impact: '防止过期数据被消费，与 Deadline 互补' },
+                'OwnershipQosPolicy': { kind: 'Ownership', values: ['SHARED', 'EXCLUSIVE'], desc: 'SHARED 允许多个 DataWriter 同时写入同一 Topic，所有数据都传递给 Subscriber；EXCLUSIVE 只允许拥有权最高的 DataWriter 的数据传递。', compat: 'Publisher 和 Subscriber 的 Ownership 必须一致', impact: 'EXCLUSIVE 用于主备切换场景，避免数据冲突' }
+            };
+
+            // ==================== IDL Examples ====================
+            const IDL_EXAMPLES = {
+                'sensor': {
+                    title: '传感器数据 (SensorData)',
+                    code: `struct SensorData {\n    unsigned long sensor_id;    // 传感器标识\n    double timestamp;           // 时间戳 (秒)\n    float value;                // 传感器值\n    string<32> unit;            // 单位 (如 "m/s", "deg")\n    boolean is_valid;           // 数据有效性标志\n};`
+                },
+                'vehicle_state': {
+                    title: '车辆状态 (VehicleState)',
+                    code: `struct VehicleState {\n    double timestamp;           // 时间戳\n    float speed;                // 车速 (km/h)\n    float steering_angle;      // 转向角 (度)\n    float acceleration;        // 加速度 (m/s²)\n    GearState gear;             // 档位\n};\n\nenum GearState {\n    PARK, REVERSE, NEUTRAL, DRIVE\n};`
+                },
+                'command': {
+                    title: '控制指令 (ControlCommand)',
+                    code: `struct ControlCommand {\n    unsigned long command_id;   // 指令 ID\n    double timestamp;          // 时间戳\n    CommandType type;           // 指令类型\n    float target_value;         // 目标值\n    unsigned short priority;    // 优先级\n};\n\nenum CommandType {\n    BRAKE, ACCELERATE, STEER, SHIFT_GEAR\n};`
+                },
+                'diagnostic': {
+                    title: '诊断信息 (DiagnosticInfo)',
+                    code: `struct DiagnosticInfo {\n    unsigned long dtc_code;    // 故障码 (DTC)\n    DtcSeverity severity;      // 严重程度\n    string<64> description;    // 故障描述\n    double timestamp;           // 检测时间\n    boolean is_active;          // 是否活跃\n};\n\nenum DtcSeverity {\n    INFO, WARNING, MINOR, MAJOR, CRITICAL\n};`
+                }
+            };
+
+            // ==================== Quiz Data ====================
+            const QUIZ_QUESTIONS = [
+                { question: 'DDS 的核心通信模型是什么？', options: ['请求/响应 (RPC)','发布/订阅 (Pub/Sub)','客户端/服务器 (C/S)','点对点 (P2P)'], correct: 1, explanation: 'DDS 采用数据为中心的发布/订阅模型（DCPS），Publisher 发布数据到 Topic，Subscriber 订阅 Topic 接收数据，双方完全解耦。' },
+                { question: 'DCPS 模型中，哪个实体是数据的实际写入接口？', options: ['Publisher','Subscriber','DataWriter','DataReader'], correct: 2, explanation: 'DataWriter 是应用向 DDS 写入数据的接口，Publisher 是 DataWriter 的容器。应用调用 DataWriter.write() 发布数据。' },
+                { question: 'DDS 中 Domain 的作用是什么？', options: ['定义数据类型','逻辑隔离通信边界','管理 QoS 策略','分配 IP 地址'], correct: 1, explanation: 'Domain 是 DDS 通信的逻辑隔离边界，同一 Domain 内的参与者可以互相发现和通信，不同 Domain 之间完全隔离。' },
+                { question: 'RTPS 线协议的消息头固定长度是多少字节？', options: ['4 字节','8 字节','16 字节','20 字节'], correct: 3, explanation: 'RTPS Header 固定 20 字节：Magic(4B) + Protocol Version(2B) + Vendor ID(2B) + GUID Prefix(12B)。' },
+                { question: 'DDS 发现协议的第一阶段是什么？', options: ['SEDP — 端点发现','SPDP — 参与者发现','SDP — 服务发现','DHCP — 地址分配'], correct: 1, explanation: 'SPDP（Simple Participant Discovery Protocol）是发现的第一阶段，用于发现网络中的其他参与者。SEDP 在 SPDP 之后交换端点信息。' },
+                { question: '以下哪个 QoS 策略控制数据是否保证送达？', options: ['Durability','Deadline','Reliability','Liveliness'], correct: 2, explanation: 'Reliability QoS 控制数据传输的可靠性：BEST_EFFORT 不保证送达，RELIABLE 通过重传保证送达。' },
+                { question: 'DDS 中 Publisher 和 Subscriber 的 QoS 匹配规则，对于 Reliability 策略，以下哪种情况不能匹配？', options: ['Pub=RELIABLE, Sub=RELIABLE','Pub=RELIABLE, Sub=BEST_EFFORT','Pub=BEST_EFFORT, Sub=BEST_EFFORT','Pub=BEST_EFFORT, Sub=RELIABLE'], correct: 3, explanation: 'Reliability 兼容规则：Publisher 必须 ≥ Subscriber。BEST_EFFORT 的 Publisher 不能满足 RELIABLE 的 Subscriber 需求。' },
+                { question: 'ROS 2 的底层通信默认使用什么协议？', options: ['SOME/IP','ZeroMQ','DDS','MQTT'], correct: 2, explanation: 'ROS 2 的 rmw 层默认使用 DDS 作为底层通信机制，支持 Fast DDS、Cyclone DDS、Connext 等多种 DDS 实现。' },
+                { question: 'RTPS 中 HEARTBEAT 子消息的作用是什么？', options: ['发送数据','确认接收','通告可用序列号范围','请求重传'], correct: 2, explanation: 'HEARTBEAT 由 DataWriter 发送，通告其可用的数据序列号范围，DataReader 据此判断缺失哪些数据并发送 ACKNACK 请求重传。' },
+                { question: 'DDS 的 IDL 用于什么？', options: ['配置 Domain','定义数据类型和接口','设置 QoS 策略','调试网络问题'], correct: 1, explanation: 'IDL（Interface Definition Language）用于定义 Topic 的数据类型（struct、enum 等），DDS 工具链自动生成目标语言的序列化代码。' },
+                { question: 'Durability=TRANSIENT_LOCAL 意味着什么？', options: ['数据不保留任何历史','数据在 DataWriter 生命周期内保留','数据持久化到磁盘','数据仅在有订阅者时保留'], correct: 1, explanation: 'TRANSIENT_LOCAL 表示数据在 DataWriter 的生命周期内保留在 DataWriter 端，迟加入的 Subscriber 可以收到 DataWriter 仍保留的历史数据。' },
+                { question: 'DDS vs SOME/IP 的核心架构差异是什么？', options: ['DDS 使用 TCP，SOME/IP 使用 UDP','DDS 中心化，SOME/IP 去中心化','DDS 发布/订阅去中心化，SOME/IP 请求/响应需服务发现','DDS 只支持小数据，SOME/IP 支持大数据'], correct: 2, explanation: 'DDS 是去中心化的发布/订阅模式（无需中心服务），SOME/IP 是请求/响应模式（需要 SD 服务发现中心化管理服务实例）。' }
+            ];
+
+            // ==================== Theme & Tab ====================
+            function toggleTheme() {
+                const body = document.body;
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const t = localStorage.getItem('theme') || 'light';
+                if (t === 'dark') document.body.setAttribute('data-theme','dark');
+                else document.body.removeAttribute('data-theme');
+                renderHeaderFields();
+                loadQuizQuestion();
+                populateQoSSelect();
+            });
+            function showTab(tabName) {
+                document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.hidden = true; });
+                document.querySelectorAll('.tab-button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+                const sec = document.getElementById(tabName + '-tab');
+                if (sec) { sec.classList.add('active'); sec.hidden = false; }
+                const btn = document.querySelector(`[data-tab="${tabName}"]`);
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+                currentTab = tabName;
+            }
+
+            // ==================== Render Header Fields ====================
+            function renderHeaderFields() {
+                const grid = document.getElementById('messageTypesGrid');
+                if (!grid) return;
+                let html = '';
+                html += `<h3 style="color:var(--accent);margin-bottom:12px;">RTPS Header 字段</h3>`;
+                Object.entries(RTPS_HEADER_FIELDS).forEach(([key, field]) => {
+                    html += `<div class="frame-field-card" onclick="showHeaderModal('${key}')">
+                        <h4>${field.name}</h4>
+                        <p>${field.description.substring(0, 90)}...</p>
+                        <div class="field-meta"><span>📐 ${field.bytes} 字节</span><span>📋 点击查看详情</span></div>
+                    </div>`;
+                });
+                html += `<h3 style="color:var(--accent);margin:24px 0 12px;">Submessage 类型</h3>`;
+                html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">`;
+                Object.entries(RTPS_SUBMESSAGE_TYPES).forEach(([code, mt]) => {
+                    const catColor = mt.category === '数据' ? '#2E8B8B' : mt.category === '确认' ? '#E8A838' : mt.category === '控制' ? '#4A7BA0' : '#9B7ACC';
+                    html += `<div class="frame-field-card" onclick="showSubmsgModal('${code}')">
+                        <h4 style="color:${catColor};">${code} ${mt.name}</h4>
+                        <p>${mt.description.substring(0, 80)}...</p>
+                        <div class="field-meta"><span>📂 ${mt.category}</span><span>${mt.direction}</span></div>
+                    </div>`;
+                });
+                html += `</div>`;
+                grid.innerHTML = html;
+            }
+
+            function showHeaderModal(key) {
+                const f = RTPS_HEADER_FIELDS[key];
+                if (!f) return;
+                let detailsHtml = f.details.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('');
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${f.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:16px;font-size:0.85rem;">📐 ${f.bytes} 字节</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${f.description}</p>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">详细信息</h4>
+                    <ul style="margin:0 0 16px 20px;padding:0;font-size:0.9rem;color:var(--text-2);">${detailsHtml}</ul>
+                    <div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${f.tip}</div>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            function showSubmsgModal(code) {
+                const mt = RTPS_SUBMESSAGE_TYPES[code];
+                if (!mt) return;
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${code} — ${mt.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:4px;font-size:0.85rem;">📂 ${mt.category} | ${mt.direction}</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${mt.description}</p>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            // ==================== Demo Functions ====================
+            function addLog(msg, type) {
+                const log = document.getElementById('commLog');
+                const now = new Date();
+                const ts = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+                const cls = type === 'warning' ? 'log-warning' : type === 'error' ? 'log-error' : 'log-info';
+                log.innerHTML += `<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${msg}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+            function setStatus(id, text) {
+                const el = document.getElementById(id + 'Status');
+                if (el) el.textContent = text;
+            }
+            function resetDemo() {
+                demoActive = false;
+                ['publisher','network','subscriber'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove('pulse');
+                    setStatus(id, '就绪');
+                });
+                ['connLine1','connLine2'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove('active');
+                });
+                const log = document.getElementById('commLog');
+                log.innerHTML = '<div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">🔄 演示已重置，点击按钮开始新的演示</span></div>';
+            }
+
+            function startDemo(type) {
+                if (demoActive) return;
+                demoActive = true;
+                resetDemo();
+                demoActive = true;
+                ['connLine1','connLine2'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.add('active');
+                });
+
+                if (type === 'spdp') demoSPDP();
+                else if (type === 'sedp') demoSEDP();
+                else if (type === 'publish') demoPublish();
+                else if (type === 'qos') demoQoS();
+                else if (type === 'fullflow') demoFullFlow();
+            }
+
+            function demoSPDP() {
+                addLog('🔍 参与者发现 (SPDP) 演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', '发送 SPDP...');
+                    addLog('📤 [Publisher] 发送 SPDP 多播消息','info');
+                    addLog('   → GUID: 00.01.0A.0C.01.02.03.01','info');
+                    addLog('   → Domain ID: 0','info');
+                    addLog('   → 多播地址: 239.255.0.1:7400','info');
+                }, 500);
+                setTimeout(() => {
+                    const n = document.getElementById('network');
+                    if (n) n.classList.add('pulse');
+                    setStatus('network', '传播中...');
+                    addLog('📡 SPDP 消息在 Domain 0 多播传播...','info');
+                }, 1200);
+                setTimeout(() => {
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    setStatus('subscriber', '发现参与者');
+                    addLog('📥 [Subscriber] 收到 SPDP','info');
+                    addLog('   → 发现参与者 GUID: 00.01.0A.0C...','info');
+                    addLog('   → 记录对端单播地址: 192.168.1.10:7410','info');
+                }, 2000);
+                setTimeout(() => {
+                    addLog('📤 [Subscriber] 回复自身 SPDP','info');
+                    addLog('   → GUID: 00.01.0A.0C.02.04.05.01','info');
+                    addLog('   → Domain ID: 0','info');
+                }, 2800);
+                setTimeout(() => {
+                    addLog('📥 [Publisher] 收到 Subscriber SPDP','info');
+                    setStatus('publisher', '已发现'); setStatus('subscriber', '已发现'); setStatus('network', '就绪');
+                    ['publisher','network','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    addLog('✅ SPDP 完成！双方已发现彼此的 Participant','info');
+                    demoActive = false;
+                }, 3800);
+            }
+
+            function demoSEDP() {
+                addLog('🔗 端点发现 (SEDP) 演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', '发布端点...');
+                    addLog('📤 [Publisher] SEDP: PublicationWriter 发送端点信息','info');
+                    addLog('   → Topic: "SensorData"','info');
+                    addLog('   → Type: SensorData (IDL struct)','info');
+                    addLog('   → QoS: RELIABLE, TRANSIENT_LOCAL','info');
+                    addLog('   → Writer GUID: ...01.00.00.03.00000100','info');
+                }, 500);
+                setTimeout(() => {
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    setStatus('subscriber', '发布端点...');
+                    addLog('📤 [Subscriber] SEDP: SubscriptionWriter 发送端点信息','info');
+                    addLog('   → Topic: "SensorData"','info');
+                    addLog('   → QoS: RELIABLE, TRANSIENT_LOCAL','info');
+                    addLog('   → Reader GUID: ...02.00.00.04.00000100','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('network', '匹配中...');
+                    addLog('🔍 双方匹配 Topic + QoS...','info');
+                    addLog('   → Topic 匹配: SensorData = SensorData ✓','info');
+                    addLog('   → Reliability 匹配: RELIABLE ≥ RELIABLE ✓','info');
+                    addLog('   → Durability 匹配: TRANSIENT_LOCAL ≥ TRANSIENT_LOCAL ✓','info');
+                }, 2800);
+                setTimeout(() => {
+                    setStatus('publisher', '匹配成功'); setStatus('subscriber', '匹配成功'); setStatus('network', '就绪');
+                    ['publisher','network','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    addLog('✅ SEDP 完成！DataWriter 和 DataReader 已匹配，数据通道建立','info');
+                    demoActive = false;
+                }, 4200);
+            }
+
+            function demoPublish() {
+                addLog('📡 数据发布演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', '写入数据...');
+                    addLog('📤 [DataWriter] write() 调用','info');
+                    addLog('   → Topic: SensorData','info');
+                    addLog('   → 序列号: 1','info');
+                    addLog('   → 数据: {sensor_id:1, value:23.5, unit:"°C"}','info');
+                }, 500);
+                setTimeout(() => {
+                    setStatus('publisher', '发送 DATA...');
+                    addLog('📤 [RTPS] DATA Submessage 发送','info');
+                    addLog('   → 序列号 SN=1','info');
+                    addLog('   → 单播至 Reader 地址','info');
+                }, 1500);
+                setTimeout(() => {
+                    const n = document.getElementById('network');
+                    if (n) n.classList.add('pulse');
+                    setStatus('network', '传输中...');
+                }, 2000);
+                setTimeout(() => {
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    setStatus('subscriber', '接收数据...');
+                    addLog('📥 [DataReader] 收到 DATA SN=1','info');
+                    addLog('   → take() 返回 {sensor_id:1, value:23.5°C}','info');
+                }, 2800);
+                setTimeout(() => {
+                    addLog('📤 [DataReader] ACKNACK: 确认 SN≤1 ✓','info');
+                }, 3500);
+                setTimeout(() => {
+                    setStatus('publisher', '已确认'); setStatus('subscriber', '已接收'); setStatus('network', '就绪');
+                    ['publisher','network','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    addLog('✅ 数据发布成功！Publisher 收到确认','info');
+                    demoActive = false;
+                }, 4500);
+            }
+
+            function demoQoS() {
+                addLog('⚙️ QoS 匹配检查演示', 'info');
+                setTimeout(() => {
+                    addLog('📋 场景：Publisher 配置 BEST_EFFORT, Subscriber 请求 RELIABLE','warning');
+                    setStatus('publisher', 'BEST_EFFORT');
+                    setStatus('subscriber', 'RELIABLE');
+                }, 500);
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    addLog('🔍 SEDP 交换 QoS 信息...','info');
+                    addLog('   → Publisher Reliability = BEST_EFFORT','info');
+                    addLog('   → Subscriber Reliability = RELIABLE','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('network', '不匹配!');
+                    addLog('❌ QoS 不兼容！','error');
+                    addLog('   → Reliability 规则: Pub ≥ Sub','info');
+                    addLog('   → BEST_EFFORT < RELIABLE → 匹配失败','error');
+                    addLog('   → 通信无法建立','error');
+                }, 3000);
+                setTimeout(() => {
+                    addLog('🔧 修正：将 Publisher 改为 RELIABLE','warning');
+                    setStatus('publisher', 'RELIABLE');
+                }, 4500);
+                setTimeout(() => {
+                    addLog('🔍 重新匹配 QoS...','info');
+                    addLog('   → Publisher Reliability = RELIABLE','info');
+                    addLog('   → Subscriber Reliability = RELIABLE','info');
+                    addLog('   → RELIABLE ≥ RELIABLE ✓ 匹配成功！','info');
+                }, 5500);
+                setTimeout(() => {
+                    setStatus('publisher', '已匹配'); setStatus('subscriber', '已匹配'); setStatus('network', '就绪');
+                    ['publisher','network','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    addLog('✅ QoS 匹配成功！数据通道已建立','info');
+                    demoActive = false;
+                }, 6500);
+            }
+
+            function demoFullFlow() {
+                addLog('📋 完整 DDS 通信流程演示', 'warning');
+                setTimeout(() => {
+                    const p = document.getElementById('publisher');
+                    if (p) p.classList.add('pulse');
+                    setStatus('publisher', 'Step 1/6...');
+                    addLog('=== Step 1: SPDP 参与者发现 ===','warning');
+                    addLog('📤 [Publisher] SPDP 多播 → 发现 Subscriber Participant','info');
+                }, 500);
+                setTimeout(() => {
+                    const s = document.getElementById('subscriber');
+                    if (s) s.classList.add('pulse');
+                    addLog('📥 [Subscriber] SPDP 回复 → 双方发现完毕','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('publisher', 'Step 2/6...'); setStatus('subscriber', 'Step 2/6...');
+                    addLog('=== Step 2: SEDP 端点发现 ===','warning');
+                    addLog('📤 [Pub] SEDP: Topic=SensorData, QoS=RELIABLE+TRANSIENT_LOCAL','info');
+                    addLog('📤 [Sub] SEDP: Topic=SensorData, QoS=RELIABLE+TRANSIENT_LOCAL','info');
+                }, 2500);
+                setTimeout(() => {
+                    addLog('🔍 QoS 匹配检查 → 全部兼容 ✓','info');
+                    addLog('✅ DataWriter ↔ DataReader 匹配成功','info');
+                }, 3500);
+                setTimeout(() => {
+                    setStatus('publisher', 'Step 3/6...');
+                    addLog('=== Step 3: 历史数据发送 ===','warning');
+                    addLog('📤 [Pub] TRANSIENT_LOCAL: 发送历史数据 SN=1 (最新传感器值)','info');
+                    addLog('📥 [Sub] 收到历史数据，立即获得当前传感器状态','info');
+                }, 4500);
+                setTimeout(() => {
+                    setStatus('publisher', 'Step 4/6...'); setStatus('subscriber', 'Step 4/6...');
+                    addLog('=== Step 4: 实时数据发布 ===','warning');
+                    addLog('📤 [DataWriter] write() → DATA SN=2 {value:23.6°C}','info');
+                    addLog('📥 [DataReader] 收到 SN=2','info');
+                }, 5800);
+                setTimeout(() => {
+                    setStatus('publisher', 'Step 5/6...');
+                    addLog('=== Step 5: 可靠性确认 ===','warning');
+                    addLog('📤 [Pub] HEARTBEAT: 可用 SN=[1,2]','info');
+                    addLog('📤 [Sub] ACKNACK: 确认 SN≤2 ✓','info');
+                }, 7000);
+                setTimeout(() => {
+                    setStatus('publisher', 'Step 6/6...'); setStatus('subscriber', 'Step 6/6...');
+                    addLog('=== Step 6: 持续发布 + 活跃检测 ===','warning');
+                    addLog('📤 [Pub] 持续发送传感器更新...','info');
+                    addLog('📡 AUTOMATIC Liveliness: 定期 HEARTBEAT 维持活跃状态','info');
+                }, 8200);
+                setTimeout(() => {
+                    ['publisher','network','subscriber'].forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) el.classList.remove('pulse');
+                    });
+                    setStatus('publisher', '完成'); setStatus('subscriber', '完成'); setStatus('network', '就绪');
+                    addLog('✅ 完整 DDS 生命周期演示结束','info');
+                    demoActive = false;
+                }, 9500);
+            }
+
+            // ==================== Tool Functions ====================
+            function populateQoSSelect() {
+                const sel = document.getElementById('qosSelect');
+                if (!sel) return;
+                Object.entries(QOS_POLICIES).forEach(([key, policy]) => {
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.textContent = policy.kind;
+                    sel.appendChild(opt);
+                });
+            }
+
+            function lookupQoS() {
+                const sel = document.getElementById('qosSelect');
+                const result = document.getElementById('qosResult');
+                const key = sel.value;
+                if (!key) { result.innerHTML = ''; return; }
+                const p = QOS_POLICIES[key];
+                let valuesHtml = p.values.map(v => `<span style="display:inline-block;padding:4px 12px;background:var(--accent-bg);border-radius:100px;font-size:0.85rem;margin:2px;">${v}</span>`).join('');
+                result.innerHTML = `<div style="padding:16px;background:var(--accent-bg);border-radius:8px;">
+                    <h4 style="color:var(--accent);margin-bottom:8px;">${p.kind}</h4>
+                    <p style="margin-bottom:12px;">${p.desc}</p>
+                    <p style="font-size:0.85rem;margin-bottom:8px;"><strong>可选值:</strong></p>
+                    <div style="margin-bottom:12px;">${valuesHtml}</div>
+                    <div style="padding:12px;background:var(--surface);border-radius:6px;font-size:0.85rem;">
+                        <p><strong>兼容规则:</strong> ${p.compat}</p>
+                        <p style="margin-top:8px;"><strong>影响:</strong> ${p.impact}</p>
+                    </div>
+                </div>`;
+            }
+
+            function generateIDL() {
+                const sel = document.getElementById('idlSelect');
+                const result = document.getElementById('idlResult');
+                const key = sel.value;
+                if (!key) { result.innerHTML = ''; return; }
+                const ex = IDL_EXAMPLES[key];
+                result.innerHTML = `<div style="padding:16px;background:var(--accent-bg);border-radius:8px;">
+                    <h4 style="color:var(--accent);margin-bottom:8px;">${ex.title}</h4>
+                    <pre style="background:#111;color:#0f0;padding:16px;border-radius:8px;overflow-x:auto;font-size:0.85rem;line-height:1.6;">${ex.code}</pre>
+                </div>`;
+            }
+
+            function parseRtpsMessage() {
+                const input = document.getElementById('rtpsMsgInput').value.trim();
+                const result = document.getElementById('parseResult');
+                if (!input) { result.innerHTML = '<p style="color:#dc3545;">请输入十六进制报文</p>'; return; }
+                const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                if (!bytes || bytes.length < 10) { result.innerHTML = '<p style="color:#dc3545;">格式错误，至少需要 20 字节 (40 个十六进制字符) 用于 RTPS Header</p>'; return; }
+                const magic = bytes.slice(0,4).map(b=>String.fromCharCode(parseInt(b,16))).join('');
+                const protoMajor = parseInt(bytes[4],16);
+                const protoMinor = parseInt(bytes[5],16);
+                const vendorMajor = parseInt(bytes[6],16);
+                const vendorMinor = parseInt(bytes[7],16);
+                const guidPrefix = bytes.slice(8,20).map(b=>parseInt(b,16).toString(16).toUpperCase().padStart(2,'0')).join(':');
+                const isRtps = (magic === 'RTPS');
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                html += `<p><strong>Magic:</strong> "${magic}" ${isRtps ? '✓' : '✗ (非 RTPS 消息)'}</p>`;
+                if (!isRtps) { html += `<p style="color:#dc3545;">魔数不匹配，这不是有效的 RTPS 消息</p></div>`; result.innerHTML = html; return; }
+                html += `<p><strong>Protocol Version:</strong> ${protoMajor}.${protoMinor}</p>`;
+                html += `<p><strong>Vendor ID:</strong> 0x${vendorMajor.toString(16).toUpperCase().padStart(2,'0')} 0x${vendorMinor.toString(16).toUpperCase().padStart(2,'0')}</p>`;
+                html += `<p><strong>GUID Prefix:</strong> ${guidPrefix}</p>`;
+                if (bytes.length > 20) {
+                    const submsgId = parseInt(bytes[20],16);
+                    const submsgIdHex = '0x' + submsgId.toString(16).toUpperCase().padStart(2,'0');
+                    const submsgInfo = RTPS_SUBMESSAGE_TYPES[submsgIdHex];
+                    html += `<p><strong>第一个 Submessage ID:</strong> ${submsgIdHex} ${submsgInfo ? '— ' + submsgInfo.name : '(未知)'}</p>`;
+                    if (bytes.length > 22) {
+                        const submsgFlags = parseInt(bytes[21],16);
+                        const submsgLen = (parseInt(bytes[22],16)<<8)|parseInt(bytes[23],16);
+                        html += `<p><strong>Submessage Flags:</strong> 0x${submsgFlags.toString(16).toUpperCase().padStart(2,'0')} (Endian=${(submsgFlags & 1) ? 'LE' : 'BE'})</p>`;
+                        html += `<p><strong>Submessage Length:</strong> ${submsgLen} 字节</p>`;
+                    }
+                    const remaining = bytes.length - 20;
+                    html += `<p style="color:var(--text-3);font-size:0.8rem;">💡 剩余 ${remaining} 字节包含 Submessage 数据</p>`;
+                }
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function lookupDomainPorts() {
+                const input = document.getElementById('domainIdInput').value.trim();
+                const result = document.getElementById('domainResult');
+                const id = parseInt(input);
+                if (isNaN(id) || id < 0 || id > 232) { result.innerHTML = '<p style="color:#dc3545;">请输入 0-232 之间的 Domain ID</p>'; return; }
+                const pb = 7400;
+                const dg = 250;
+                const pg = 2;
+                const mcBase = pb + dg * id;
+                const ucBase = pb + dg * id + pg + 10;
+                const spdpMc = mcBase;
+                const sedpMc1 = mcBase + 1;
+                const sedpMc2 = mcBase + 2;
+                const userMc = mcBase + 3;
+                const userUcBase = ucBase;
+                let html = `<div style="padding:16px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<h4 style="color:var(--accent);margin-bottom:12px;">Domain ${id} 端口映射</h4>`;
+                html += `<table style="width:100%;border-collapse:collapse;">`;
+                html += `<tr><th style="text-align:left;padding:8px;background:var(--surface);">用途</th><th style="text-align:left;padding:8px;background:var(--surface);">端口</th><th style="text-align:left;padding:8px;background:var(--surface);">类型</th></tr>`;
+                html += `<tr><td style="padding:8px;border-bottom:1px solid var(--border);">SPDP 多播</td><td style="padding:8px;border-bottom:1px solid var(--border);">${spdpMc}</td><td style="padding:8px;border-bottom:1px solid var(--border);">多播</td></tr>`;
+                html += `<tr><td style="padding:8px;border-bottom:1px solid var(--border);">SEDP 多播 (Pub)</td><td style="padding:8px;border-bottom:1px solid var(--border);">${sedpMc1}</td><td style="padding:8px;border-bottom:1px solid var(--border);">多播</td></tr>`;
+                html += `<tr><td style="padding:8px;border-bottom:1px solid var(--border);">SEDP 多播 (Sub)</td><td style="padding:8px;border-bottom:1px solid var(--border);">${sedpMc2}</td><td style="padding:8px;border-bottom:1px solid var(--border);">多播</td></tr>`;
+                html += `<tr><td style="padding:8px;border-bottom:1px solid var(--border);">用户数据多播</td><td style="padding:8px;border-bottom:1px solid var(--border);">${userMc}</td><td style="padding:8px;border-bottom:1px solid var(--border);">多播</td></tr>`;
+                html += `<tr><td style="padding:8px;">用户数据单播起始</td><td style="padding:8px;">${userUcBase}+</td><td style="padding:8px;">单播</td></tr>`;
+                html += `</table>`;
+                html += `<p style="font-size:0.8rem;color:var(--text-3);margin-top:8px;">💡 单播端口从 ${userUcBase} 起按 Participant 递增</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            // ==================== Quiz Functions ====================
+            function loadQuizQuestion() {
+                const area = document.getElementById('questionArea');
+                if (!area) return;
+                if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                    document.getElementById('quizResults').style.display = 'block';
+                    area.style.display = 'none';
+                    const pct = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+                    document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('percentage').textContent = pct + '%';
+                    return;
+                }
+                quizState.answered = false;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                let html = `<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}</div>`;
+                html += `<div style="display:flex;gap:4px;margin-bottom:16px;">`;
+                QUIZ_QUESTIONS.forEach((_, i) => { html += `<div style="flex:1;height:4px;border-radius:2px;background:${i < quizState.currentQuestion ? 'var(--accent)' : 'var(--border)'};"></div>`; });
+                html += `</div>`;
+                html += `<h3 style="margin-bottom:16px;font-size:1.1em;">${q.question}</h3>`;
+                q.options.forEach((opt, i) => {
+                    html += `<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${opt}</button>`;
+                });
+                html += `<div id="quizFeedback" style="margin-top:12px;"></div>`;
+                area.innerHTML = html;
+                area.style.display = 'block';
+                document.getElementById('quizResults').style.display = 'none';
+            }
+
+            function answerQuiz(idx) {
+                if (quizState.answered) return;
+                quizState.answered = true;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                const feedback = document.getElementById('quizFeedback');
+                for (let i = 0; i < q.options.length; i++) {
+                    const btn = document.getElementById('qopt' + i);
+                    if (i === q.correct) btn.classList.add('correct');
+                    if (i === idx && i !== q.correct) btn.classList.add('wrong');
+                    btn.classList.add('disabled');
+                }
+                if (idx === q.correct) {
+                    quizState.score++;
+                    feedback.innerHTML = `<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;
+                } else {
+                    feedback.innerHTML = `<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;
+                }
+                setTimeout(() => { quizState.currentQuestion++; loadQuizQuestion(); }, 2500);
+            }
+
+            function restartQuiz() {
+                quizState = { currentQuestion: 0, score: 0, answered: false };
+                loadQuizQuestion();
+            }
+
+            // Tab button event listeners
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => showTab(btn.dataset.tab));
+            });
+            </script>
 
             <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
                 <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
@@ -161,7 +1075,5 @@
             </aside>
         </div>
     </div>
-
-    <script src="../../assets/js/main.js"></script>
 </body>
 </html>
