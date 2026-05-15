@@ -1,407 +1,990 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SOME/IP 协议 — Visual Protocol</title>
-  <meta name="description" content="SOME/IP 协议可视化学习，面向服务的中间件，AUTOSAR 车载以太网通信。">
-
-  <!-- Google Fonts: Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-  <!-- Google AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
-
-  <!-- Umami Analytics -->
-  <script async defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
-
-  <style>
-    /* ---------- Reset & Base ---------- */
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      transition: background-color 0.25s ease, color 0.25s ease;
-    }
-
-    a {
-      text-decoration: none;
-      color: inherit;
-    }
-
-    ul {
-      list-style: none;
-    }
-
-    /* ---------- Light Theme (default) ---------- */
-    [data-theme="light"] body,
-    body {
-      background-color: #F9F7F4;
-      color: #1C1917;
-    }
-
-    [data-theme="light"] .nav,
-    :root .nav {
-      background-color: #FFFFFF;
-      border-bottom: 1px solid #E7E5E4;
-    }
-
-    [data-theme="light"] .card,
-    :root .card {
-      background-color: #FFFFFF;
-      border: 1px solid #E7E5E4;
-    }
-
-    [data-theme="light"] .badge,
-    :root .badge {
-      background-color: #F0F5EC;
-      color: #788C5D;
-    }
-
-    [data-theme="light"] .text-secondary,
-    :root .text-secondary {
-      color: #57534E;
-    }
-
-    [data-theme="light"] .text-tertiary,
-    :root .text-tertiary {
-      color: #A8A29E;
-    }
-
-    [data-theme="light"] .feature-item::before,
-    :root .feature-item::before {
-      color: #788C5D;
-    }
-
-    [data-theme="light"] .theme-toggle svg,
-    :root .theme-toggle svg {
-      stroke: #57534E;
-    }
-
-    [data-theme="light"] .accent-link,
-    :root .accent-link {
-      color: #788C5D;
-    }
-
-    [data-theme="light"] .accent-link:hover,
-    :root .accent-link:hover {
-      color: #5c6d47;
-    }
-
-    /* ---------- Dark Theme ---------- */
-    [data-theme="dark"] body {
-      background-color: #171412;
-      color: #E7E5E4;
-    }
-
-    [data-theme="dark"] .nav {
-      background-color: #231F1D;
-      border-bottom: 1px solid #3D3835;
-    }
-
-    [data-theme="dark"] .card {
-      background-color: #231F1D;
-      border: 1px solid #3D3835;
-    }
-
-    [data-theme="dark"] .badge {
-      background-color: #1D2418;
-      color: #8FA374;
-    }
-
-    [data-theme="dark"] .text-secondary {
-      color: #A8A29E;
-    }
-
-    [data-theme="dark"] .text-tertiary {
-      color: #78716C;
-    }
-
-    [data-theme="dark"] .feature-item::before {
-      color: #8FA374;
-    }
-
-    [data-theme="dark"] .theme-toggle svg {
-      stroke: #A8A29E;
-    }
-
-    [data-theme="dark"] .accent-link {
-      color: #8FA374;
-    }
-
-    [data-theme="dark"] .accent-link:hover {
-      color: #a7b98e;
-    }
-
-    /* ---------- Navigation ---------- */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 24px;
-      height: 56px;
-      transition: background-color 0.25s ease, border-color 0.25s ease;
-    }
-
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
-
-    .logo {
-      font-size: 16px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
-
-    .nav-link {
-      font-size: 14px;
-      font-weight: 500;
-      transition: opacity 0.15s ease;
-    }
-
-    .nav-link:hover {
-      opacity: 0.7;
-    }
-
-    .theme-toggle {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 36px;
-      height: 36px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      border-radius: 8px;
-      transition: opacity 0.15s ease;
-    }
-
-    .theme-toggle:hover {
-      opacity: 0.7;
-    }
-
-    .theme-toggle svg {
-      width: 20px;
-      height: 20px;
-      fill: none;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    /* ---------- Main Content ---------- */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: 80px 24px;
-    }
-
-    .page-title {
-      font-size: 32px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      text-align: center;
-      margin-bottom: 8px;
-    }
-
-    .page-subtitle {
-      font-size: 16px;
-      font-weight: 400;
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    /* ---------- Card ---------- */
-    .card {
-      max-width: 520px;
-      width: 100%;
-      border-radius: 12px;
-      padding: 40px;
-      text-align: center;
-      transition: background-color 0.25s ease, border-color 0.25s ease;
-    }
-
-    .badge {
-      display: inline-block;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 4px 12px;
-      border-radius: 100px;
-      margin-bottom: 24px;
-      letter-spacing: 0.02em;
-    }
-
-    .card-description {
-      font-size: 15px;
-      margin-bottom: 32px;
-    }
-
-    .features-title {
-      font-size: 13px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 16px;
-    }
-
-    .features-list {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .feature-item {
-      font-size: 14px;
-      font-weight: 500;
-      padding-left: 20px;
-      position: relative;
-    }
-
-    .feature-item::before {
-      content: "\25B8";
-      position: absolute;
-      left: 0;
-      font-size: 12px;
-    }
-
-    /* ---------- Footer ---------- */
-    .footer {
-      text-align: center;
-      padding: 24px;
-      font-size: 13px;
-    }
-
-    /* ---------- Responsive ---------- */
-    @media (max-width: 600px) {
-      .page-title {
-        font-size: 24px;
-      }
-
-      .card {
-        padding: 28px 24px;
-      }
-
-      .nav {
-        padding: 0 16px;
-      }
-    }
-  </style>
-</head>
-<body data-theme="light">
-
-  <!-- Navigation -->
-  <nav class="nav">
-    <div class="nav-left">
-      <a href="../../index.html" class="logo">Visual Protocol</a>
-      <a href="../../index.html" class="nav-link accent-link">返回主页</a>
-    </div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-      <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="5"></circle>
-        <line x1="12" y1="1" x2="12" y2="3"></line>
-        <line x1="12" y1="21" x2="12" y2="23"></line>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-        <line x1="1" y1="12" x2="3" y2="12"></line>
-        <line x1="21" y1="12" x2="23" y2="12"></line>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-      </svg>
-      <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="display:none;">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-      </svg>
-    </button>
-  </nav>
-
-  <!-- Main Content -->
-  <main class="main">
-    <h1 class="page-title">SOME/IP 协议</h1>
-    <p class="page-subtitle text-secondary">面向服务的中间件 — AUTOSAR</p>
-
-    <div class="card">
-      <span class="badge">开发中</span>
-      <p class="card-description text-secondary">
-        SOME/IP 协议的可视化学习内容正在筹备中。以下是我们计划涵盖的内容：
-      </p>
-      <p class="features-title text-tertiary">即将推出</p>
-      <ul class="features-list">
-        <li class="feature-item text-secondary">服务发现机制 (SD) 详解</li>
-        <li class="feature-item text-secondary">面向服务的通信架构</li>
-        <li class="feature-item text-secondary">序列化协议与消息格式</li>
-        <li class="feature-item text-secondary">下一代车载以太网应用</li>
-      </ul>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="footer text-tertiary">
-    Visual Protocol &mdash; 协议可视化学习
-  </footer>
-
-  <!-- AdSense Ad Unit -->
-  <ins class="adsbygoogle"
-       style="display:block"
-       data-ad-client="ca-pub-3215512126020129"
-       data-ad-slot="7014497615"
-       data-ad-format="auto"
-       data-full-width-responsive="true"></ins>
-  <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-
-  <!-- Theme Toggle Script -->
-  <script>
-    (function () {
-      const key = 'vp-theme';
-      const toggle = document.getElementById('themeToggle');
-      const iconSun = document.getElementById('iconSun');
-      const iconMoon = document.getElementById('iconMoon');
-
-      function applyTheme(theme) {
-        document.body.setAttribute('data-theme', theme);
-        if (theme === 'dark') {
-          iconSun.style.display = 'none';
-          iconMoon.style.display = 'block';
-        } else {
-          iconSun.style.display = 'block';
-          iconMoon.style.display = 'none';
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOME/IP 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 SOME/IP 协议学习平台 — 掌握面向服务的车载以太网中间件">
+    <meta name="keywords" content="SOME/IP, AUTOSAR, 面向服务, 车载以太网, 服务发现, 序列化">
+    <meta property="og:title" content="Visual Protocol — SOME/IP 协议学习平台">
+    <meta property="og:description" content="交互式 SOME/IP 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/someip/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        :root {
+            --primary-gradient-start: #788C5D;
+            --primary-gradient-end: #5C6D47;
+            --client-color: #788C5D; --server-color: #5C6D47;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
         }
-      }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-gradient-start: #8FA374; --primary-gradient-end: #A7B98E;
+                --client-color: #8FA374; --server-color: #A7B98E;
+                --success-color: #86EFAC; --success-bg: #14532D;
+                --error-color: #FCA5A5; --error-bg: #7F1D1D;
+                --bg-card-light: #231F1D; --bg-light: #171412;
+                --border-light: #3D3835;
+                --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+            }
+        }
+        body[data-theme="light"] {
+            --primary-gradient-start: #788C5D; --primary-gradient-end: #5C6D47;
+            --client-color: #788C5D; --server-color: #5C6D47;
+            --bg-card-light: #FFFFFF; --bg-light: #F9F7F4;
+            --border-light: #E7E5E4;
+            --text-light-main: #1C1917; --text-light-secondary: #57534E;
+        }
+        body[data-theme="dark"] {
+            --primary-gradient-start: #8FA374; --primary-gradient-end: #A7B98E;
+            --client-color: #8FA374; --server-color: #A7B98E;
+            --bg-card-light: #231F1D; --bg-light: #171412;
+            --border-light: #3D3835;
+            --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+        }
 
-      // Initialize from localStorage
-      const saved = localStorage.getItem(key);
-      if (saved === 'dark' || saved === 'light') {
-        applyTheme(saved);
-      } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        applyTheme('dark');
-      } else {
-        applyTheme('light');
-      }
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
 
-      toggle.addEventListener('click', function () {
-        const current = document.body.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        localStorage.setItem(key, next);
-      });
-    })();
-  </script>
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 24px 0 32px; padding: 4px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; flex-wrap: wrap;
+        }
+        .tab-button {
+            padding: 10px 20px; background: transparent; color: var(--text-2);
+            border: none; border-radius: 100px; cursor: pointer;
+            font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
 
+        .content-section {
+            display: none; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 32px; margin-bottom: 32px;
+        }
+        .content-section.active { display: block; }
+
+        .back-button, .theme-toggle, .header { display: none; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
+
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 14px 18px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em;
+            transition: all 0.15s;
+        }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-family: "SF Mono","Fira Code",monospace;
+        }
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button {
+            padding: 10px 20px; background: var(--accent); color: #FFF;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+        }
+        .tool-button:hover { opacity: 0.9; }
+
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th {
+            text-align: left; padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border);
+        }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+
+        /* Device Topology */
+        .device-topology {
+            display: flex; align-items: center; justify-content: center;
+            margin: 32px 0; gap: 0; position: relative;
+        }
+        .device-node {
+            width: 140px; height: 90px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .device-node .device-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .device-node .device-name { font-size: 0.8rem; margin-bottom: 2px; }
+        .device-node .device-status { font-size: 0.7rem; opacity: 0.9; }
+        .device-client { background: linear-gradient(135deg, #788C5D, #5C6D47); }
+        .device-server { background: linear-gradient(135deg, #5C6D47, #4A5A3A); }
+        .connection-line {
+            width: 120px; height: 4px;
+            background: linear-gradient(90deg, #788C5D, #5C6D47);
+            border-radius: 2px; position: relative;
+        }
+        .connection-line.active { animation: connPulse 1s infinite; }
+        .packet-indicator {
+            position: absolute; width: 12px; height: 12px; background: #FFF;
+            border-radius: 50%; top: -4px; left: 0; opacity: 0;
+            box-shadow: 0 0 8px rgba(120,140,93,0.5);
+        }
+        .connection-line.active .packet-indicator {
+            opacity: 1; animation: packetMove 1.5s infinite;
+        }
+
+        .log {
+            background: #111; color: #0f0; padding: 24px;
+            border-radius: 12px; font-family: 'Courier New', monospace;
+            text-align: left; max-width: 100%; margin: 24px auto;
+            min-height: 150px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #3a3a38; font-size: 0.875rem;
+        }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; }
+        .log-warning { color: #FFD700; }
+        .log-error { color: #FF6B6B; }
+
+        .demo-controls {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px;
+            background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); cursor: pointer; transition: all 0.15s;
+            margin-bottom: 8px;
+        }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta {
+            display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3);
+        }
+
+        .concept-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg);
+        }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer {
+            color: white; padding: 12px; border-radius: 8px;
+            text-align: center; margin-bottom: 4px;
+            transition: all 0.3s; cursor: default;
+        }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white; padding: 24px; border-radius: 12px;
+            margin: 16px 0; text-align: center;
+        }
+
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        @keyframes connPulse { 0%{box-shadow:0 0 8px rgba(120,140,93,0.3)}50%{box-shadow:0 0 20px rgba(120,140,93,0.6)}100%{box-shadow:0 0 8px rgba(120,140,93,0.3)} }
+        @keyframes packetMove { 0%{left:0;opacity:1}100%{left:calc(100% - 12px);opacity:1} }
+        .device-node.pulse { animation: pulse 1s infinite; }
+
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.5em; }
+            .content-section { padding: 20px; }
+            .tab-button { padding: 8px 12px; font-size: 0.82em; }
+            .device-topology { flex-direction: column; gap: 8px; }
+            .connection-line { width: 4px; height: 40px; }
+            .connection-line.active .packet-indicator { animation: packetMoveV 1.5s infinite; }
+        }
+        @media (max-width: 480px) {
+            .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; }
+        }
+        @keyframes packetMoveV { 0%{top:0;left:-4px;opacity:1}100%{top:calc(100% - 12px);left:-4px;opacity:1} }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="nav-inner container-wide">
+            <a href="../../index.html" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span>Visual Protocol</span>
+            </a>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-back">返回主页</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <div class="container">
+                <header class="page-header">
+                    <h1>SOME/IP 协议学习</h1>
+                    <p>面向服务的中间件 — AUTOSAR — 从服务发现到事件通知</p>
+                </header>
+
+                <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                    <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                    <button class="tab-button" role="tab" data-tab="frames">报文详解</button>
+                    <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                    <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                    <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+                </nav>
+
+                <!-- ===== Tab 1: 基础概念 ===== -->
+                <section id="basics-tab" class="content-section active" role="tabpanel">
+                    <h2 class="section-title">SOME/IP 协议基础概念</h2>
+                    <p>SOME/IP（Scalable service-Oriented MiddlewarE over IP）是 AUTOSAR 定义的车载以太网中间件协议，实现了面向服务的通信架构（SOA），支持 RPC、发布/订阅和服务发现。</p>
+
+                    <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                        <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card"><h4>🏗️ 面向服务架构 (SOA)</h4><p>车载通信从传统的信号导向（每个信号广播给所有节点）转向服务导向（按需请求/订阅）。服务提供者和消费者解耦，支持动态发现和灵活部署，是软件定义汽车的基础。</p></div>
+                            <div class="concept-card"><h4>📦 序列化协议</h4><p>将结构化数据（整数、字符串、结构体、数组、枚举等）序列化为二进制格式在网络上传输。SOME/IP TLV（Type-Length-Value）格式支持嵌套数据结构，与 Protobuf 类似但专为车载设计。</p></div>
+                            <div class="concept-card"><h4>📞 RPC 远程调用</h4><p>三种通信模式：Request/Response（请求-响应，同步调用）、Fire & Forget（只发不回，REQUEST_NO_RETURN）、Notification（事件通知，无需响应）。支持方法调用和事件推送。</p></div>
+                            <div class="concept-card"><h4>🔍 服务发现 (SD)</h4><p>动态发现网络中可用的服务实例。提供者发送 OfferService 宣告服务，消费者发送 FindService 查找服务，通过 SubscribeEventGroup 订阅事件组。基于 UDP 多播在端口 30490 上运行。</p></div>
+                            <div class="concept-card"><h4>📢 发布/订阅 (Pub/Sub)</h4><p>事件驱动的通信模式。消费者通过 SD 订阅 EventGroup，提供者在事件触发时向所有订阅者发送 Notification。支持选择性通知（仅值变化时发送）和周期性通知。</p></div>
+                            <div class="concept-card"><h4>📋 消息类型</h4><p>REQUEST (0x01): 请求消息 | NOTIFICATION (0x02): 事件通知 | REQUEST_NO_RETURN (0x03): 无需响应 | RESPONSE (0x80): 响应消息 | ERROR (0x81): 错误响应 | TP_* (0x20-0x23): 分段传输。</p></div>
+                            <div class="concept-card"><h4>📊 vs CAN 信号</h4><p>CAN 是面向信号的广播：所有信号始终发送到所有节点，接收方自行过滤。SOME/IP 是面向服务的按需通信：消费者只接收订阅的服务和事件，带宽利用率更高，支持复杂的数据类型。</p></div>
+                            <div class="concept-card"><h4>🔌 AUTOSAR 集成</h4><p>SOME/IP 是 AUTOSAR Adaptive Platform (AP) 的标准通信协议，也支持在 AUTOSAR Classic Platform (CP) 中通过 SOME/IP Transformer 使用。与 ara::com API 集成，是 SOA 车载架构的核心通信中间件。</p></div>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                        <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:12px;">SOME/IP 协议栈从上到下共 5 层，服务接口通过 SOME/IP 序列化后经 UDP/TCP 在以太网上传输。</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;">
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#788C5D,#5C6D47);width:260px;"><div class="layer-name">服务接口</div><div class="layer-desc">应用定义的方法/事件/字段</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#5A8AB5,#4A7A9B);width:260px;"><div class="layer-name">SOME/IP</div><div class="layer-desc">序列化 / RPC / SD</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#E8A838,#C88818);width:260px;"><div class="layer-name">UDP / TCP</div><div class="layer-desc">传输层 (UDP 30490 SD, TCP/UDP 业务)</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#6A9BCC,#4A7BAC);width:260px;"><div class="layer-name">IPv4</div><div class="layer-desc">网络层寻址与路由</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#607D8B,#455A64);width:260px;"><div class="layer-name">Ethernet</div><div class="layer-desc">物理链路 (100BASE-T1)</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 2: 报文详解 ===== -->
+                <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">📡 SOME/IP 报文结构详解</h2>
+                    <p>SOME/IP 消息由 16 字节固定头部 + 可变负载组成，点击卡片查看详细字段</p>
+                    <div id="messageTypesGrid"></div>
+                </section>
+
+                <!-- ===== Tab 3: 交互演示 ===== -->
+                <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🎮 SOME/IP 交互演示</h2>
+                    <p>观察 SOME/IP 服务发现、订阅和通信的完整流程</p>
+
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo('offer')">📢 服务提供</button>
+                        <button class="demo-btn" onclick="startDemo('subscribe')">📥 服务订阅</button>
+                        <button class="demo-btn" onclick="startDemo('request')">📞 请求响应</button>
+                        <button class="demo-btn" onclick="startDemo('event')">🔔 事件通知</button>
+                        <button class="demo-btn" onclick="startDemo('fullflow')">📋 完整流程</button>
+                        <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                    </div>
+
+                    <div class="device-topology">
+                        <div class="device-node device-client" id="consumer">
+                            <div class="device-icon">📱</div>
+                            <div class="device-name">Consumer</div>
+                            <div class="device-status" id="consumerStatus">就绪</div>
+                        </div>
+                        <div class="connection-line" id="connLine">
+                            <div class="packet-indicator"></div>
+                        </div>
+                        <div class="device-node device-server" id="provider">
+                            <div class="device-icon">🖥️</div>
+                            <div class="device-name">Provider</div>
+                            <div class="device-status" id="providerStatus">就绪</div>
+                        </div>
+                    </div>
+
+                    <div id="commLog" class="log">
+                        <div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">💡 点击上方按钮开始 SOME/IP 通信演示...</span></div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 4: 实用工具 ===== -->
+                <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🛠️ SOME/IP 实用工具集</h2>
+                    <p>为 SOME/IP 协议开发和调试提供专业工具支持</p>
+
+                    <div style="display:grid;gap:24px;margin:24px 0;">
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📊 SOME/IP 消息解析器</h3>
+                            <p>解析十六进制格式的 SOME/IP 消息，显示头部各字段</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="someipMsgInput" placeholder="输入十六进制 (如: 12 34 00 01 00 00 00 10 00 01 00 01 01 01 01 00 ...)" style="flex:1;min-width:200px;" aria-label="SOME/IP消息输入">
+                                <button class="tool-button" onclick="parseSomeipMessage()">解析</button>
+                            </div>
+                            <div id="parseResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📋 消息类型查询</h3>
+                            <p>输入消息类型代码，查询对应的名称和用途</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="msgTypeInput" placeholder="消息类型 (如: 0x01, 0x80)" style="flex:1;min-width:200px;" aria-label="消息类型输入">
+                                <button class="tool-button" onclick="lookupMsgType()">查询</button>
+                            </div>
+                            <div id="msgTypeResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔢 返回码查询</h3>
+                            <p>输入 SOME/IP 返回码，查看对应含义</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="returnCodeInput" placeholder="返回码 (如: 0x00, 0x02)" style="flex:1;min-width:200px;" aria-label="返回码输入">
+                                <button class="tool-button" onclick="lookupReturnCode()">查询</button>
+                            </div>
+                            <div id="returnCodeResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔍 SD Entry 分析器</h3>
+                            <p>解析 SOME/IP SD Entry 十六进制数据</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="sdEntryInput" placeholder="SD Entry 十六进制 (如: 01 00 00 00 12 34 56 78 00 01 01 00 00 03 ...)" style="flex:1;min-width:200px;" aria-label="SD Entry输入">
+                                <button class="tool-button" onclick="parseSdEntry()">解析</button>
+                            </div>
+                            <div id="sdEntryResult" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 5: 知识测试 ===== -->
+                <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🧠 SOME/IP 协议知识测试</h2>
+                    <div id="questionArea"></div>
+                    <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                        <div class="results-box">
+                            <h3>🎯 测试完成！</h3>
+                            <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div>
+                            <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                        </div>
+                        <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                    </div>
+                </section>
+
+            <script>
+            // ==================== State ====================
+            let currentTab = 'basics';
+            let quizState = { currentQuestion: 0, score: 0, answered: false };
+            let demoActive = false;
+
+            // ==================== SOME/IP Data ====================
+            const SOMEIP_MSG_TYPES = {
+                '0x01': { name: 'REQUEST', category: '请求', description: '请求消息，发送方期望收到对应的 RESPONSE 消息。用于 RPC 方法调用，承载方法 ID 和参数数据。', direction: 'Consumer → Provider' },
+                '0x02': { name: 'NOTIFICATION', category: '事件', description: '事件通知消息，提供者主动发送给订阅了该事件的消费者。无需响应，用于 Pub/Sub 模式中的事件推送。', direction: 'Provider → Consumer(s)' },
+                '0x03': { name: 'REQUEST_NO_RETURN', category: '请求', description: 'Fire & Forget 请求消息，发送方不期望收到响应。用于不需要确认的操作，如设置某个参数。', direction: 'Consumer → Provider' },
+                '0x80': { name: 'RESPONSE', category: '响应', description: '对 REQUEST 消息的响应。Request ID 与对应的 REQUEST 一致，Return Code 表示操作结果。', direction: 'Provider → Consumer' },
+                '0x81': { name: 'ERROR', category: '响应', description: '错误响应消息。当服务端处理 REQUEST 失败时返回，包含错误返回码说明失败原因。', direction: 'Provider → Consumer' },
+                '0x20': { name: 'TP_REQUEST', category: '分段', description: '分段传输的请求消息。当负载超过传输协议最大长度时，使用 TP 类型将大消息拆分为多个段传输。', direction: 'Consumer → Provider' },
+                '0x21': { name: 'TP_RESPONSE', category: '分段', description: '分段传输的响应消息。与 TP_REQUEST 类似，用于承载超过单个报文限制的响应数据。', direction: 'Provider → Consumer' },
+                '0x22': { name: 'TP_NOTIFICATION', category: '分段', description: '分段传输的事件通知消息。用于大数据量的事件推送场景。', direction: 'Provider → Consumer(s)' },
+                '0x23': { name: 'TP_ERROR', category: '分段', description: '分段传输的错误响应消息。', direction: 'Provider → Consumer' }
+            };
+
+            const SOMEIP_RETURN_CODES = {
+                '0x00': { name: 'E_OK', desc: '操作成功完成' },
+                '0x01': { name: 'E_NOT_OK', desc: '通用错误，操作失败' },
+                '0x02': { name: 'E_UNKNOWN_SERVICE', desc: '请求的服务 ID 不存在' },
+                '0x03': { name: 'E_UNKNOWN_METHOD', desc: '请求的方法 ID 在该服务中不存在' },
+                '0x04': { name: 'E_NOT_READY', desc: '服务尚未就绪，无法处理请求' },
+                '0x05': { name: 'E_NOT_REACHABLE', desc: '服务不可达（如服务实例已下线）' },
+                '0x06': { name: 'E_TIMEOUT', desc: '操作超时' },
+                '0x07': { name: 'E_WRONG_PROTOCOL_VERSION', desc: 'SOME/IP 协议版本不匹配' },
+                '0x08': { name: 'E_WRONG_INTERFACE_VERSION', desc: '服务接口版本不匹配' },
+                '0x09': { name: 'E_MALFORMED_MESSAGE', desc: '消息格式错误，无法解析' },
+                '0x0A': { name: 'E_WRONG_MESSAGE_TYPE', desc: '消息类型不正确（如对 Notification 发送了 Response）' }
+            };
+
+            const SOMEIP_HEADER_FIELDS = {
+                'Message ID': {
+                    name: 'Message ID (消息标识)', bytes: '4',
+                    description: '唯一标识一条消息。由 Service ID（2 字节）和 Method/Event ID（2 字节）组成。Service ID 标识服务实例，Method ID 标识服务中的方法或事件。',
+                    details: ['Service ID 范围: 0x0000-0xFFFF (由 AUTOSAR 分配)','Method ID: 0x0000-0x7FFF 为方法，0x8000-0xFFFF 为事件','Service ID + Method ID 组合在通信关系内唯一','Event ID = Service ID + EventGroup 内偏移'],
+                    tip: 'Service ID 通常由 OEM 或 AUTOSAR 预分配，如 0x1234 可能代表 "导航服务"'
+                },
+                'Length': {
+                    name: 'Length (长度)', bytes: '4',
+                    description: '从 Request ID 开始到消息末尾的总字节数。不包含 Message ID 和 Length 字段自身的 8 字节。最小值为 8（仅包含头部剩余字段，无负载）。',
+                    details: ['最小值: 8 字节 (仅头部剩余字段)','包含 Request ID(4B) + Protocol Ver(1B) + Interface Ver(1B) + Msg Type(1B) + Return Code(1B) + Payload','最大值取决于传输层 (UDP 约 1400B, TCP 无限制)','TP 模式下: 额外包含 Offset(4B) + Reserved(4B)'],
+                    tip: 'Length 不包含自身和 Message ID，这是 SOME/IP 与许多其他协议不同的地方'
+                },
+                'Request ID': {
+                    name: 'Request ID (请求标识)', bytes: '4',
+                    description: '由 Client ID（2 字节）和 Session ID（2 字节）组成。Client ID 标识发送方，Session ID 用于匹配请求和响应。Response 必须原样回传 Request ID。',
+                    details: ['Client ID: 标识服务消费者实例','Session ID: 递增的会话标识，0x00 表示忽略','Response 必须回传与 Request 相同的 Request ID','Notification 的 Session ID 也应递增'],
+                    tip: 'Session ID 从 1 开始递增，到达 0xFFFF 后回到 1（跳过 0）'
+                },
+                'Protocol Version': {
+                    name: 'Protocol Version (协议版本)', bytes: '1',
+                    description: 'SOME/IP 协议版本号。当前版本为 0x01。接收方必须检查此字段，版本不匹配时返回 E_WRONG_PROTOCOL_VERSION。',
+                    details: ['当前值: 0x01 (SOME/IP v1)','未来版本可能为 0x02, 0x03 等','版本不匹配时返回错误码 0x07'],
+                    tip: '协议版本与接口版本不同——协议版本是 SOME/IP 本身的版本'
+                },
+                'Interface Version': {
+                    name: 'Interface Version (接口版本)', bytes: '1',
+                    description: '服务接口的主版本号。由服务开发者定义，用于确保 Consumer 和 Provider 使用兼容的接口。版本不匹配时返回 E_WRONG_INTERFACE_VERSION。',
+                    details: ['由服务开发者定义（如 0x01, 0x02）','Consumer 和 Provider 必须使用相同版本','版本不匹配时返回错误码 0x08'],
+                    tip: '接口版本变更意味着方法签名或数据结构发生了变化'
+                },
+                'Message Type': {
+                    name: 'Message Type (消息类型)', bytes: '1',
+                    description: '标识消息的通信模式。REQUEST(0x01) 期望响应，NOTIFICATION(0x02) 无需响应，REQUEST_NO_RETURN(0x03) 不需要响应，RESPONSE(0x80) 是正常响应，ERROR(0x81) 是错误响应。',
+                    details: ['0x01 REQUEST: 请求→响应','0x02 NOTIFICATION: 事件通知','0x03 REQUEST_NO_RETURN: Fire & Forget','0x80 RESPONSE: 正常响应','0x81 ERROR: 错误响应','0x20-0x23 TP_*: 分段传输'],
+                    tip: 'MessageType 决定了消息的处理方式，是 SOME/IP 通信模型的核心'
+                },
+                'Return Code': {
+                    name: 'Return Code (返回码)', bytes: '1',
+                    description: '表示操作的结果。E_OK(0x00) 表示成功，其他值表示各种错误。仅 RESPONSE 和 ERROR 消息中有效，REQUEST 中应为 0x00。',
+                    details: ['0x00 E_OK: 成功','0x02 E_UNKNOWN_SERVICE: 未知服务','0x04 E_NOT_READY: 服务未就绪','0x06 E_TIMEOUT: 超时','0x09 E_MALFORMED_MESSAGE: 格式错误'],
+                    tip: 'Return Code 是诊断通信问题的重要线索'
+                }
+            };
+
+            // ==================== Quiz Data ====================
+            const QUIZ_QUESTIONS = [
+                { question: 'SOME/IP 的全称是什么？', options: ['Simple Object Messaging over IP','Scalable service-Oriented MiddlewarE over IP','Secure Onboard Messaging and Ethernet Protocol','Service Oriented Multi-channel Ethernet IP'], correct: 1, explanation: 'SOME/IP 全称 Scalable service-Oriented MiddlewarE over IP，是 AUTOSAR 定义的面向服务的可扩展中间件协议。' },
+                { question: 'SOME/IP 头部的固定长度是多少字节？', options: ['8 字节','12 字节','16 字节','32 字节'], correct: 2, explanation: 'SOME/IP 头部固定 16 字节：Message ID(4B) + Length(4B) + Request ID(4B) + Protocol Version(1B) + Interface Version(1B) + Message Type(1B) + Return Code(1B)。' },
+                { question: 'SOME/IP 服务发现 (SD) 使用哪个 UDP 端口？', options: ['13400','30490','15765','8080'], correct: 1, explanation: 'SOME/IP SD 使用 UDP 端口 30490 进行多播通信。端口 13400 是 DoIP 的端口。' },
+                { question: 'REQUEST 消息的消息类型代码是？', options: ['0x00','0x01','0x02','0x80'], correct: 1, explanation: 'REQUEST 的消息类型代码是 0x01。NOTIFICATION 是 0x02，RESPONSE 是 0x80。' },
+                { question: '以下哪个不是 SOME/IP 支持的通信模式？', options: ['Request/Response','Fire & Forget','Notification','Token Ring'], correct: 3, explanation: 'SOME/IP 支持 Request/Response、Fire & Forget (REQUEST_NO_RETURN) 和 Notification 三种通信模式。Token Ring 是网络拓扑类型。' },
+                { question: 'Message ID 由哪两部分组成？', options: ['Client ID + Session ID','Service ID + Method/Event ID','Source IP + Dest IP','Source Port + Dest Port'], correct: 1, explanation: 'Message ID 由 Service ID（2 字节）和 Method/Event ID（2 字节）组成，唯一标识一条消息。Client ID + Session ID 组成的是 Request ID。' },
+                { question: '返回码 E_UNKNOWN_SERVICE 的含义是什么？', options: ['操作成功','通用错误','请求的服务 ID 不存在','消息格式错误'], correct: 2, explanation: 'E_UNKNOWN_SERVICE (0x02) 表示请求的 Service ID 在提供者端不存在，可能是服务未启动或 ID 配置错误。' },
+                { question: 'SOME/IP 的 Length 字段包含哪些部分？', options: ['整个消息的长度','从 Request ID 到消息末尾的长度','仅负载数据的长度','从 Message ID 到消息末尾的长度'], correct: 1, explanation: 'Length 字段表示从 Request ID 开始到消息末尾的总字节数，不包含 Message ID 和 Length 自身的 8 字节。' },
+                { question: 'SOME/IP TP (分段传输) 的主要用途是什么？', options: ['加密传输','传输超过单个报文限制的大消息','错误恢复','流量控制'], correct: 1, explanation: 'TP (Transport Protocol) 用于将超过传输层最大长度限制的消息拆分为多个段传输，如超过 UDP 单包限制的大数据。' },
+                { question: 'OfferService SD Entry 的作用是什么？', options: ['请求某个服务','宣告提供某个服务','订阅事件组','报告错误'], correct: 1, explanation: 'OfferService 是服务提供者向网络宣告自己可提供某个服务，消费者收到后可以开始使用该服务或订阅其事件。' },
+                { question: 'SOME/IP 与 CAN 信号通信的核心区别是什么？', options: ['SOME/IP 速度更慢','CAN 支持服务发现','SOME/IP 是面向服务的按需通信','CAN 支持更复杂的数据类型'], correct: 2, explanation: 'CAN 是面向信号的广播模式（所有信号始终发送），SOME/IP 是面向服务的按需通信（只接收订阅的服务和事件）。' },
+                { question: 'Request ID 中的 Session ID 的用途是什么？', options: ['标识服务类型','匹配请求和响应','标识网络地址','标识协议版本'], correct: 1, explanation: 'Session ID 用于匹配 REQUEST 和对应的 RESPONSE，Response 必须回传与 Request 相同的 Request ID。' }
+            ];
+
+            // ==================== Theme & Tab ====================
+            function toggleTheme() {
+                const body = document.body;
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const t = localStorage.getItem('theme') || 'light';
+                if (t === 'dark') document.body.setAttribute('data-theme','dark');
+                else document.body.removeAttribute('data-theme');
+                renderHeaderFields();
+                loadQuizQuestion();
+            });
+            function showTab(tabName) {
+                document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.hidden = true; });
+                document.querySelectorAll('.tab-button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+                const sec = document.getElementById(tabName + '-tab');
+                if (sec) { sec.classList.add('active'); sec.hidden = false; }
+                const btn = document.querySelector(`[data-tab="${tabName}"]`);
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+                currentTab = tabName;
+            }
+
+            // ==================== Render Header Fields ====================
+            function renderHeaderFields() {
+                const grid = document.getElementById('messageTypesGrid');
+                if (!grid) return;
+                let html = '';
+                // First render header fields
+                html += `<h3 style="color:var(--accent);margin-bottom:12px;">SOME/IP 头部字段</h3>`;
+                Object.entries(SOMEIP_HEADER_FIELDS).forEach(([key, field]) => {
+                    html += `<div class="frame-field-card" onclick="showHeaderModal('${key}')">
+                        <h4>${field.name}</h4>
+                        <p>${field.description.substring(0, 90)}...</p>
+                        <div class="field-meta"><span>📐 ${field.bytes} 字节</span><span>📋 点击查看详情</span></div>
+                    </div>`;
+                });
+                // Then render message types
+                html += `<h3 style="color:var(--accent);margin:24px 0 12px;">消息类型与返回码</h3>`;
+                html += `<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;">`;
+                Object.entries(SOMEIP_MSG_TYPES).forEach(([code, mt]) => {
+                    const catColor = mt.category === '请求' ? '#788C5D' : mt.category === '事件' ? '#E8A838' : mt.category === '响应' ? '#6A9BCC' : '#9B7ACC';
+                    html += `<div class="frame-field-card" onclick="showMsgTypeModal('${code}')">
+                        <h4 style="color:${catColor};">${code} ${mt.name}</h4>
+                        <p>${mt.description.substring(0, 80)}...</p>
+                        <div class="field-meta"><span>📂 ${mt.category}</span><span>${mt.direction}</span></div>
+                    </div>`;
+                });
+                html += `</div>`;
+                grid.innerHTML = html;
+            }
+
+            function showHeaderModal(key) {
+                const f = SOMEIP_HEADER_FIELDS[key];
+                if (!f) return;
+                let detailsHtml = f.details.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('');
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${f.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:16px;font-size:0.85rem;">📐 ${f.bytes} 字节</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${f.description}</p>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">详细信息</h4>
+                    <ul style="margin:0 0 16px 20px;padding:0;font-size:0.9rem;color:var(--text-2);">${detailsHtml}</ul>
+                    <div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${f.tip}</div>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            function showMsgTypeModal(code) {
+                const mt = SOMEIP_MSG_TYPES[code];
+                if (!mt) return;
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${code} — ${mt.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:4px;font-size:0.85rem;">📂 ${mt.category} | ${mt.direction}</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${mt.description}</p>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            // ==================== Demo Functions ====================
+            function addLog(msg, type) {
+                const log = document.getElementById('commLog');
+                const now = new Date();
+                const ts = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+                const cls = type === 'warning' ? 'log-warning' : type === 'error' ? 'log-error' : 'log-info';
+                log.innerHTML += `<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${msg}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+            function setStatus(id, text) {
+                const el = document.getElementById(id + 'Status');
+                if (el) el.textContent = text;
+            }
+            function resetDemo() {
+                demoActive = false;
+                ['consumer','provider'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove('pulse');
+                    setStatus(id, '就绪');
+                });
+                const conn = document.getElementById('connLine');
+                if (conn) conn.classList.remove('active');
+                const log = document.getElementById('commLog');
+                log.innerHTML = '<div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">🔄 演示已重置，点击按钮开始新的演示</span></div>';
+            }
+
+            function startDemo(type) {
+                if (demoActive) return;
+                demoActive = true;
+                resetDemo();
+                demoActive = true;
+                const conn = document.getElementById('connLine');
+                if (conn) conn.classList.add('active');
+
+                if (type === 'offer') demoOffer();
+                else if (type === 'subscribe') demoSubscribe();
+                else if (type === 'request') demoRequest();
+                else if (type === 'event') demoEvent();
+                else if (type === 'fullflow') demoFullFlow();
+            }
+
+            function demoOffer() {
+                addLog('📢 服务提供演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('provider');
+                    if (p) p.classList.add('pulse');
+                    setStatus('provider', 'Offering...');
+                    addLog('📤 [Provider] 发送 OfferService SD 消息','info');
+                    addLog('   → Service ID: 0x1234 (导航服务)','info');
+                    addLog('   → Instance ID: 0x0001','info');
+                    addLog('   → Major Version: 1, TTL: 3','info');
+                    addLog('   → UDP 多播至 224.0.0.1:30490','info');
+                }, 500);
+                setTimeout(() => {
+                    addLog('📡 SD 消息在以太网中多播传播...','info');
+                }, 1200);
+                setTimeout(() => {
+                    const c = document.getElementById('consumer');
+                    if (c) c.classList.add('pulse');
+                    setStatus('consumer', '发现服务');
+                    addLog('📥 [Consumer] 收到 OfferService','info');
+                    addLog('   → 发现服务 0x1234 版本 1 可用','info');
+                }, 2000);
+                setTimeout(() => {
+                    setStatus('provider', '已提供'); setStatus('consumer', '已发现');
+                    const p = document.getElementById('provider'); const c = document.getElementById('consumer');
+                    if (p) p.classList.remove('pulse'); if (c) c.classList.remove('pulse');
+                    addLog('✅ 服务发现完成！Consumer 知道 Provider 可提供导航服务','info');
+                    demoActive = false;
+                }, 3200);
+            }
+
+            function demoSubscribe() {
+                addLog('📥 服务订阅演示开始', 'info');
+                setTimeout(() => {
+                    const c = document.getElementById('consumer');
+                    if (c) c.classList.add('pulse');
+                    setStatus('consumer', '订阅中...');
+                    addLog('📤 [Consumer] 发送 SubscribeEventGroup SD 消息','info');
+                    addLog('   → Service ID: 0x1234','info');
+                    addLog('   → EventGroup ID: 0x8001 (位置事件组)','info');
+                    addLog('   → Major Version: 1, TTL: 3','info');
+                }, 500);
+                setTimeout(() => {
+                    const p = document.getElementById('provider');
+                    if (p) p.classList.add('pulse');
+                    setStatus('provider', '确认订阅...');
+                    addLog('📥 [Provider] 收到订阅请求','info');
+                }, 1500);
+                setTimeout(() => {
+                    addLog('📤 [Provider] 发送 SubscribeEventGroup ACK','info');
+                    addLog('   → 订阅确认，TTL: 3','info');
+                    setStatus('provider', '订阅已确认');
+                }, 2500);
+                setTimeout(() => {
+                    setStatus('consumer', '已订阅'); setStatus('provider', '就绪');
+                    const c = document.getElementById('consumer'); const p = document.getElementById('provider');
+                    if (c) c.classList.remove('pulse'); if (p) p.classList.remove('pulse');
+                    addLog('✅ 事件订阅成功！Consumer 将收到位置更新通知','info');
+                    demoActive = false;
+                }, 3800);
+            }
+
+            function demoRequest() {
+                addLog('📞 请求响应演示开始', 'info');
+                setTimeout(() => {
+                    const c = document.getElementById('consumer');
+                    if (c) c.classList.add('pulse');
+                    setStatus('consumer', '发送请求...');
+                    addLog('📤 [Consumer] REQUEST (MsgType 0x01)','info');
+                    addLog('   → Service ID: 0x1234, Method ID: 0x0001','info');
+                    addLog('   → Client ID: 0x0001, Session ID: 0x0042','info');
+                    addLog('   → Payload: [获取当前位置]','info');
+                }, 500);
+                setTimeout(() => {
+                    const p = document.getElementById('provider');
+                    if (p) p.classList.add('pulse');
+                    setStatus('provider', '处理中...');
+                    addLog('📥 [Provider] 收到请求，处理中...','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('provider', '发送响应');
+                    addLog('📤 [Provider] RESPONSE (MsgType 0x80, ReturnCode 0x00 E_OK)','info');
+                    addLog('   → Request ID: 0x00010042 (回传)','info');
+                    addLog('   → Payload: [纬度=31.2304, 经度=121.4737]','info');
+                }, 2800);
+                setTimeout(() => {
+                    setStatus('consumer', '收到响应'); setStatus('provider', '完成');
+                    const c = document.getElementById('consumer'); const p = document.getElementById('provider');
+                    if (c) c.classList.remove('pulse'); if (p) p.classList.remove('pulse');
+                    addLog('✅ RPC 调用成功！Consumer 获取到当前位置数据','info');
+                    demoActive = false;
+                }, 4000);
+            }
+
+            function demoEvent() {
+                addLog('🔔 事件通知演示开始', 'info');
+                setTimeout(() => {
+                    const p = document.getElementById('provider');
+                    if (p) p.classList.add('pulse');
+                    setStatus('provider', '触发事件...');
+                    addLog('📤 [Provider] NOTIFICATION (MsgType 0x02)','info');
+                    addLog('   → Service ID: 0x1234, Event ID: 0x8001','info');
+                    addLog('   → Session ID: 0x0001','info');
+                    addLog('   → 位置更新: [纬度=31.2305, 经度=121.4738]','info');
+                }, 500);
+                setTimeout(() => {
+                    const c = document.getElementById('consumer');
+                    if (c) c.classList.add('pulse');
+                    setStatus('consumer', '收到通知');
+                    addLog('📥 [Consumer] 收到事件通知','info');
+                    addLog('   → 位置已更新: 纬度变化 +0.0001','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('provider', '通知已发送');
+                    const p = document.getElementById('provider'); const c = document.getElementById('consumer');
+                    if (p) p.classList.remove('pulse'); if (c) c.classList.remove('pulse');
+                    addLog('✅ 事件通知完成（Provider 不期望 Consumer 响应）','info');
+                    demoActive = false;
+                }, 2800);
+            }
+
+            function demoFullFlow() {
+                addLog('📋 完整 SOME/IP 通信流程演示', 'warning');
+                setTimeout(() => {
+                    const p = document.getElementById('provider');
+                    if (p) p.classList.add('pulse');
+                    setStatus('provider', 'Step 1/5...');
+                    addLog('=== Step 1: OfferService ===','warning');
+                    addLog('📤 [Provider] OfferService (Service 0x1234, Inst 0x0001)','info');
+                }, 500);
+                setTimeout(() => {
+                    const c = document.getElementById('consumer');
+                    if (c) c.classList.add('pulse');
+                    addLog('📥 [Consumer] 收到 OfferService → 发现导航服务','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('consumer', 'Step 2/5...');
+                    addLog('=== Step 2: SubscribeEventGroup ===','warning');
+                    addLog('📤 [Consumer] SubscribeEventGroup (EventGroup 0x8001)','info');
+                    addLog('📥 [Provider] 订阅确认 ACK','info');
+                }, 2500);
+                setTimeout(() => {
+                    setStatus('consumer', 'Step 3/5...');
+                    addLog('=== Step 3: Request/Response ===','warning');
+                    addLog('📤 [Consumer] REQUEST: GetPosition()','info');
+                    addLog('📤 [Provider] RESPONSE: E_OK [31.2304, 121.4737]','info');
+                }, 4000);
+                setTimeout(() => {
+                    setStatus('consumer', 'Step 4/5...');
+                    setStatus('provider', 'Step 4/5...');
+                    addLog('=== Step 4: Event Notification ===','warning');
+                    addLog('📤 [Provider] NOTIFICATION: 位置更新 [31.2305, 121.4738]','info');
+                    addLog('📥 [Consumer] 收到事件通知','info');
+                }, 5500);
+                setTimeout(() => {
+                    setStatus('consumer', 'Step 5/5...');
+                    setStatus('provider', 'Step 5/5...');
+                    addLog('=== Step 5: StopOfferService ===','warning');
+                    addLog('📤 [Provider] StopOfferService (TTL=0)','info');
+                    addLog('📥 [Consumer] 服务下线，清理订阅','info');
+                }, 7000);
+                setTimeout(() => {
+                    const c = document.getElementById('consumer'); const p = document.getElementById('provider');
+                    if (c) c.classList.remove('pulse'); if (p) p.classList.remove('pulse');
+                    setStatus('consumer', '完成'); setStatus('provider', '完成');
+                    addLog('✅ 完整 SOME/IP 生命周期演示结束','info');
+                    demoActive = false;
+                }, 8000);
+            }
+
+            // ==================== Tool Functions ====================
+            function parseSomeipMessage() {
+                const input = document.getElementById('someipMsgInput').value.trim();
+                const result = document.getElementById('parseResult');
+                if (!input) { result.innerHTML = '<p style="color:#dc3545;">请输入十六进制报文</p>'; return; }
+                const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                if (!bytes || bytes.length < 8) { result.innerHTML = '<p style="color:#dc3545;">格式错误，至少需要 16 字节 (32 个十六进制字符)</p>'; return; }
+                const serviceId = (parseInt(bytes[0],16)<<8)|parseInt(bytes[1],16);
+                const methodId = (parseInt(bytes[2],16)<<8)|parseInt(bytes[3],16);
+                const length = (parseInt(bytes[4],16)<<24)|(parseInt(bytes[5],16)<<16)|(parseInt(bytes[6],16)<<8)|parseInt(bytes[7],16);
+                const clientId = (parseInt(bytes[8],16)<<8)|parseInt(bytes[9],16);
+                const sessionId = (parseInt(bytes[10],16)<<8)|parseInt(bytes[11],16);
+                const protoVer = parseInt(bytes[12],16);
+                const ifaceVer = parseInt(bytes[13],16);
+                const msgType = parseInt(bytes[14],16);
+                const retCode = parseInt(bytes[15],16);
+                const typeKey = '0x' + msgType.toString(16).toUpperCase().padStart(2,'0');
+                const typeInfo = SOMEIP_MSG_TYPES[typeKey];
+                const retKey = '0x' + retCode.toString(16).toUpperCase().padStart(2,'0');
+                const retInfo = SOMEIP_RETURN_CODES[retKey];
+                const isEvent = methodId >= 0x8000;
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                html += `<p><strong>Message ID:</strong> 0x${serviceId.toString(16).toUpperCase().padStart(4,'0')} 0x${methodId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                html += `<p>&nbsp;&nbsp;Service ID: 0x${serviceId.toString(16).toUpperCase().padStart(4,'0')} | ${isEvent ? 'Event' : 'Method'} ID: 0x${methodId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                html += `<p><strong>Length:</strong> ${length} 字节</p>`;
+                html += `<p><strong>Request ID:</strong> 0x${clientId.toString(16).toUpperCase().padStart(4,'0')} 0x${sessionId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                html += `<p>&nbsp;&nbsp;Client ID: 0x${clientId.toString(16).toUpperCase().padStart(4,'0')} | Session ID: 0x${sessionId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                html += `<p><strong>Protocol Version:</strong> 0x${protoVer.toString(16).toUpperCase().padStart(2,'0')}</p>`;
+                html += `<p><strong>Interface Version:</strong> 0x${ifaceVer.toString(16).toUpperCase().padStart(2,'0')}</p>`;
+                html += `<p><strong>Message Type:</strong> ${typeKey} ${typeInfo ? '— ' + typeInfo.name : '(未知)'}</p>`;
+                html += `<p><strong>Return Code:</strong> ${retKey} ${retInfo ? '— ' + retInfo.name : '(未知)'}</p>`;
+                if (bytes.length > 16) {
+                    const payload = bytes.slice(16);
+                    html += `<p><strong>Payload (${payload.length} B):</strong> ${payload.map(b=>'0x'+b.toUpperCase()).join(' ')}</p>`;
+                }
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function lookupMsgType() {
+                const input = document.getElementById('msgTypeInput').value.trim();
+                const result = document.getElementById('msgTypeResult');
+                const val = parseInt(input.replace(/0x/i,''), 16);
+                if (isNaN(val)) { result.innerHTML = '<p style="color:#dc3545;">请输入有效的十六进制消息类型</p>'; return; }
+                const key = '0x' + val.toString(16).toUpperCase().padStart(2,'0');
+                const info = SOMEIP_MSG_TYPES[key];
+                if (!info) { result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;"><p><strong>${key}</strong> — 未知消息类型</p></div>`; return; }
+                const catColor = info.category === '请求' ? '#788C5D' : info.category === '事件' ? '#E8A838' : info.category === '响应' ? '#6A9BCC' : '#9B7ACC';
+                result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">
+                    <h4 style="color:${catColor};margin-bottom:8px;">${key} — ${info.name}</h4>
+                    <p style="color:var(--text-3);font-size:0.85rem;">📂 ${info.category} | ${info.direction}</p>
+                    <p style="margin:8px 0;">${info.description}</p>
+                </div>`;
+            }
+
+            function lookupReturnCode() {
+                const input = document.getElementById('returnCodeInput').value.trim();
+                const result = document.getElementById('returnCodeResult');
+                const val = parseInt(input.replace(/0x/i,''), 16);
+                if (isNaN(val)) { result.innerHTML = '<p style="color:#dc3545;">请输入有效的十六进制返回码</p>'; return; }
+                const key = '0x' + val.toString(16).toUpperCase().padStart(2,'0');
+                const info = SOMEIP_RETURN_CODES[key];
+                if (!info) { result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;"><p><strong>${key}</strong> — 未知返回码</p></div>`; return; }
+                const color = val === 0 ? '#28a745' : '#dc3545';
+                result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">
+                    <h4 style="color:${color};margin-bottom:8px;">${key} — ${info.name}</h4>
+                    <p>${info.desc}</p>
+                </div>`;
+            }
+
+            function parseSdEntry() {
+                const input = document.getElementById('sdEntryInput').value.trim();
+                const result = document.getElementById('sdEntryResult');
+                if (!input) { result.innerHTML = '<p style="color:#dc3545;">请输入 SD Entry 十六进制</p>'; return; }
+                const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                if (!bytes || bytes.length < 4) { result.innerHTML = '<p style="color:#dc3545;">格式错误，至少需要 4 字节</p>'; return; }
+                const type = parseInt(bytes[0], 16);
+                const idx1st = parseInt(bytes[1], 16);
+                const idx2nd = parseInt(bytes[2], 16);
+                const numOfOpts = parseInt(bytes[3], 16);
+                let typeStr = '未知';
+                if (type === 0x00) typeStr = 'FindService';
+                else if (type === 0x01) typeStr = 'OfferService';
+                else if (type === 0x06) typeStr = 'SubscribeEventGroup';
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                html += `<p><strong>Entry Type:</strong> 0x${type.toString(16).toUpperCase().padStart(2,'0')} — ${typeStr}</p>`;
+                html += `<p><strong>Index 1st Option:</strong> ${idx1st}</p>`;
+                html += `<p><strong>Index 2nd Option:</strong> ${idx2nd}</p>`;
+                html += `<p><strong># Options:</strong> ${(numOfOpts >> 4) & 0x0F} / ${(numOfOpts) & 0x0F}</p>`;
+                if (bytes.length >= 12) {
+                    const svcId = (parseInt(bytes[4],16)<<8)|parseInt(bytes[5],16);
+                    const instId = (parseInt(bytes[6],16)<<8)|parseInt(bytes[7],16);
+                    const majorVer = (parseInt(bytes[8],16) >> 4) & 0x0F;
+                    const ttl = ((parseInt(bytes[8],16) & 0x0F) << 16) | (parseInt(bytes[9],16) << 8) | parseInt(bytes[10],16);
+                    html += `<p><strong>Service ID:</strong> 0x${svcId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                    html += `<p><strong>Instance ID:</strong> 0x${instId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                    html += `<p><strong>Major Version:</strong> ${majorVer}</p>`;
+                    html += `<p><strong>TTL:</strong> ${ttl} ${ttl === 0 ? '(停止/取消)' : '秒'}</p>`;
+                }
+                if (bytes.length >= 16 && (type === 0x01 || type === 0x00)) {
+                    const minorVer = (parseInt(bytes[12],16)<<24)|(parseInt(bytes[13],16)<<16)|(parseInt(bytes[14],16)<<8)|parseInt(bytes[15],16);
+                    html += `<p><strong>Minor Version:</strong> ${minorVer}</p>`;
+                }
+                html += `<p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 TTL=0 表示停止提供或取消订阅</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            // ==================== Quiz Functions ====================
+            function loadQuizQuestion() {
+                const area = document.getElementById('questionArea');
+                if (!area) return;
+                if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                    document.getElementById('quizResults').style.display = 'block';
+                    area.style.display = 'none';
+                    const pct = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+                    document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('percentage').textContent = pct + '%';
+                    return;
+                }
+                quizState.answered = false;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                let html = `<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}</div>`;
+                html += `<div style="display:flex;gap:4px;margin-bottom:16px;">`;
+                QUIZ_QUESTIONS.forEach((_, i) => { html += `<div style="flex:1;height:4px;border-radius:2px;background:${i < quizState.currentQuestion ? 'var(--accent)' : 'var(--border)'};"></div>`; });
+                html += `</div>`;
+                html += `<h3 style="margin-bottom:16px;font-size:1.1em;">${q.question}</h3>`;
+                q.options.forEach((opt, i) => {
+                    html += `<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${opt}</button>`;
+                });
+                html += `<div id="quizFeedback" style="margin-top:12px;"></div>`;
+                area.innerHTML = html;
+                area.style.display = 'block';
+                document.getElementById('quizResults').style.display = 'none';
+            }
+
+            function answerQuiz(idx) {
+                if (quizState.answered) return;
+                quizState.answered = true;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                const feedback = document.getElementById('quizFeedback');
+                for (let i = 0; i < q.options.length; i++) {
+                    const btn = document.getElementById('qopt' + i);
+                    if (i === q.correct) btn.classList.add('correct');
+                    if (i === idx && i !== q.correct) btn.classList.add('wrong');
+                    btn.classList.add('disabled');
+                }
+                if (idx === q.correct) {
+                    quizState.score++;
+                    feedback.innerHTML = `<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;
+                } else {
+                    feedback.innerHTML = `<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;
+                }
+                setTimeout(() => { quizState.currentQuestion++; loadQuizQuestion(); }, 2500);
+            }
+
+            function restartQuiz() {
+                quizState = { currentQuestion: 0, score: 0, answered: false };
+                loadQuizQuestion();
+            }
+
+            // Tab button event listeners
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => showTab(btn.dataset.tab));
+            });
+            </script>
+
+            <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </aside>
+        </div>
+    </div>
 </body>
 </html>

@@ -57,7 +57,7 @@
             <header class="hero">
                 <div class="container">
                     <h1 class="hero-title">理解汽车通信协议<br>从未如此直观</h1>
-                    <p class="hero-desc">通过可视化动画和交互式演示，15 分钟极速掌握 UDS、DoIP、CAN 等汽车通信协议的核心概念。</p>
+                    <p class="hero-desc">通过可视化动画和交互式演示，15 分钟极速掌握 UDS、DoIP、CAN、Ethernet、SOME/IP 等汽车通信协议的核心概念。</p>
                     <div class="hero-actions">
                         <a href="protocols/uds/" class="btn btn-primary">开始学习 UDS</a>
                         <a href="#protocols" class="btn btn-secondary">浏览全部协议</a>
@@ -86,12 +86,38 @@
                             <div class="protocol-standard">ISO 14229</div>
                         </a>
 
-                        <a class="protocol-card protocol-card--coming">
+                        <a href="protocols/can/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <div class="protocol-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
+                                </div>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">CAN</h3>
+                            <p class="protocol-fullname">控制器局域网络</p>
+                            <p class="protocol-desc">经典的车载网络通信协议，高可靠性、实时性的串行总线标准。</p>
+                            <div class="protocol-standard">ISO 11898</div>
+                        </a>
+
+                        <a href="protocols/ethernet/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <div class="protocol-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
+                                </div>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">Ethernet</h3>
+                            <p class="protocol-fullname">车载以太网</p>
+                            <p class="protocol-desc">车载高速通信网络的基础协议，支持 VLAN、TSN 等关键特性。</p>
+                            <div class="protocol-standard">IEEE 802.3</div>
+                        </a>
+
+                        <a href="protocols/doip/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
                                 <div class="protocol-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
                                 </div>
-                                <span class="protocol-status protocol-status--coming">开发中</span>
+                                <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">DoIP</h3>
                             <p class="protocol-fullname">基于 IP 的诊断</p>
@@ -99,30 +125,17 @@
                             <div class="protocol-standard">ISO 13400</div>
                         </a>
 
-                        <a class="protocol-card protocol-card--coming">
+                        <a href="protocols/someip/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
                                 <div class="protocol-icon">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
                                 </div>
-                                <span class="protocol-status protocol-status--coming">开发中</span>
+                                <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">SOME/IP</h3>
                             <p class="protocol-fullname">面向服务的中间件</p>
                             <p class="protocol-desc">下一代车载以太网通信架构，基于服务发现机制的中间件协议。</p>
                             <div class="protocol-standard">AUTOSAR</div>
-                        </a>
-
-                        <a class="protocol-card protocol-card--coming">
-                            <div class="protocol-card-header">
-                                <div class="protocol-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-                                </div>
-                                <span class="protocol-status protocol-status--coming">开发中</span>
-                            </div>
-                            <h3 class="protocol-name">CAN</h3>
-                            <p class="protocol-fullname">控制器局域网络</p>
-                            <p class="protocol-desc">经典的车载网络通信协议，高可靠性、实时性的串行总线标准。</p>
-                            <div class="protocol-standard">ISO 11898</div>
                         </a>
                     </div>
                 </div>

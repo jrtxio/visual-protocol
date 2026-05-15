@@ -1,347 +1,1015 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DoIP 协议 — Visual Protocol</title>
-  <meta name="description" content="DoIP 协议（ISO 13400）可视化学习指南：基于 IP 的诊断通信，远程诊断与 OTA 更新能力。">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DoIP 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 DoIP 协议学习平台 — 掌握基于 IP 的诊断通信核心原理">
+    <meta name="keywords" content="DoIP, ISO 13400, 车载以太网, 诊断通信, 远程诊断, OTA">
+    <meta property="og:title" content="Visual Protocol — DoIP 协议学习平台">
+    <meta property="og:description" content="交互式 DoIP 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/doip/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        :root {
+            --primary-gradient-start: #6A9BCC;
+            --primary-gradient-end: #4A7BAC;
+            --client-color: #6A9BCC; --server-color: #4A7BAC;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-gradient-start: #7DB4DD; --primary-gradient-end: #9BC8EB;
+                --client-color: #7DB4DD; --server-color: #9BC8EB;
+                --success-color: #86EFAC; --success-bg: #14532D;
+                --error-color: #FCA5A5; --error-bg: #7F1D1D;
+                --bg-card-light: #231F1D; --bg-light: #171412;
+                --border-light: #3D3835;
+                --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+            }
+        }
+        body[data-theme="light"] {
+            --primary-gradient-start: #6A9BCC; --primary-gradient-end: #4A7BAC;
+            --client-color: #6A9BCC; --server-color: #4A7BAC;
+            --bg-card-light: #FFFFFF; --bg-light: #F9F7F4;
+            --border-light: #E7E5E4;
+            --text-light-main: #1C1917; --text-light-secondary: #57534E;
+        }
+        body[data-theme="dark"] {
+            --primary-gradient-start: #7DB4DD; --primary-gradient-end: #9BC8EB;
+            --client-color: #7DB4DD; --server-color: #9BC8EB;
+            --bg-card-light: #231F1D; --bg-light: #171412;
+            --border-light: #3D3835;
+            --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+        }
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
 
-  <!-- AdSense -->
-  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 24px 0 32px; padding: 4px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; flex-wrap: wrap;
+        }
+        .tab-button {
+            padding: 10px 20px; background: transparent; color: var(--text-2);
+            border: none; border-radius: 100px; cursor: pointer;
+            font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif;
+            transition: all 0.15s; white-space: nowrap;
+        }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
 
-  <!-- Umami Analytics -->
-  <script async defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+        .content-section {
+            display: none; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 32px; margin-bottom: 32px;
+        }
+        .content-section.active { display: block; }
 
-  <style>
-    *, *::before, *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        .back-button, .theme-toggle, .header { display: none; }
 
-    :root {
-      --accent: #6A9BCC;
-      --accent-bg: #EFF6FF;
-      --bg: #F9F7F4;
-      --surface: #FFFFFF;
-      --text: #1C1917;
-      --text-2: #57534E;
-      --text-3: #A8A29E;
-      --border: #E7E5E4;
-    }
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; align-items: center; justify-content: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
+        }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
 
-    [data-theme="dark"] {
-      --accent: #7DB4DD;
-      --accent-bg: #1A2535;
-      --bg: #171412;
-      --surface: #231F1D;
-      --text: #E7E5E4;
-      --text-2: #A8A29E;
-      --text-3: #78716C;
-      --border: #3D3835;
-    }
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 14px 18px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em;
+            transition: all 0.15s;
+        }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
 
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-family: "SF Mono","Fira Code",monospace;
+        }
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button {
+            padding: 10px 20px; background: var(--accent); color: #FFF;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
+        }
+        .tool-button:hover { opacity: 0.9; }
 
-    /* Navigation */
-    .nav {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background-color: var(--surface);
-      border-bottom: 1px solid var(--border);
-      padding: 0 24px;
-      height: 56px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th {
+            text-align: left; padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border);
+        }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
 
-    .nav-left {
-      display: flex;
-      align-items: center;
-      gap: 24px;
-    }
+        /* Device Topology */
+        .device-topology {
+            display: flex; align-items: center; justify-content: center;
+            margin: 32px 0; gap: 0; position: relative;
+        }
+        .device-node {
+            width: 140px; height: 90px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .device-node .device-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .device-node .device-name { font-size: 0.85rem; margin-bottom: 2px; }
+        .device-node .device-status { font-size: 0.7rem; opacity: 0.9; }
+        .device-client { background: linear-gradient(135deg, #6A9BCC, #4A7BAC); }
+        .device-server { background: linear-gradient(135deg, #4A7BAC, #3A6B9C); }
+        .connection-line {
+            width: 120px; height: 4px;
+            background: linear-gradient(90deg, #6A9BCC, #4A7BAC);
+            border-radius: 2px; position: relative;
+        }
+        .connection-line.active { animation: connPulse 1s infinite; }
+        .packet-indicator {
+            position: absolute; width: 12px; height: 12px; background: #FFF;
+            border-radius: 50%; top: -4px; left: 0; opacity: 0;
+            box-shadow: 0 0 8px rgba(106,155,204,0.5);
+        }
+        .connection-line.active .packet-indicator {
+            opacity: 1; animation: packetMove 1.5s infinite;
+        }
 
-    .nav-logo {
-      font-weight: 700;
-      font-size: 18px;
-      color: var(--text);
-      text-decoration: none;
-      letter-spacing: -0.02em;
-    }
+        .log {
+            background: #111; color: #0f0; padding: 24px;
+            border-radius: 12px; font-family: 'Courier New', monospace;
+            text-align: left; max-width: 100%; margin: 24px auto;
+            min-height: 150px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #3a3a38; font-size: 0.875rem;
+        }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; }
+        .log-warning { color: #FFD700; }
+        .log-error { color: #FF6B6B; }
 
-    .nav-logo:hover {
-      color: var(--accent);
-    }
+        .demo-controls {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px;
+            background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    .nav-link {
-      font-size: 14px;
-      color: var(--text-2);
-      text-decoration: none;
-      transition: color 0.15s;
-    }
+        .frame-field-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); cursor: pointer; transition: all 0.15s;
+            margin-bottom: 8px;
+        }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta {
+            display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3);
+        }
 
-    .nav-link:hover {
-      color: var(--accent);
-    }
+        .concept-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg);
+        }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
 
-    .theme-toggle {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      width: 36px;
-      height: 36px;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--text-2);
-      transition: all 0.15s;
-    }
+        .protocol-stack-layer {
+            color: white; padding: 12px; border-radius: 8px;
+            text-align: center; margin-bottom: 4px;
+            transition: all 0.3s; cursor: default;
+        }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
 
-    .theme-toggle:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white; padding: 24px; border-radius: 12px;
+            margin: 16px 0; text-align: center;
+        }
 
-    .theme-toggle svg {
-      width: 18px;
-      height: 18px;
-    }
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        @keyframes connPulse { 0%{box-shadow:0 0 8px rgba(106,155,204,0.3)}50%{box-shadow:0 0 20px rgba(106,155,204,0.6)}100%{box-shadow:0 0 8px rgba(106,155,204,0.3)} }
+        @keyframes packetMove { 0%{left:0;opacity:1}100%{left:calc(100% - 12px);opacity:1} }
+        .device-node.pulse { animation: pulse 1s infinite; }
 
-    /* Main Content */
-    .main {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 80px 24px 120px;
-    }
-
-    .page-header {
-      text-align: center;
-      margin-bottom: 48px;
-    }
-
-    .page-title {
-      font-size: 36px;
-      font-weight: 700;
-      letter-spacing: -0.03em;
-      margin-bottom: 12px;
-      color: var(--text);
-    }
-
-    .page-subtitle {
-      font-size: 16px;
-      color: var(--text-2);
-      font-weight: 400;
-    }
-
-    /* Card */
-    .card {
-      background-color: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 48px;
-      max-width: 600px;
-      width: 100%;
-      text-align: center;
-    }
-
-    .badge {
-      display: inline-block;
-      background-color: var(--accent-bg);
-      color: var(--accent);
-      font-size: 13px;
-      font-weight: 600;
-      padding: 6px 16px;
-      border-radius: 100px;
-      margin-bottom: 24px;
-      letter-spacing: 0.02em;
-    }
-
-    .card-description {
-      font-size: 15px;
-      color: var(--text-2);
-      line-height: 1.7;
-      margin-bottom: 32px;
-    }
-
-    .card-divider {
-      height: 1px;
-      background-color: var(--border);
-      margin: 0 -48px 32px;
-    }
-
-    .features-label {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text-3);
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin-bottom: 20px;
-    }
-
-    .features-list {
-      list-style: none;
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .features-list li {
-      font-size: 14px;
-      color: var(--text-2);
-      padding-left: 24px;
-      position: relative;
-      line-height: 1.6;
-    }
-
-    .features-list li::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 9px;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background-color: var(--accent);
-    }
-
-    /* Ad container */
-    .ad-container {
-      margin-top: 48px;
-      max-width: 600px;
-      width: 100%;
-    }
-
-    /* Responsive */
-    @media (max-width: 640px) {
-      .main {
-        padding: 48px 16px 80px;
-      }
-
-      .page-title {
-        font-size: 28px;
-      }
-
-      .card {
-        padding: 32px 24px;
-      }
-
-      .card-divider {
-        margin: 0 -24px 24px;
-      }
-    }
-  </style>
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.5em; }
+            .content-section { padding: 20px; }
+            .tab-button { padding: 8px 12px; font-size: 0.82em; }
+            .device-topology { flex-direction: column; gap: 8px; }
+            .connection-line { width: 4px; height: 40px; }
+            .connection-line.active .packet-indicator { animation: packetMoveV 1.5s infinite; }
+        }
+        @media (max-width: 480px) {
+            .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; }
+        }
+        @keyframes packetMoveV { 0%{top:0;left:-4px;opacity:1}100%{top:calc(100% - 12px);left:-4px;opacity:1} }
+    </style>
 </head>
 <body>
-  <!-- Navigation -->
-  <nav class="nav">
-    <div class="nav-left">
-      <a href="../../index.html" class="nav-logo">Visual Protocol</a>
-      <a href="../../index.html" class="nav-link">返回主页</a>
+    <nav class="site-nav">
+        <div class="nav-inner container-wide">
+            <a href="../../index.html" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span>Visual Protocol</span>
+            </a>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-back">返回主页</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <div class="container">
+                <header class="page-header">
+                    <h1>DoIP 协议学习</h1>
+                    <p>基于 IP 的诊断 — ISO 13400 — 从车辆发现到远程诊断</p>
+                </header>
+
+                <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                    <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                    <button class="tab-button" role="tab" data-tab="frames">报文详解</button>
+                    <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                    <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                    <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+                </nav>
+
+                <!-- ===== Tab 1: 基础概念 ===== -->
+                <section id="basics-tab" class="content-section active" role="tabpanel">
+                    <h2 class="section-title">DoIP 协议基础概念</h2>
+                    <p>DoIP（Diagnosis over Internet Protocol）是 ISO 13400 定义的车载以太网诊断协议，通过 TCP/IP 承载 UDS 诊断服务，实现高速远程诊断和 OTA 更新。</p>
+
+                    <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                        <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card"><h4>🌐 网络角色</h4><p>5 种角色：DoIP 节点（外部 Tester）、DoIP 网关（车辆侧协议转换）、外部测试设备（运行诊断软件）、车辆节点（车内 ECU）、车内 ECU（被诊断目标）。网关是以太网和车内总线的桥梁。</p></div>
+                            <div class="concept-card"><h4>📈 vs CAN 诊断</h4><p>带宽从 CAN 的 500kbps 跃升至 100Mbps，支持远程诊断（通过互联网接入）、多路并发诊断会话、大文件 OTA 固件更新。CAN 诊断受限于物理连接和带宽，DoIP 打破了这些限制。</p></div>
+                            <div class="concept-card"><h4>🔗 TCP/IP 传输</h4><p>TCP 端口 13400 用于大数据量诊断通信（可靠传输），UDP 端口 13400 用于车辆发现和节点公告（无连接、低延迟）。TCP 确保诊断消息可靠到达，UDP 用于广播发现。</p></div>
+                            <div class="concept-card"><h4>📋 协议版本</h4><p>当前主流版本 ISO 13400-2:2019，协议版本号 0x02。相比 0x01 版本增加了安全认证、改进了路由激活流程、支持更大负载长度。新旧版本通过逆版本号区分。</p></div>
+                            <div class="concept-card"><h4>🔍 车辆发现</h4><p>Tester 通过 UDP 广播发送车辆识别请求（Payload Type 0x0001），车辆节点响应车辆声明消息（0x0004），包含 VIN、EID（Entity ID）、GID（Group ID）和逻辑地址等关键信息。</p></div>
+                            <div class="concept-card"><h4>🔑 路由激活</h4><p>Tester 通过路由激活请求（0x0005）与目标 ECU 建立诊断路由。网关验证 Tester 的源地址后返回激活响应（0x0006），支持认证激活类型（如 0x01 Default、0x0E 中央安全）。</p></div>
+                            <div class="concept-card"><h4>💓 存活检查</h4><p>网关周期性发送存活检查请求（0x0007），Tester 必须在超时时间内响应存活检查响应（0x0008）。超时未响应则网关断开 TCP 连接，释放诊断资源。</p></div>
+                            <div class="concept-card"><h4>🔧 诊断通信</h4><p>激活路由后，Tester 通过诊断消息（0x8001）发送 UDS 请求（如 ReadDataByIdentifier 0x22），网关将 DoIP 消息解封装后通过车内总线转发至目标 ECU，再将响应封装回 DoIP 返回。</p></div>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                        <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:12px;">DoIP 协议栈从上到下共 5 层，UDS 诊断服务通过 DoIP 封装后经 TCP/IP 在以太网上传输。</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;">
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#6A9BCC,#4A7BAC);width:260px;"><div class="layer-name">UDS 诊断服务</div><div class="layer-desc">ISO 14229 诊断请求/响应</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#5A8AB5,#4A7A9B);width:260px;"><div class="layer-name">DoIP 协议</div><div class="layer-desc">ISO 13400 消息封装/解封</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#E8A838,#C88818);width:260px;"><div class="layer-name">TCP / UDP</div><div class="layer-desc">传输层 (端口 13400)</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#788C5D,#5C6D47);width:260px;"><div class="layer-name">IPv4</div><div class="layer-desc">网络层寻址与路由</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#607D8B,#455A64);width:260px;"><div class="layer-name">Ethernet</div><div class="layer-desc">物理链路 (100BASE-T1)</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 2: 报文详解 ===== -->
+                <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">📡 DoIP 报文类型详解</h2>
+                    <p>DoIP 消息由固定 8 字节头部 + 可变负载组成，点击卡片查看详细字段</p>
+                    <div id="messageTypesGrid"></div>
+                </section>
+
+                <!-- ===== Tab 3: 交互演示 ===== -->
+                <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🎮 DoIP 诊断交互演示</h2>
+                    <p>观察 DoIP 协议从车辆发现到诊断通信的完整流程</p>
+
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo('discovery')">🔍 车辆发现</button>
+                        <button class="demo-btn" onclick="startDemo('routing')">🔑 路由激活</button>
+                        <button class="demo-btn" onclick="startDemo('alive')">💓 存活检查</button>
+                        <button class="demo-btn" onclick="startDemo('diagnostic')">🔧 诊断通信</button>
+                        <button class="demo-btn" onclick="startDemo('fullflow')">📋 完整流程</button>
+                        <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                    </div>
+
+                    <div class="device-topology">
+                        <div class="device-node device-client" id="tester">
+                            <div class="device-icon">🖥️</div>
+                            <div class="device-name">Tester</div>
+                            <div class="device-status" id="testerStatus">就绪</div>
+                        </div>
+                        <div class="connection-line" id="connLine">
+                            <div class="packet-indicator"></div>
+                        </div>
+                        <div class="device-node device-server" id="gateway">
+                            <div class="device-icon">🚗</div>
+                            <div class="device-name">Vehicle GW</div>
+                            <div class="device-status" id="gatewayStatus">就绪</div>
+                        </div>
+                    </div>
+
+                    <div id="commLog" class="log">
+                        <div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">💡 点击上方按钮开始 DoIP 通信演示...</span></div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 4: 实用工具 ===== -->
+                <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🛠️ DoIP 实用工具集</h2>
+                    <p>为 DoIP 协议开发和调试提供专业工具支持</p>
+
+                    <div style="display:grid;gap:24px;margin:24px 0;">
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📊 DoIP 消息解析器</h3>
+                            <p>解析十六进制格式的 DoIP 消息，显示头部和负载信息</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="doipMsgInput" placeholder="输入十六进制 (如: 02 FD 00 01 00 00 00 00)" style="flex:1;min-width:200px;" aria-label="DoIP消息输入">
+                                <button class="tool-button" onclick="parseDoIPMessage()">解析</button>
+                            </div>
+                            <div id="parseResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📋 负载类型查询</h3>
+                            <p>输入负载类型代码，查询对应的 DoIP 消息名称和描述</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="payloadTypeInput" placeholder="负载类型 (如: 0x0001, 0x8001)" style="flex:1;min-width:200px;" aria-label="负载类型输入">
+                                <button class="tool-button" onclick="lookupPayloadType()">查询</button>
+                            </div>
+                            <div id="payloadTypeResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔢 逻辑地址分析器</h3>
+                            <p>输入逻辑地址，分析地址类型和所属节点</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="addrInput" placeholder="逻辑地址 (如: 0x0E00, 0x1000)" style="flex:1;min-width:200px;" aria-label="逻辑地址输入">
+                                <button class="tool-button" onclick="analyzeAddress()">分析</button>
+                            </div>
+                            <div id="addrResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔌 端口参考</h3>
+                            <p>DoIP 协议使用的端口和传输协议参考</p>
+                            <div id="portRefResult" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 5: 知识测试 ===== -->
+                <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🧠 DoIP 协议知识测试</h2>
+                    <div id="questionArea"></div>
+                    <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                        <div class="results-box">
+                            <h3>🎯 测试完成！</h3>
+                            <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div>
+                            <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                        </div>
+                        <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                    </div>
+                </section>
+
+            <script>
+            // ==================== State ====================
+            let currentTab = 'basics';
+            let quizState = { currentQuestion: 0, score: 0, answered: false };
+            let demoActive = false;
+
+            // ==================== DoIP Message Types Data ====================
+            const DOIP_MESSAGE_TYPES = {
+                '0x0000': {
+                    name: '通用 DoIP 头否定确认', category: '节点管理',
+                    description: '当接收方检测到 DoIP 头部格式错误时返回此消息，包含否定确认码指明具体错误原因。',
+                    fields: [
+                        { name: 'NACK Code', bytes: '1', desc: '否定确认码：0x00=不正确的模式, 0x01=未知负载类型, 0x02=消息过长, 0x03=消息过短, 0x04=其他' }
+                    ],
+                    notes: 'Tester 收到 NACK 后应检查发送的 DoIP 头部格式是否正确'
+                },
+                '0x0001': {
+                    name: '车辆识别请求', category: '节点管理',
+                    description: 'Tester 通过 UDP 广播发送此消息以发现网络中的车辆节点。无需负载，所有监听 13400 端口的 DoIP 实体都会响应。',
+                    fields: [],
+                    notes: '使用 UDP 广播地址发送，目标端口 13400'
+                },
+                '0x0002': {
+                    name: '车辆识别请求 (EID)', category: '节点管理',
+                    description: '根据已知的 EID（Entity ID，即 MAC 地址）查询特定车辆节点。用于已知目标 MAC 地址的场景。',
+                    fields: [
+                        { name: 'EID', bytes: '6', desc: '目标实体的 MAC 地址' }
+                    ],
+                    notes: 'EID 通常为车辆网络接口的 MAC 地址'
+                },
+                '0x0003': {
+                    name: '车辆识别请求 (VIN)', category: '节点管理',
+                    description: '根据已知的 VIN（车辆识别号）查询特定车辆节点。用于已知车辆 VIN 的远程诊断场景。',
+                    fields: [
+                        { name: 'VIN', bytes: '17', desc: '车辆识别号（ASCII 编码）' }
+                    ],
+                    notes: 'VIN 为 17 位 ASCII 字符，是全球唯一的车辆标识'
+                },
+                '0x0004': {
+                    name: '车辆声明消息', category: '节点管理',
+                    description: '车辆节点对识别请求的响应，或启动时主动公告。包含车辆核心标识信息。',
+                    fields: [
+                        { name: 'VIN', bytes: '17', desc: '车辆识别号' },
+                        { name: 'Logical Address', bytes: '2', desc: '车辆节点的逻辑地址' },
+                        { name: 'EID', bytes: '6', desc: '实体 ID（MAC 地址）' },
+                        { name: 'GID', bytes: '6', desc: '组 ID（同组车辆共享）' },
+                        { name: 'Further Action', bytes: '1', desc: '后续动作指示：0x00=无, 0x10=路由激活需要中央安全' },
+                        { name: 'VIN/GID Sync Status', bytes: '1', desc: '同步状态：0x00=未知, 0x10=已同步' }
+                    ],
+                    notes: '启动后车辆会自动发送 3 次公告（间隔 500ms）'
+                },
+                '0x0005': {
+                    name: '路由激活请求', category: '节点管理',
+                    description: 'Tester 请求与车辆网关建立诊断路由，这是进行诊断通信的前提条件。',
+                    fields: [
+                        { name: 'Source Address', bytes: '2', desc: 'Tester 的源逻辑地址' },
+                        { name: 'Activation Type', bytes: '1', desc: '激活类型：0x00=Default, 0x01=DDD, 0x0E=中央安全, 0x0F=中央安全+DDD' },
+                        { name: 'Reserved', bytes: '4', desc: '保留字段，填 0x00000000' },
+                        { name: 'OEM Reserved', bytes: '4', desc: 'OEM 自定义字段（可选）' }
+                    ],
+                    notes: '激活类型 0x0E/0x0F 需要安全认证，常见于生产环境'
+                },
+                '0x0006': {
+                    name: '路由激活响应', category: '节点管理',
+                    description: '网关对路由激活请求的响应，告知 Tester 激活是否成功。',
+                    fields: [
+                        { name: 'Client Logical Address', bytes: '2', desc: 'Tester 的逻辑地址（回显）' },
+                        { name: 'Logical Address', bytes: '2', desc: '网关/目标 ECU 的逻辑地址' },
+                        { name: 'Response Code', bytes: '1', desc: '响应码：0x00=成功, 0x01=未知源地址, 0x02=未知激活类型, 0x03=路由已激活, 0x04=认证需要, 0x05=认证失败, 0x06=已注册路由激活' },
+                        { name: 'Reserved', bytes: '4', desc: '保留字段' }
+                    ],
+                    notes: 'Response Code 0x00 表示路由激活成功，可以开始诊断通信'
+                },
+                '0x0007': {
+                    name: '存活检查请求', category: '节点管理',
+                    description: '网关或 Tester 发送存活检查请求，验证对端是否仍然在线。',
+                    fields: [],
+                    notes: '网关通常每 30 秒发送一次存活检查'
+                },
+                '0x0008': {
+                    name: '存活检查响应', category: '节点管理',
+                    description: '对存活检查请求的响应，表示本端仍然在线。',
+                    fields: [],
+                    notes: '必须在超时时间内响应（通常 2 秒），否则连接会被断开'
+                },
+                '0x8001': {
+                    name: '诊断消息', category: '诊断通信',
+                    description: '承载 UDS 诊断请求或响应的核心消息类型。Tester 发送 UDS 请求，ECU 通过此类型返回 UDS 响应。',
+                    fields: [
+                        { name: 'Source Address', bytes: '2', desc: '发送方的逻辑地址' },
+                        { name: 'Target Address', bytes: '2', desc: '接收方的逻辑地址' },
+                        { name: 'UDS Payload', bytes: '变长', desc: '完整的 UDS 诊断报文（服务 ID + 参数 + 数据）' }
+                    ],
+                    notes: '这是 DoIP 最核心的消息类型，承载所有 UDS 诊断交互'
+                },
+                '0x8002': {
+                    name: '诊断消息否定确认', category: '诊断通信',
+                    description: '网关无法转发诊断消息时返回此消息，包含否定确认码说明原因。',
+                    fields: [
+                        { name: 'Source Address', bytes: '2', desc: '原始发送方地址' },
+                        { name: 'Target Address', bytes: '2', desc: '原始目标地址' },
+                        { name: 'NACK Code', bytes: '1', desc: '否定码：0x02=未知目标地址, 0x03=消息过长, 0x04=消息过短, 0x05=路由未激活, 0x06=目标未连接' }
+                    ],
+                    notes: '常见原因：路由未激活（0x05）或目标 ECU 不存在（0x02）'
+                },
+                '0x8003': {
+                    name: '诊断消息肯定确认', category: '诊断通信',
+                    description: '网关确认已成功转发诊断消息至目标 ECU。发送方收到此确认后等待 ECU 的实际诊断响应。',
+                    fields: [
+                        { name: 'Source Address', bytes: '2', desc: '原始发送方地址' },
+                        { name: 'Target Address', bytes: '2', desc: '原始目标地址' }
+                    ],
+                    notes: 'ACK 仅表示网关成功转发，不代表 ECU 已处理完成'
+                },
+                '0x4001': {
+                    name: '节点电源模式信息请求', category: '状态查询',
+                    description: '查询 DoIP 实体的当前电源模式状态。',
+                    fields: [],
+                    notes: '可了解车辆是否处于休眠状态'
+                },
+                '0x4002': {
+                    name: '节点电源模式信息响应', category: '状态查询',
+                    description: '返回当前节点的电源模式。',
+                    fields: [
+                        { name: 'Power Mode', bytes: '1', desc: '电源模式：0x00=未就绪, 0x01=就绪, 0x02=未支持' }
+                    ],
+                    notes: '电源模式影响诊断服务的可用性'
+                },
+                '0x4003': {
+                    name: '实体状态请求', category: '状态查询',
+                    description: '查询 DoIP 实体的详细状态信息，包括最大并发连接数、当前连接数和节点类型。',
+                    fields: [],
+                    notes: '用于了解网关的负载情况'
+                },
+                '0x4004': {
+                    name: '实体状态响应', category: '状态查询',
+                    description: '返回 DoIP 实体的详细状态信息。',
+                    fields: [
+                        { name: 'Node Type', bytes: '1', desc: '节点类型：0x00=网关, 0x01=节点' },
+                        { name: 'Max Concurrent Sockets', bytes: '1', desc: '最大并发 TCP 连接数' },
+                        { name: 'Currently Open Sockets', bytes: '1', desc: '当前已打开的 TCP 连接数' }
+                    ],
+                    notes: '可据此判断网关是否还能接受新的诊断连接'
+                }
+            };
+
+            // ==================== Quiz Data ====================
+            const QUIZ_QUESTIONS = [
+                { question: 'DoIP 协议的标准编号是什么？', options: ['ISO 14229','ISO 13400','ISO 11898','ISO 15765'], correct: 1, explanation: 'DoIP（Diagnosis over Internet Protocol）的标准编号是 ISO 13400。ISO 14229 是 UDS，ISO 11898 是 CAN，ISO 15765 是 CAN 上的诊断（DoCAN）。' },
+                { question: 'DoIP 头部的固定长度是多少字节？', options: ['4 字节','8 字节','12 字节','16 字节'], correct: 1, explanation: 'DoIP 头部固定 8 字节：协议版本(1B) + 逆版本(1B) + 负载类型(2B) + 负载长度(4B)。' },
+                { question: 'DoIP 诊断通信使用的 TCP 端口号是？', options: ['13400','15765','6801','8080'], correct: 0, explanation: 'DoIP 使用 TCP 端口 13400 进行诊断通信，UDP 端口 13400 用于车辆发现。' },
+                { question: '车辆发现过程使用哪种传输协议？', options: ['TCP','UDP','ICMP','ARP'], correct: 1, explanation: '车辆发现使用 UDP 广播（端口 13400），因为发现过程不需要可靠传输，且需要广播能力。' },
+                { question: '路由激活请求的负载类型代码是？', options: ['0x0001','0x0004','0x0005','0x8001'], correct: 2, explanation: '路由激活请求的 Payload Type 是 0x0005，响应是 0x0006。' },
+                { question: 'DoIP 头部中"逆协议版本"字段的作用是什么？', options: ['标识协议版本','与协议版本取反用于校验头部完整性','标识消息方向','标识负载类型'], correct: 1, explanation: '逆协议版本是协议版本值的按位取反（如版本 0x02 对应逆版本 0xFD），用于校验头部是否被正确接收。' },
+                { question: '存活检查的超时后会发生什么？', options: ['自动重试','网关断开 TCP 连接','切换到 UDP','忽略超时'], correct: 1, explanation: '如果 Tester 未在超时时间内响应存活检查，网关会断开 TCP 连接并释放诊断资源。' },
+                { question: 'DoIP 诊断消息 (0x8001) 的负载首先包含什么？', options: ['UDS 服务 ID','源逻辑地址 + 目标逻辑地址','协议版本','消息长度'], correct: 1, explanation: '诊断消息负载前 4 字节是源地址(2B) + 目标地址(2B)，然后才是 UDS 诊断报文。' },
+                { question: '哪个负载类型用于承载 UDS 诊断请求？', options: ['0x0001','0x0005','0x8001','0x8003'], correct: 2, explanation: '0x8001 是诊断消息类型，承载 UDS 诊断请求和响应。0x0001 是车辆识别请求，0x0005 是路由激活请求。' },
+                { question: '路由激活响应码 0x05 表示什么？', options: ['激活成功','未知源地址','需要安全认证','认证失败'], correct: 3, explanation: '响应码 0x05 表示认证失败（authentication failed）。0x04 表示需要认证，0x00 表示成功。' },
+                { question: '车辆声明消息 (0x0004) 包含以下哪个字段？', options: ['UDS 服务 ID','CRC 校验码','VIN 和逻辑地址','IP 地址'], correct: 2, explanation: '车辆声明消息包含 VIN(17B)、逻辑地址(2B)、EID(6B)、GID(6B) 等车辆标识信息。' },
+                { question: 'DoIP 相比 CAN 诊断的主要优势是什么？', options: ['更低的成本','更高的带宽和支持远程诊断','更简单的协议','不需要网关'], correct: 1, explanation: 'DoIP 基于以太网，带宽可达 100Mbps（vs CAN 500kbps），且支持通过互联网进行远程诊断和大文件 OTA 更新。' }
+            ];
+
+            // ==================== Theme & Tab ====================
+            function toggleTheme() {
+                const body = document.body;
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const t = localStorage.getItem('theme') || 'light';
+                if (t === 'dark') document.body.setAttribute('data-theme','dark');
+                else document.body.removeAttribute('data-theme');
+                renderMessageTypes();
+                loadQuizQuestion();
+                renderPortRef();
+            });
+            function showTab(tabName) {
+                document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.hidden = true; });
+                document.querySelectorAll('.tab-button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+                const sec = document.getElementById(tabName + '-tab');
+                if (sec) { sec.classList.add('active'); sec.hidden = false; }
+                const btn = document.querySelector(`[data-tab="${tabName}"]`);
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+                currentTab = tabName;
+            }
+
+            // ==================== Render Message Types ====================
+            function renderMessageTypes() {
+                const grid = document.getElementById('messageTypesGrid');
+                if (!grid) return;
+                let html = '';
+                Object.entries(DOIP_MESSAGE_TYPES).forEach(([key, msg]) => {
+                    const catColor = msg.category === '节点管理' ? '#6A9BCC' : msg.category === '诊断通信' ? '#4A7BAC' : '#788C5D';
+                    html += `<div class="frame-field-card" onclick="showMsgModal('${key}')">
+                        <h4 style="color:${catColor};">${key} — ${msg.name}</h4>
+                        <p>${msg.description.substring(0, 90)}...</p>
+                        <div class="field-meta"><span>📂 ${msg.category}</span><span>📋 ${msg.fields.length} 个字段</span><span>点击查看详情</span></div>
+                    </div>`;
+                });
+                grid.innerHTML = html;
+            }
+
+            function showMsgModal(key) {
+                const m = DOIP_MESSAGE_TYPES[key];
+                if (!m) return;
+                let fieldsHtml = m.fields.length > 0
+                    ? m.fields.map(f => `<tr><td style="font-weight:600;">${f.name}</td><td>${f.bytes} B</td><td>${f.desc}</td></tr>`).join('')
+                    : '<tr><td colspan="3" style="text-align:center;">无额外负载字段</td></tr>';
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${key} — ${m.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:4px;font-size:0.85rem;">📂 ${m.category}</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${m.description}</p>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">负载字段</h4>
+                    <table style="font-size:0.85rem;margin-bottom:16px;"><tr><th>字段</th><th>字节</th><th>说明</th></tr>${fieldsHtml}</table>
+                    <div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${m.notes}</div>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            // ==================== Demo Functions ====================
+            function addLog(msg, type) {
+                const log = document.getElementById('commLog');
+                const now = new Date();
+                const ts = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+                const cls = type === 'warning' ? 'log-warning' : type === 'error' ? 'log-error' : 'log-info';
+                log.innerHTML += `<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${msg}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+            function setStatus(id, text) {
+                const el = document.getElementById(id + 'Status');
+                if (el) el.textContent = text;
+            }
+            function resetDemo() {
+                demoActive = false;
+                ['tester','gateway'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.classList.remove('pulse');
+                    setStatus(id, '就绪');
+                });
+                const conn = document.getElementById('connLine');
+                if (conn) conn.classList.remove('active');
+                const log = document.getElementById('commLog');
+                log.innerHTML = '<div class="log-entry"><span class="log-timestamp">[00:00:00]</span><span class="log-info">🔄 演示已重置，点击按钮开始新的演示</span></div>';
+            }
+
+            function startDemo(type) {
+                if (demoActive) return;
+                demoActive = true;
+                resetDemo();
+                demoActive = true;
+                const conn = document.getElementById('connLine');
+                if (conn) conn.classList.add('active');
+
+                if (type === 'discovery') demoDiscovery();
+                else if (type === 'routing') demoRouting();
+                else if (type === 'alive') demoAlive();
+                else if (type === 'diagnostic') demoDiagnostic();
+                else if (type === 'fullflow') demoFullFlow();
+            }
+
+            function demoDiscovery() {
+                addLog('🔍 车辆发现演示开始', 'info');
+                setTimeout(() => {
+                    const t = document.getElementById('tester');
+                    if (t) t.classList.add('pulse');
+                    setStatus('tester', '广播发现...');
+                    addLog('📤 [Tester] 发送车辆识别请求 (UDP 广播, PT 0x0001)','info');
+                    addLog('   → DoIP Header: 02 FD 00 01 00 00 00 00','info');
+                }, 500);
+                setTimeout(() => {
+                    addLog('📡 UDP 广播发送至 255.255.255.255:13400','info');
+                }, 1200);
+                setTimeout(() => {
+                    const g = document.getElementById('gateway');
+                    if (g) g.classList.add('pulse');
+                    setStatus('gateway', '响应中...');
+                    addLog('📥 [Vehicle GW] 收到识别请求','info');
+                }, 2000);
+                setTimeout(() => {
+                    addLog('📤 [Vehicle GW] 发送车辆声明消息 (PT 0x0004)','info');
+                    addLog('   → VIN: WBA12345678901234','info');
+                    addLog('   → Logical Address: 0x0E00','info');
+                    addLog('   → EID: AA:BB:CC:DD:EE:FF','info');
+                    addLog('   → GID: 11:22:33:44:55:66','info');
+                }, 2800);
+                setTimeout(() => {
+                    setStatus('tester', '发现完成');
+                    setStatus('gateway', '已声明');
+                    const t = document.getElementById('tester'); const g = document.getElementById('gateway');
+                    if (t) t.classList.remove('pulse'); if (g) g.classList.remove('pulse');
+                    addLog('✅ 车辆发现完成！Tester 已获取车辆信息','info');
+                    demoActive = false;
+                }, 4000);
+            }
+
+            function demoRouting() {
+                addLog('🔑 路由激活演示开始', 'info');
+                setTimeout(() => {
+                    const t = document.getElementById('tester');
+                    if (t) t.classList.add('pulse');
+                    setStatus('tester', '请求激活...');
+                    addLog('📤 [Tester] TCP 连接建立 → 192.168.0.1:13400','info');
+                    addLog('📤 [Tester] 路由激活请求 (PT 0x0005)','info');
+                    addLog('   → Source Address: 0x0E80 (Tester)','info');
+                    addLog('   → Activation Type: 0x00 (Default)','info');
+                }, 500);
+                setTimeout(() => {
+                    const g = document.getElementById('gateway');
+                    if (g) g.classList.add('pulse');
+                    setStatus('gateway', '验证中...');
+                    addLog('📥 [Vehicle GW] 收到路由激活请求','info');
+                    addLog('🔑 验证源地址 0x0E80...','warning');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('gateway', '激活成功');
+                    addLog('📤 [Vehicle GW] 路由激活响应 (PT 0x0006)','info');
+                    addLog('   → Client Address: 0x0E80','info');
+                    addLog('   → Gateway Address: 0x0E00','info');
+                    addLog('   → Response Code: 0x00 (路由激活成功)','info');
+                }, 2500);
+                setTimeout(() => {
+                    setStatus('tester', '路由已激活');
+                    const t = document.getElementById('tester'); const g = document.getElementById('gateway');
+                    if (t) t.classList.remove('pulse'); if (g) g.classList.remove('pulse');
+                    addLog('✅ 路由激活完成！现在可以进行诊断通信','info');
+                    demoActive = false;
+                }, 3800);
+            }
+
+            function demoAlive() {
+                addLog('💓 存活检查演示开始', 'info');
+                setTimeout(() => {
+                    const g = document.getElementById('gateway');
+                    if (g) g.classList.add('pulse');
+                    setStatus('gateway', '发送检查...');
+                    addLog('📤 [Vehicle GW] 存活检查请求 (PT 0x0007)','info');
+                }, 500);
+                setTimeout(() => {
+                    setStatus('tester', '响应中...');
+                    addLog('📥 [Tester] 收到存活检查请求','info');
+                }, 1500);
+                setTimeout(() => {
+                    const t = document.getElementById('tester');
+                    if (t) t.classList.add('pulse');
+                    addLog('📤 [Tester] 存活检查响应 (PT 0x0008)','info');
+                    setStatus('tester', '在线');
+                    setStatus('gateway', '确认存活');
+                }, 2200);
+                setTimeout(() => {
+                    const t = document.getElementById('tester'); const g = document.getElementById('gateway');
+                    if (t) t.classList.remove('pulse'); if (g) g.classList.remove('pulse');
+                    addLog('✅ 存活检查通过，连接保持正常','info');
+                    demoActive = false;
+                }, 3500);
+            }
+
+            function demoDiagnostic() {
+                addLog('🔧 诊断通信演示开始', 'info');
+                setTimeout(() => {
+                    const t = document.getElementById('tester');
+                    if (t) t.classList.add('pulse');
+                    setStatus('tester', '发送 UDS...');
+                    addLog('📤 [Tester] 诊断消息 (PT 0x8001)','info');
+                    addLog('   → Source: 0x0E80 → Target: 0x0E00','info');
+                    addLog('   → UDS: 22 F1 90 (ReadDataByIdentifier, DID 0xF190)','info');
+                }, 500);
+                setTimeout(() => {
+                    const g = document.getElementById('gateway');
+                    if (g) g.classList.add('pulse');
+                    setStatus('gateway', '转发中...');
+                    addLog('📥 [Vehicle GW] 收到诊断消息','info');
+                    addLog('📤 [Vehicle GW] 诊断 ACK (PT 0x8003) — 消息已转发','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('gateway', 'ECU 处理中');
+                    addLog('🔄 [Gateway → ECU] 通过 CAN 总线转发 UDS 请求...','info');
+                    addLog('🔄 [ECU → Gateway] ECU 返回 VIN 数据...','info');
+                }, 2500);
+                setTimeout(() => {
+                    addLog('📤 [Vehicle GW] 诊断响应 (PT 0x8001)','info');
+                    addLog('   → Source: 0x0E00 → Target: 0x0E80','info');
+                    addLog('   → UDS: 62 F1 90 57 42 41 31 32 ... (VIN: WBA12...)','info');
+                    setStatus('tester', '收到响应');
+                }, 3500);
+                setTimeout(() => {
+                    const t = document.getElementById('tester'); const g = document.getElementById('gateway');
+                    if (t) t.classList.remove('pulse'); if (g) g.classList.remove('pulse');
+                    setStatus('gateway', '完成');
+                    addLog('✅ 诊断通信完成！成功读取车辆 VIN','info');
+                    demoActive = false;
+                }, 4500);
+            }
+
+            function demoFullFlow() {
+                addLog('📋 完整 DoIP 诊断流程演示', 'warning');
+                setTimeout(() => {
+                    const t = document.getElementById('tester');
+                    if (t) t.classList.add('pulse');
+                    setStatus('tester', 'Step 1/5...');
+                    addLog('=== Step 1: 车辆发现 ===','warning');
+                    addLog('📤 [Tester] UDP 广播车辆识别请求','info');
+                }, 500);
+                setTimeout(() => {
+                    const g = document.getElementById('gateway');
+                    if (g) g.classList.add('pulse');
+                    addLog('📥 [Vehicle GW] 响应: VIN=WBA..., Addr=0x0E00','info');
+                    addLog('✅ 车辆发现完成','info');
+                }, 1500);
+                setTimeout(() => {
+                    setStatus('tester', 'Step 2/5...');
+                    addLog('=== Step 2: TCP 连接 + 路由激活 ===','warning');
+                    addLog('📤 [Tester] TCP 连接 192.168.0.1:13400','info');
+                    addLog('📤 [Tester] 路由激活请求 (0x0E80, Type=Default)','info');
+                }, 2500);
+                setTimeout(() => {
+                    addLog('📥 [Vehicle GW] 路由激活成功 (Code=0x00)','info');
+                    addLog('✅ 路由激活完成','info');
+                }, 3500);
+                setTimeout(() => {
+                    setStatus('tester', 'Step 3/5...');
+                    addLog('=== Step 3: 存活检查 ===','warning');
+                    addLog('📤 [Vehicle GW] 存活检查请求','info');
+                    addLog('📤 [Tester] 存活检查响应 → 在线确认','info');
+                }, 4500);
+                setTimeout(() => {
+                    setStatus('tester', 'Step 4/5...');
+                    addLog('=== Step 4: 诊断通信 ===','warning');
+                    addLog('📤 [Tester] UDS: 22 F1 90 (读取 VIN)','info');
+                    addLog('📥 [Vehicle GW] ACK: 消息已转发至 ECU','info');
+                    addLog('📤 [Vehicle GW] 响应: 62 F1 90 WBA...','info');
+                    addLog('✅ 诊断数据获取成功','info');
+                }, 5500);
+                setTimeout(() => {
+                    setStatus('tester', 'Step 5/5...');
+                    addLog('=== Step 5: 断开连接 ===','warning');
+                    addLog('📤 [Tester] 关闭 TCP 连接','info');
+                }, 7000);
+                setTimeout(() => {
+                    const t = document.getElementById('tester'); const g = document.getElementById('gateway');
+                    if (t) t.classList.remove('pulse'); if (g) g.classList.remove('pulse');
+                    setStatus('tester', '完成'); setStatus('gateway', '完成');
+                    addLog('✅ 完整 DoIP 诊断流程结束','info');
+                    demoActive = false;
+                }, 8000);
+            }
+
+            // ==================== Tool Functions ====================
+            function parseDoIPMessage() {
+                const input = document.getElementById('doipMsgInput').value.trim();
+                const result = document.getElementById('parseResult');
+                if (!input) { result.innerHTML = '<p style="color:#dc3545;">请输入十六进制报文</p>'; return; }
+                const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                if (!bytes || bytes.length < 4) { result.innerHTML = '<p style="color:#dc3545;">格式错误，至少需要 8 字节 (16 个十六进制字符)</p>'; return; }
+                const version = parseInt(bytes[0], 16);
+                const invVersion = parseInt(bytes[1], 16);
+                const payloadType = (parseInt(bytes[2], 16) << 8) | parseInt(bytes[3], 16);
+                const payloadLen = bytes.length >= 8
+                    ? (parseInt(bytes[4],16)<<24)|(parseInt(bytes[5],16)<<16)|(parseInt(bytes[6],16)<<8)|parseInt(bytes[7],16)
+                    : 0;
+                const versionOk = (version === 0x02 && invVersion === 0xFD) || (version === 0x01 && invVersion === 0xFE);
+                const ptKey = '0x' + payloadType.toString(16).toUpperCase().padStart(4,'0');
+                const ptInfo = DOIP_MESSAGE_TYPES[ptKey];
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                html += `<p><strong>协议版本:</strong> 0x${version.toString(16).toUpperCase().padStart(2,'0')} ${version === 0x02 ? '(ISO 13400-2:2019)' : version === 0x01 ? '(旧版)' : '(未知)'}</p>`;
+                html += `<p><strong>逆版本校验:</strong> 0x${invVersion.toString(16).toUpperCase().padStart(2,'0')} ${versionOk ? '✅ 通过' : '❌ 不匹配'}</p>`;
+                html += `<p><strong>负载类型:</strong> ${ptKey} ${ptInfo ? '— ' + ptInfo.name : '(未知类型)'}</p>`;
+                html += `<p><strong>负载长度:</strong> ${payloadLen} 字节</p>`;
+                if (bytes.length > 8) {
+                    const payload = bytes.slice(8);
+                    html += `<p><strong>负载数据:</strong> ${payload.map(b=>'0x'+b.toUpperCase()).join(' ')}</p>`;
+                }
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function lookupPayloadType() {
+                const input = document.getElementById('payloadTypeInput').value.trim();
+                const result = document.getElementById('payloadTypeResult');
+                const val = parseInt(input.replace(/0x/i,''), 16);
+                if (isNaN(val)) { result.innerHTML = '<p style="color:#dc3545;">请输入有效的十六进制负载类型</p>'; return; }
+                const key = '0x' + val.toString(16).toUpperCase().padStart(4,'0');
+                const info = DOIP_MESSAGE_TYPES[key];
+                if (!info) { result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;"><p><strong>${key}</strong> — 未知负载类型</p></div>`; return; }
+                let fieldsHtml = info.fields.map(f => `<tr><td>${f.name}</td><td>${f.bytes} B</td><td>${f.desc}</td></tr>`).join('');
+                result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">
+                    <h4 style="color:var(--accent);margin-bottom:8px;">${key} — ${info.name}</h4>
+                    <p style="color:var(--text-3);font-size:0.85rem;">📂 ${info.category}</p>
+                    <p style="margin:8px 0;">${info.description}</p>
+                    ${info.fields.length > 0 ? `<table style="font-size:0.85rem;margin-top:8px;"><tr><th>字段</th><th>字节</th><th>说明</th></tr>${fieldsHtml}</table>` : ''}
+                    <p style="margin-top:8px;font-size:0.85rem;color:var(--text-3);">💡 ${info.notes}</p>
+                </div>`;
+            }
+
+            function analyzeAddress() {
+                const input = document.getElementById('addrInput').value.trim();
+                const result = document.getElementById('addrResult');
+                const val = parseInt(input.replace(/0x/i,''), 16);
+                if (isNaN(val) || val < 0 || val > 0xFFFF) { result.innerHTML = '<p style="color:#dc3545;">请输入有效的 16 位地址 (0x0000-0xFFFF)</p>'; return; }
+                let type = '未知', desc = '', color = 'var(--text-2)';
+                if (val >= 0x0E00 && val <= 0x0EFF) { type = '车辆节点 (Vehicle)'; desc = '车辆侧 DoIP 实体的逻辑地址，通常用于网关和 ECU'; color = '#4A7BAC'; }
+                else if (val >= 0x0E80 && val <= 0x0E9F) { type = '外部测试设备 (Tester)'; desc = '外部 Tester 的逻辑地址'; color = '#6A9BCC'; }
+                else if (val === 0x0000) { type = '广播地址'; desc = '用于广播消息的目标地址'; color = '#E8A838'; }
+                else if (val >= 0x1000 && val <= 0x1FFF) { type = 'OEM 自定义'; desc = '厂商自定义的逻辑地址范围'; color = '#788C5D'; }
+                else if (val >= 0x2000) { type = '自定义/扩展'; desc = '扩展逻辑地址范围'; color = '#9B7ACC'; }
+                result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">
+                    <h4 style="color:${color};margin-bottom:8px;">0x${val.toString(16).toUpperCase().padStart(4,'0')} — ${type}</h4>
+                    <p>${desc}</p>
+                    <p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 逻辑地址由 ISO 13400 分配：车辆侧通常 0x0E00-0x0EFF，Tester 通常 0x0E80-0x0E9F</p>
+                </div>`;
+            }
+
+            function renderPortRef() {
+                const el = document.getElementById('portRefResult');
+                if (!el) return;
+                el.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">
+                    <table style="font-size:0.9rem;width:100%;"><tr><th>协议</th><th>端口</th><th>用途</th></tr>
+                    <tr><td>TCP</td><td>13400</td><td>诊断通信、路由激活、存活检查等主要通信</td></tr>
+                    <tr><td>UDP</td><td>13400</td><td>车辆发现、车辆公告、节点识别</td></tr>
+                    <tr><td>TCP</td><td>13400</td><td>诊断消息 (0x8001/0x8002/0x8003) 可靠传输</td></tr>
+                    </table>
+                    <p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 所有 DoIP 通信均使用端口 13400，TCP 用于需要可靠传输的消息，UDP 用于广播发现</p>
+                </div>`;
+            }
+
+            // ==================== Quiz Functions ====================
+            function loadQuizQuestion() {
+                const area = document.getElementById('questionArea');
+                if (!area) return;
+                if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                    document.getElementById('quizResults').style.display = 'block';
+                    area.style.display = 'none';
+                    const pct = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+                    document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('percentage').textContent = pct + '%';
+                    return;
+                }
+                quizState.answered = false;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                let html = `<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}</div>`;
+                html += `<div style="display:flex;gap:4px;margin-bottom:16px;">`;
+                QUIZ_QUESTIONS.forEach((_, i) => { html += `<div style="flex:1;height:4px;border-radius:2px;background:${i < quizState.currentQuestion ? 'var(--accent)' : 'var(--border)'};"></div>`; });
+                html += `</div>`;
+                html += `<h3 style="margin-bottom:16px;font-size:1.1em;">${q.question}</h3>`;
+                q.options.forEach((opt, i) => {
+                    html += `<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${opt}</button>`;
+                });
+                html += `<div id="quizFeedback" style="margin-top:12px;"></div>`;
+                area.innerHTML = html;
+                area.style.display = 'block';
+                document.getElementById('quizResults').style.display = 'none';
+            }
+
+            function answerQuiz(idx) {
+                if (quizState.answered) return;
+                quizState.answered = true;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                const feedback = document.getElementById('quizFeedback');
+                for (let i = 0; i < q.options.length; i++) {
+                    const btn = document.getElementById('qopt' + i);
+                    if (i === q.correct) btn.classList.add('correct');
+                    if (i === idx && i !== q.correct) btn.classList.add('wrong');
+                    btn.classList.add('disabled');
+                }
+                if (idx === q.correct) {
+                    quizState.score++;
+                    feedback.innerHTML = `<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;
+                } else {
+                    feedback.innerHTML = `<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;
+                }
+                setTimeout(() => { quizState.currentQuestion++; loadQuizQuestion(); }, 2500);
+            }
+
+            function restartQuiz() {
+                quizState = { currentQuestion: 0, score: 0, answered: false };
+                loadQuizQuestion();
+            }
+
+            // Tab button event listeners
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => showTab(btn.dataset.tab));
+            });
+            </script>
+
+            <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </aside>
+        </div>
     </div>
-    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
-      <svg id="iconSun" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/>
-        <line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/>
-        <line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
-        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </svg>
-      <svg id="iconMoon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="display:none;">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-    </button>
-  </nav>
-
-  <!-- Main Content -->
-  <main class="main">
-    <div class="page-header">
-      <h1 class="page-title">DoIP 协议</h1>
-      <p class="page-subtitle">基于 IP 的诊断 — ISO 13400</p>
-    </div>
-
-    <div class="card">
-      <span class="badge">开发中</span>
-      <p class="card-description">
-        我们正在精心制作 DoIP 协议的交互式可视化教程，涵盖从基础概念到实际应用的完整学习路径。以下内容即将上线：
-      </p>
-      <div class="card-divider"></div>
-      <p class="features-label">即将推出的内容</p>
-      <ul class="features-list">
-        <li>基于以太网的高速诊断通信</li>
-        <li>远程诊断和 OTA 更新能力</li>
-        <li>现代化的诊断服务架构</li>
-        <li>与传统 UDS 协议的无缝集成</li>
-      </ul>
-    </div>
-
-    <!-- AdSense -->
-    <div class="ad-container">
-      <ins class="adsbygoogle"
-        style="display:block"
-        data-ad-client="ca-pub-3215512126020129"
-        data-ad-slot="7014497615"
-        data-ad-format="auto"
-        data-full-width-responsive="true"></ins>
-      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
-    </div>
-  </main>
-
-  <!-- Theme Toggle -->
-  <script>
-    (function () {
-      const key = 'vp-theme';
-      const toggle = document.getElementById('themeToggle');
-      const iconSun = document.getElementById('iconSun');
-      const iconMoon = document.getElementById('iconMoon');
-
-      function applyTheme(theme) {
-        document.body.setAttribute('data-theme', theme);
-        if (theme === 'dark') {
-          iconSun.style.display = 'none';
-          iconMoon.style.display = 'block';
-        } else {
-          iconSun.style.display = 'block';
-          iconMoon.style.display = 'none';
-        }
-      }
-
-      const stored = localStorage.getItem(key);
-      if (stored) {
-        applyTheme(stored);
-      } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        applyTheme('dark');
-      }
-
-      toggle.addEventListener('click', function () {
-        const current = document.body.getAttribute('data-theme');
-        const next = current === 'dark' ? 'light' : 'dark';
-        applyTheme(next);
-        localStorage.setItem(key, next);
-      });
-    })();
-  </script>
 </body>
 </html>

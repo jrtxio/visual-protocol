@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>车载以太网学习 — Visual Protocol</title>
+    <meta name="description" content="交互式车载以太网学习平台 — 掌握 Automotive Ethernet 的核心原理">
+    <meta name="keywords" content="车载以太网, Automotive Ethernet, 100BASE-T1, VLAN, TCP/IP">
+    <meta property="og:title" content="Visual Protocol — 车载以太网学习平台">
+    <meta property="og:description" content="交互式车载以太网学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/ethernet/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        :root {
+            --primary-gradient-start: #4A9B8E;
+            --primary-gradient-end: #3A7B6E;
+            --client-color: #6A9BCC; --server-color: #788C5D; --vlan-color: #E8A838;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root { --primary-gradient-start: #5ABFAE; --primary-gradient-end: #6DD4C2; --client-color: #7DB4DD; --server-color: #8FA374; --bg-card-light: #231F1D; --bg-light: #171412; --border-light: #3D3835; --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E; }
+        }
+        body[data-theme="light"] { --primary-gradient-start: #4A9B8E; --primary-gradient-end: #3A7B6E; --client-color: #6A9BCC; --server-color: #788C5D; --bg-card-light: #FFFFFF; --bg-light: #F9F7F4; --border-light: #E7E5E4; --text-light-main: #1C1917; --text-light-secondary: #57534E; }
+        body[data-theme="dark"] { --primary-gradient-start: #5ABFAE; --primary-gradient-end: #6DD4C2; --client-color: #7DB4DD; --server-color: #8FA374; --bg-card-light: #231F1D; --bg-light: #171412; --border-light: #3D3835; --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E; }
+
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
+        .nav-tabs { display: flex; justify-content: center; gap: 4px; margin: 24px 0 32px; padding: 4px; background: var(--surface); border: 1px solid var(--border); border-radius: 100px; flex-wrap: wrap; }
+        .tab-button { padding: 10px 20px; background: transparent; color: var(--text-2); border: none; border-radius: 100px; cursor: pointer; font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif; transition: all 0.15s; white-space: nowrap; }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
+        .content-section { display: none; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; margin-bottom: 32px; }
+        .content-section.active { display: block; }
+        .back-button, .theme-toggle, .header { display: none; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
+        .quiz-option { display: block; width: 100%; text-align: left; padding: 14px 18px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em; transition: all 0.15s; }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-family: "SF Mono","Fira Code",monospace; }
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button { padding: 10px 20px; background: var(--accent); color: #FFF; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .tool-button:hover { opacity: 0.9; }
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th { text-align: left; padding: 12px; background: var(--accent-bg); color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border); }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
+
+        .device-container { display: flex; justify-content: center; align-items: center; gap: 48px; margin: 32px 0; flex-wrap: wrap; }
+        .device { width: 120px; height: 80px; border-radius: 12px; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; font-weight: 600; transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .device .device-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .device .device-name { font-size: 0.8rem; margin-bottom: 2px; }
+        .device .device-status { font-size: 0.7rem; opacity: 0.9; }
+        .client-device { background: linear-gradient(135deg, #6A9BCC, #4A7BAC); }
+        .server-device { background: linear-gradient(135deg, #788C5D, #5C6D47); }
+        .switch-device { background: linear-gradient(135deg, #E8A838, #C88818); width: 80px; height: 60px; }
+        .connection-line { font-size: 2rem; color: #b0aea5; }
+        .log { background: #111; color: #0f0; padding: 24px; border-radius: 12px; font-family: 'Courier New', monospace; text-align: left; max-width: 100%; margin: 24px auto; min-height: 150px; max-height: 250px; overflow-y: auto; border: 1px solid #3a3a38; font-size: 0.875rem; }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; } .log-warning { color: #FFD700; } .log-error { color: #FF6B6B; }
+        .demo-controls { display: flex; gap: 8px; justify-content: center; margin: 24px 0; flex-wrap: wrap; }
+        .demo-btn { padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px; background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em; font-weight: 500; transition: all 0.15s; }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); cursor: pointer; transition: all 0.15s; margin-bottom: 8px; }
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta { display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3); }
+
+        .concept-card { padding: 16px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer { color: white; padding: 12px; border-radius: 8px; text-align: center; margin-bottom: 4px; }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box { background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end)); color: white; padding: 24px; border-radius: 12px; margin: 16px 0; text-align: center; }
+
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        .device.pulse { animation: pulse 1s infinite; }
+
+        @media (max-width: 768px) { .page-header h1 { font-size: 1.5em; } .content-section { padding: 20px; } .tab-button { padding: 8px 12px; font-size: 0.82em; } .device { width: 100px; height: 70px; } .device-container { gap: 24px; } }
+        @media (max-width: 480px) { .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; } }
+    </style>
+</head>
+<body>
+    <nav class="site-nav"><div class="nav-inner container-wide">
+        <a href="../../index.html" class="nav-logo" aria-label="首页"><svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><span>Visual Protocol</span></a>
+        <div class="nav-right"><a href="../../index.html" class="nav-back">返回主页</a>
+            <button class="theme-btn" id="themeToggle" aria-label="切换主题"><svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg><svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg></button>
+        </div>
+    </div></nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></aside>
+        <div class="page-body"><div class="container">
+            <header class="page-header"><h1>车载以太网学习</h1><p>Automotive Ethernet — 从物理层到 TCP/IP 协议栈</p></header>
+            <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                <button class="tab-button" role="tab" data-tab="frames">帧详解</button>
+                <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+            </nav>
+
+            <!-- ===== Tab 1: 基础概念 ===== -->
+            <section id="basics-tab" class="content-section active" role="tabpanel">
+                <h2 class="section-title">车载以太网基础概念</h2>
+                <p>车载以太网是传统以太网技术在汽车领域的适配与演进，通过单对非屏蔽双绞线实现轻量化布线，满足汽车 EMC、延迟和可靠性的严格要求。</p>
+                <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                    <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                        <div class="concept-card"><h4>🔌 车载以太网概述</h4><p>传统以太网使用四对双绞线，车载以太网通过单对非屏蔽双绞线（Single Pair Ethernet）实现轻量化布线。支持 PoDL（Power over Data Line，数据线供电），满足汽车 EMC、延迟和可靠性要求。</p></div>
+                        <div class="concept-card"><h4>📡 物理层标准</h4><p>100BASE-T1 (100Mbps) 主流域内通信；1000BASE-T1 (1Gbps) 高带宽域控间通信和 ADAS；10BASE-T1S (10Mbps) 边缘节点传感器接入；2.5/5/10GBASE-T1 下一代高带宽场景。</p></div>
+                        <div class="concept-card"><h4>🖼️ 帧结构</h4><p>IEEE 802.3 以太网帧：前导码(7B) + SFD(1B) + 目的MAC(6B) + 源MAC(6B) + EtherType(2B) + 数据(46-1500B) + FCS(4B)。最小帧 64 字节，最大 1518 字节。</p></div>
+                        <div class="concept-card"><h4>🏷️ VLAN (802.1Q)</h4><p>4 字节 VLAN 标签插入在源 MAC 之后：TPID(0x8100) + PCP(3bit,QoS优先级) + DEI(1bit,可丢弃) + VID(12bit,最多 4094 个 VLAN)。实现流量隔离和优先级调度。</p></div>
+                        <div class="concept-card"><h4>🌐 TCP/IP 协议栈</h4><p>应用层(SOME/IP/DoIP) → 传输层(TCP/UDP, SoAd) → 网络层(IPv4/IPv6, TcpIp) → 数据链路层(Ethernet MAC, EthIf) → 物理层(100BASE-T1, EthTrcv)。AUTOSAR 中各层由对应 BSW 模块实现。</p></div>
+                        <div class="concept-card"><h4>🔀 交换拓扑</h4><p>车载以太网采用点对点连接+交换机转发，与 CAN 总线拓扑不同。ECU 通过以太网交换机互联，交换机根据 MAC 地址表转发帧，支持 VLAN 隔离不同域的流量。</p></div>
+                        <div class="concept-card"><h4>⏱️ TSN 时间敏感网络</h4><p>IEEE 802.1AS (gPTP 时钟同步，精度 &lt;1μs) + IEEE 802.1Qbv (时间调度流量，通过 TAS 划分时隙)。三种流量：ST(硬实时)、RT(软实时)、BE(尽力而为)。</p></div>
+                        <div class="concept-card"><h4>🔗 协议承载关系</h4><p>以太网是物理传输基础，承载多种上层协议：SOME/IP（面向服务中间件）、DoIP（诊断）、XCP（标定）、gPTP（时间同步）、AVB（音视频桥接）。构成车内通信的骨干网络。</p></div>
+                    </div>
+                    <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                    <div style="display:flex;flex-direction:column;align-items:center;">
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#4A9B8E,#3A7B6E);width:260px;"><div class="layer-name">应用层</div><div class="layer-desc">SOME/IP / DoIP / 诊断</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#5A8AB5,#4A7A9B);width:260px;"><div class="layer-name">传输层</div><div class="layer-desc">TCP / UDP</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#E8A838,#C88818);width:260px;"><div class="layer-name">网络层</div><div class="layer-desc">IPv4 / IPv6</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#9B7ACC,#7A5BA8);width:260px;"><div class="layer-name">数据链路层</div><div class="layer-desc">Ethernet MAC / VLAN</div></div>
+                        <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#607D8B,#455A64);width:260px;"><div class="layer-name">物理层</div><div class="layer-desc">100BASE-T1 / 1000BASE-T1</div></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ===== Tab 2: 帧详解 ===== -->
+            <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">📡 以太网帧结构详解</h2>
+                <p>逐字段解析 IEEE 802.3 以太网帧和 802.1Q VLAN 标签，点击卡片查看详细信息</p>
+                <div id="frameFieldsGrid"></div>
+            </section>
+
+            <!-- ===== Tab 3: 交互演示 ===== -->
+            <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">🎮 车载以太网交互演示</h2>
+                <p>观察以太网帧在节点间的传输和协议封装过程</p>
+                <div class="demo-controls">
+                    <button class="demo-btn" onclick="startDemo('transmit')">📤 帧传输</button>
+                    <button class="demo-btn" onclick="startDemo('vlan')">🏷️ VLAN 打标</button>
+                    <button class="demo-btn" onclick="startDemo('encap')">📦 协议封装</button>
+                    <button class="demo-btn" onclick="startDemo('untag')">🏷️ VLAN 去标</button>
+                    <button class="demo-btn" onclick="startDemo('arp')">🔍 ARP 解析</button>
+                    <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                </div>
+                <div class="device-container">
+                    <div class="device client-device" id="srcNode"><div class="device-icon">🖥️</div><div class="device-name">源节点</div><div class="device-status" id="srcStatus">就绪</div></div>
+                    <div><div class="connection-line">⟷</div><div style="text-align:center;font-size:0.75rem;color:var(--text-3);">交换机</div></div>
+                    <div class="device server-device" id="dstNode"><div class="device-icon">⚷</div><div class="device-name">目标节点</div><div class="device-status" id="dstStatus">就绪</div></div>
+                </div>
+                <div id="commLog" class="log"><div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">💡 点击上方按钮开始以太网通信演示...</span></div></div>
+            </section>
+
+            <!-- ===== Tab 4: 实用工具 ===== -->
+            <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">🛠️ 以太网实用工具集</h2>
+                <p>为以太网协议开发和调试提供专业工具支持</p>
+                <div style="display:grid;gap:24px;margin:24px 0;">
+                    <div class="tool-card"><h3 style="color:var(--accent);">📊 以太网帧解析器</h3><p>解析十六进制格式的以太网帧，显示各字段含义</p><div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;"><input type="text" class="tool-input" id="ethFrameInput" placeholder="输入十六进制帧 (如: ff ff ff ff ff ff 00 11 22 33 44 55 08 00 45 00)" style="flex:1;min-width:200px;"><button class="tool-button" onclick="parseEthFrame()">解析</button></div><div id="ethParseResult" style="margin-top:12px;"></div></div>
+                    <div class="tool-card"><h3 style="color:var(--accent);">🔢 MAC 地址格式化</h3><p>在不同 MAC 地址格式之间转换</p><div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;"><input type="text" class="tool-input" id="macInput" placeholder="输入 MAC 地址 (如: 00:11:22:33:44:55)" style="flex:1;min-width:200px;"><button class="tool-button" onclick="formatMAC()">转换</button></div><div id="macResult" style="margin-top:12px;"></div></div>
+                    <div class="tool-card"><h3 style="color:var(--accent);">📋 EtherType 查询</h3><p>查询 EtherType 值对应的协议</p><div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;"><input type="text" class="tool-input" id="etherTypeInput" placeholder="输入 EtherType (如: 0x0800)" style="flex:1;min-width:200px;"><button class="tool-button" onclick="lookupEtherType()">查询</button></div><div id="etherTypeResult" style="margin-top:12px;"></div></div>
+                    <div class="tool-card"><h3 style="color:var(--accent);">🏷️ VLAN 标签生成器</h3><p>根据 PCP、DEI、VID 参数生成 VLAN 标签</p><div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;"><input type="text" class="tool-input" id="pcpInput" placeholder="PCP (0-7)" style="flex:1;min-width:80px;"><input type="text" class="tool-input" id="deiInput" placeholder="DEI (0-1)" style="flex:1;min-width:80px;"><input type="text" class="tool-input" id="vidInput" placeholder="VID (1-4094)" style="flex:1;min-width:100px;"><button class="tool-button" onclick="genVLANTag()">生成</button></div><div id="vlanResult" style="margin-top:12px;"></div></div>
+                </div>
+            </section>
+
+            <!-- ===== Tab 5: 知识测试 ===== -->
+            <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                <h2 class="section-title">🧠 车载以太网知识测试</h2>
+                <div id="questionArea"></div>
+                <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                    <div class="results-box"><h3>🎯 测试完成！</h3><div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div><div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div></div>
+                    <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                </div>
+            </section>
+
+        <script>
+        let currentTab = 'basics';
+        let quizState = { currentQuestion: 0, score: 0, answered: false };
+        let demoActive = false;
+
+        const ETH_FRAME_FIELDS = {
+            'preamble': { name: '前导码 (Preamble)', bytes: '7 字节', description: '7 字节交替的 10101010 模式（0x55），用于接收方同步时钟。接收端通过检测前导码的时钟信号实现比特同步，为后续帧解析做准备。', details: ['固定值：0x55 0x55 0x55 0x55 0x55 0x55 0x55','用于接收方时钟同步','不作为帧内容计入长度'], examples: ['0x55 0x55 0x55 0x55 0x55 0x55 0x55'], tip: '前导码是物理层概念，不算入以太网帧的 64-1518 字节长度范围' },
+            'sfd': { name: 'SFD 帧起始定界符', bytes: '1 字节', description: '1 字节固定值 0xD5（10101011），标志帧内容的真正开始。前导码的最后一字节，最后两位变为 11 表示帧数据紧随其后。', details: ['固定值：0xD5','最后两位由 10 变为 11','标志帧内容开始'], examples: ['0xD5'], tip: 'SFD 是前导码的一部分，告诉接收方"帧数据马上开始"' },
+            'dst_mac': { name: '目的 MAC 地址', bytes: '6 字节', description: '标识帧的接收者。6 字节（48 位）全局唯一地址，前 3 字节为 OUI（厂商代码），后 3 字节为设备号。FF:FF:FF:FF:FF:FF 为广播地址，首位字节最低位=1 为组播地址。', details: ['长度：6 字节 (48 bit)','广播地址：FF:FF:FF:FF:FF:FF','组播：首位字节最低位为 1','单播：唯一标识一个网络接口','前 24 位为 OUI（IEEE 分配的厂商代码）'], examples: ['单播：00:11:22:33:44:55','广播：FF:FF:FF:FF:FF:FF'], tip: 'MAC 地址在局域网内唯一，跨网段通信需要路由器根据 IP 地址转发' },
+            'src_mac': { name: '源 MAC 地址', bytes: '6 字节', description: '标识帧的发送者。6 字节全局唯一地址，每个网络接口出厂时烧录。交换机通过学习源 MAC 地址构建 MAC 地址表，决定帧的转发端口。', details: ['长度：6 字节 (48 bit)','全球唯一（由 IEEE 分配 OUI + 厂商分配设备号）','交换机学习源 MAC 地址','不能为广播或组播地址'], examples: ['00:1A:2B:3C:4D:5E — 前三字节 00:1A:2B 为厂商 OUI'], tip: '交换机通过记录每个端口收到的源 MAC 地址来构建转发表' },
+            'vlan_tag': { name: '802.1Q VLAN 标签', bytes: '4 字节（可选）', description: 'VLAN 标签插入在源 MAC 之后、EtherType 之前。包含 TPID(0x8100) + PCP(3bit,QoS 优先级 0-7) + DEI(1bit,可丢弃标识) + VID(12bit,VLAN ID 1-4094)。实现流量隔离和 QoS 优先级调度。', details: ['TPID：固定 0x8100，标识这是 VLAN 标签','PCP (3 bit)：优先级 0-7，7 最高，用于 QoS','DEI (1 bit)：0=不可丢弃，1=可丢弃','VID (12 bit)：VLAN ID，0 和 4095 保留','加上 VLAN 标签后帧最大长度变为 1522 字节'], examples: ['VLAN 100, PCP=3: 81 00 60 64','VLAN 200, PCP=7: 81 00 E0 C8'], tip: '车载以太网中不同域（动力、底盘、信息娱乐）通常分配不同 VLAN' },
+            'ethertype': { name: 'EtherType', bytes: '2 字节', description: '标识帧中数据部分承载的上层协议类型。常见值：0x0800(IPv4)、0x0806(ARP)、0x8100(VLAN)、0x86DD(IPv6)、0x88F7(PTP)。值为 0x8100 时表示后面还有 VLAN 标签。', details: ['0x0800 — IPv4','0x0806 — ARP','0x8100 — VLAN 标签帧','0x86DD — IPv6','0x88F7 — PTP（精确时间协议）','0x22F0 — AVTP（音视频传输）'], examples: ['IPv4 帧：EtherType = 0x0800','VLAN 帧：EtherType = 0x8100 后跟 VLAN 标签'], tip: '当 EtherType ≤ 1500 时表示 IEEE 802.3 帧长度，>1500 时表示协议类型' },
+            'payload': { name: '数据/载荷 (Payload)', bytes: '46-1500 字节', description: '承载上层协议数据（如 IP 包、ARP 请求等）。最小 46 字节（不足需填充 Padding），最大 1500 字节（MTU）。Jumbo Frame 可扩展到 9000 字节。', details: ['最小 46 字节（不满足时用 Padding 填充）','最大 1500 字节（标准 MTU）','Jumbo Frame 最大 9000 字节','承载 IP 包、ARP 等上层协议数据','Padding 不计入真实数据长度'], examples: ['ARP 请求：28 字节 + 18 字节 Padding = 46 字节','IPv4 包：20-1480 字节'], tip: '以太网帧最小 64 字节 = 6+6+2+46+4，保证冲突检测机制有效' },
+            'fcs': { name: 'FCS 帧校验序列', bytes: '4 字节', description: 'CRC-32 校验码，用于检测帧在传输过程中是否发生错误。发送方根据目的MAC到Payload的所有数据计算 CRC-32，接收方验证。不匹配则静默丢弃帧。', details: ['CRC-32 校验算法','覆盖范围：目的MAC 到 Payload','接收方验证不匹配则丢弃帧（不通知发送方）','由网卡硬件自动计算和验证','不覆盖前导码和 SFD'], examples: ['FCS = 0xDEADBEEF（示例）'], tip: '以太网不负责重传，丢帧由上层协议（如 TCP）处理重传' }
+        };
+
+        const QUIZ_QUESTIONS = [
+            { question: '车载以太网使用什么类型的线缆？', options: ['四对屏蔽双绞线','单对非屏蔽双绞线','同轴电缆','光纤'], correct: 1, explanation: '车载以太网使用单对非屏蔽双绞线（Single Pair Ethernet），相比传统以太网的四对线缆大幅减轻重量。' },
+            { question: '100BASE-T1 的传输速率是多少？', options: ['10 Mbps','100 Mbps','1 Gbps','10 Gbps'], correct: 1, explanation: '100BASE-T1 表示 100Mbps 传输速率，T1 表示单对双绞线（1 pair），是车载以太网的主流标准。' },
+            { question: '标准以太网帧的最小和最大长度分别是多少字节？', options: ['32 和 1024','46 和 1500','64 和 1518','128 和 9000'], correct: 2, explanation: '以太网帧最小 64 字节（含 14B 头部 + 46B 数据 + 4B FCS），最大 1518 字节（含 VLAN 标签为 1522）。' },
+            { question: 'MAC 地址的长度是多少？', options: ['4 字节','6 字节','8 字节','16 字节'], correct: 1, explanation: 'MAC 地址长度为 6 字节（48 bit），前 3 字节为 OUI（厂商代码），后 3 字节为设备号。' },
+            { question: 'EtherType 值 0x0800 表示什么协议？', options: ['ARP','IPv4','IPv6','VLAN'], correct: 1, explanation: 'EtherType 0x0800 表示帧中载荷为 IPv4 数据包。其他常见值：0x0806=ARP, 0x86DD=IPv6, 0x8100=VLAN。' },
+            { question: '802.1Q VLAN 标签的长度是多少字节？', options: ['2 字节','4 字节','6 字节','8 字节'], correct: 1, explanation: 'VLAN 标签为 4 字节，包含 TPID(2B, 固定0x8100) + PCP(3bit) + DEI(1bit) + VID(12bit)。' },
+            { question: '802.1Q TPID 字段的固定值是什么？', options: ['0x0800','0x0806','0x8100','0x86DD'], correct: 2, explanation: 'TPID（Tag Protocol ID）固定为 0x8100，用于标识这是一个 802.1Q VLAN 标签帧。' },
+            { question: 'VLAN ID (VID) 的最大有效值是多少？', options: ['1024','2048','4094','4096'], correct: 2, explanation: 'VID 为 12 位，范围 0-4095。但 0（空 VLAN）和 4095（保留）不可用，有效范围为 1-4094。' },
+            { question: 'PCP 字段的用途是什么？', options: ['标识 VLAN ID','标识协议类型','QoS 优先级标记','错误检测'], correct: 2, explanation: 'PCP（Priority Code Point）为 3 位，取值 0-7，用于标记帧的 QoS 优先级，7 为最高优先级。' },
+            { question: 'FCS 使用什么校验算法？', options: ['CRC-8','CRC-16','CRC-32','MD5'], correct: 2, explanation: 'FCS（Frame Check Sequence）使用 CRC-32 校验算法，4 字节，覆盖从目的 MAC 到 Payload 的所有数据。' },
+            { question: '车载以太网与传统以太网的关键区别是什么？', options: ['使用光纤代替铜线','单对线缆、EMC优化、支持PoDL','速率更低但更可靠','使用不同的帧格式'], correct: 1, explanation: '车载以太网使用单对非屏蔽双绞线、针对 EMC 优化、支持 PoDL（数据线供电），相比传统以太网的四对线更轻量。' },
+            { question: '以太网帧中 Payload 最小长度是多少字节？', options: ['0 字节','32 字节','46 字节','64 字节'], correct: 2, explanation: 'Payload 最小 46 字节。若实际数据不足 46 字节，需用 Padding 填充至 46 字节，确保帧总长不低于 64 字节。' }
+        ];
+
+        const ETHER_TYPES = { '0x0800':'IPv4','0x0806':'ARP','0x8100':'VLAN (802.1Q)','0x86DD':'IPv6','0x88F7':'PTP (精确时间协议)','0x22F0':'AVTP (音视频传输)','0x0801':'EtherCat','0x22EB':'SOME/IP' };
+
+        // Theme & Tab
+        function toggleTheme() { const b = document.body; if(b.hasAttribute('data-theme')){b.removeAttribute('data-theme');localStorage.setItem('theme','light');}else{b.setAttribute('data-theme','dark');localStorage.setItem('theme','dark');} }
+        document.addEventListener('DOMContentLoaded', function() { const t=localStorage.getItem('theme')||'light'; if(t==='dark')document.body.setAttribute('data-theme','dark'); else document.body.removeAttribute('data-theme'); renderFrameFields(); loadQuizQuestion(); });
+        function showTab(n) { document.querySelectorAll('.content-section').forEach(s=>{s.classList.remove('active');s.hidden=true;}); document.querySelectorAll('.tab-button').forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');}); const s=document.getElementById(n+'-tab'); if(s){s.classList.add('active');s.hidden=false;} const b=document.querySelector(`[data-tab="${n}"]`); if(b){b.classList.add('active');b.setAttribute('aria-selected','true');} currentTab=n; }
+        document.querySelectorAll('.tab-button').forEach(b=>{b.addEventListener('click',()=>showTab(b.dataset.tab));});
+
+        // Render Frame Fields
+        function renderFrameFields() { const g=document.getElementById('frameFieldsGrid'); if(!g)return; let h=''; Object.entries(ETH_FRAME_FIELDS).forEach(([k,f])=>{ h+=`<div class="frame-field-card" onclick="showFieldModal('${k}')"><h4>${f.name}</h4><p>${f.description.substring(0,80)}...</p><div class="field-meta"><span>📐 ${f.bytes}</span><span>📋 点击查看详情</span></div></div>`; }); g.innerHTML=h; }
+        function showFieldModal(key) { const f=ETH_FRAME_FIELDS[key]; if(!f)return; const o=document.createElement('div'); o.className='modal-overlay active'; o.innerHTML=`<div class="modal"><button class="modal-close" onclick="this.closest('.modal-overlay').remove()">✕</button><h3 style="color:var(--accent);margin-bottom:4px;">${f.name}</h3><p style="color:var(--text-3);font-size:0.85rem;margin-bottom:16px;">📐 ${f.bytes}</p><p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${f.description}</p><h4 style="color:var(--accent);margin-bottom:8px;">功能详情</h4><ul style="margin:0 0 16px 20px;font-size:0.9rem;color:var(--text-2);">${f.details.map(d=>`<li style="margin-bottom:4px;">${d}</li>`).join('')}</ul><div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${f.tip}</div></div>`; o.addEventListener('click',function(e){if(e.target===o)o.remove();}); document.body.appendChild(o); }
+
+        // Demo
+        function addLog(m,t){const l=document.getElementById('commLog');const n=new Date();const ts=`[${n.getHours().toString().padStart(2,'0')}:${n.getMinutes().toString().padStart(2,'0')}:${n.getSeconds().toString().padStart(2,'0')}]`; const cls=t==='warning'?'log-warning':t==='error'?'log-error':'log-info'; l.innerHTML+=`<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${m}</span></div>`; l.scrollTop=l.scrollHeight;}
+        function setStatus(id,t){const e=document.getElementById(id);if(e)e.textContent=t;}
+        function resetDemo(){demoActive=false; ['srcNode','dstNode'].forEach(id=>{const e=document.getElementById(id);if(e)e.classList.remove('pulse');}); setStatus('srcStatus','就绪'); setStatus('dstStatus','就绪'); const l=document.getElementById('commLog'); l.innerHTML='<div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">🔄 已重置，点击按钮开始演示</span></div>';}
+        function startDemo(type){if(demoActive)return; resetDemo(); demoActive=true; if(type==='transmit')demoTransmit(); else if(type==='vlan')demoVLAN(); else if(type==='encap')demoEncap(); else if(type==='untag')demoUntag(); else if(type==='arp')demoARP();}
+
+        function demoTransmit(){addLog('📤 帧传输演示：源节点→目标节点','info'); setTimeout(()=>{const e=document.getElementById('srcNode');if(e)e.classList.add('pulse');setStatus('srcStatus','构建帧中...');addLog('🛠️ 构建以太网帧...','info');},500); setTimeout(()=>{addLog('📝 前导码: 55 55 55 55 55 55 55','info'); addLog('📝 SFD: D5','info');},1200); setTimeout(()=>{addLog('📝 目的MAC: 00:1A:2B:3C:4D:5E','info'); addLog('📝 源MAC: 00:11:22:33:44:55','info');},1900); setTimeout(()=>{addLog('📝 EtherType: 0x0800 (IPv4)','info'); addLog('📝 Payload: [IPv4 数据包 46-1500 字节]','info');},2600); setTimeout(()=>{addLog('📝 FCS: CRC-32 校验码已计算','info'); setStatus('srcStatus','发送中...');addLog('📤 帧通过交换机转发到目标节点...','info');},3300); setTimeout(()=>{const e=document.getElementById('dstNode');if(e)e.classList.add('pulse');addLog('📥 目标节点接收帧，FCS 校验通过','info'); setStatus('dstStatus','接收成功'); setStatus('srcStatus','发送完成'); demoActive=false;},4200);}
+
+        function demoVLAN(){addLog('🏷️ VLAN 打标演示：交换机添加 VLAN 标签','info'); setTimeout(()=>{setStatus('srcStatus','发送数据'); addLog('📤 [源节点] 发送无标签帧: DST=FF:FF:FF:FF:FF:FF SRC=00:11:22:33:44:55 Type=0x0800','info');},500); setTimeout(()=>{addLog('🔀 [交换机] 收到帧，进入 Access 端口 (VLAN 100)','warning');},1500); setTimeout(()=>{addLog('🏷️ [交换机] 插入 VLAN 标签: TPID=0x8100 PCP=3 DEI=0 VID=100','warning'); addLog('🏷️ VLAN 标签字节: 81 00 60 64','warning');},2500); setTimeout(()=>{addLog('🔀 [交换机] 从 Trunk 端口转发带标签帧','info'); addLog('📥 [目标节点] 收到带 VLAN 标签的帧','info'); setStatus('dstStatus','收到Tagged帧'); demoActive=false;},3500);}
+
+        function demoEncap(){addLog('📦 协议封装演示：从应用层到以太网帧','info'); setTimeout(()=>{addLog('📦 应用层: SOME/IP 事件通知 Payload=[10 20 30]','info');},500); setTimeout(()=>{addLog('📦 传输层: 封装为 UDP 报文，端口 30509 → 30509','info'); addLog('   UDP Header: SrcPort=30509 DstPort=30509 Length=15 Checksum=xxxx','info');},1500); setTimeout(()=>{addLog('📦 网络层: 封装为 IPv4 数据包','info'); addLog('   IP Header: Src=192.168.0.10 Dst=224.224.224.245 Protocol=UDP','info');},2500); setTimeout(()=>{addLog('📦 数据链路层: 封装为以太网帧','info'); addLog('   ETH Header: DST=01:00:5E:70:E0:F5 SRC=00:11:22:33:44:55 Type=0x0800','info'); addLog('📦 FCS: CRC-32 校验','info');},3500); setTimeout(()=>{addLog('📡 完整帧已就绪，通过物理层 100BASE-T1 发送','info'); setStatus('srcStatus','封装完成'); demoActive=false;},4500);}
+
+        function demoUntag(){addLog('🏷️ VLAN 去标演示：交换机移除 VLAN 标签','info'); setTimeout(()=>{addLog('📥 [交换机] Trunk 端口收到带标签帧: VLAN=100','info');},500); setTimeout(()=>{addLog('🏷️ [交换机] 移除 4 字节 VLAN 标签: 81 00 60 64','warning');},1500); setTimeout(()=>{addLog('📤 [交换机] 从 Access 端口转发无标签帧','info'); addLog('📥 [目标节点] 收到无标签帧: DST=FF:FF:FF:FF:FF:FF Type=0x0800','info'); setStatus('dstStatus','收到Untagged帧'); demoActive=false;},2500);}
+
+        function demoARP(){addLog('🔍 ARP 解析演示：通过广播获取 MAC 地址','info'); setTimeout(()=>{const e=document.getElementById('srcNode');if(e)e.classList.add('pulse');setStatus('srcStatus','查询MAC...');addLog('📤 [源节点] 需要目标 192.168.0.20 的 MAC 地址','info');},500); setTimeout(()=>{addLog('📤 [源节点] 发送 ARP 广播: Who has 192.168.0.20? Tell 192.168.0.10','info'); addLog('   DST=FF:FF:FF:FF:FF:FF EtherType=0x0806','warning');},1500); setTimeout(()=>{const d=document.getElementById('dstNode');if(d)d.classList.add('pulse');addLog('📥 [目标节点] 收到 ARP 请求，IP 匹配！','info');},2500); setTimeout(()=>{addLog('📤 [目标节点] 发送 ARP 应答: 192.168.0.20 is at 00:1A:2B:3C:4D:5E','info'); addLog('   DST=00:11:22:33:44:55 (单播回复)','info');},3500); setTimeout(()=>{addLog('✅ [源节点] 更新 ARP 缓存: 192.168.0.20 → 00:1A:2B:3C:4D:5E','info'); setStatus('srcStatus','ARP完成'); setStatus('dstStatus','应答完成'); demoActive=false;},4500);}
+
+        // Tools
+        function parseEthFrame(){const i=document.getElementById('ethFrameInput').value.trim();const r=document.getElementById('ethParseResult');if(!i){r.innerHTML='<p style="color:#dc3545;">请输入十六进制帧数据</p>';return;}const b=i.replace(/0x/gi,'').replace(/[\s,:-]/g,'').match(/.{2}/g);if(!b||b.length<14){r.innerHTML='<p style="color:#dc3545;">数据不足，至少需要 14 字节（两个 MAC + EtherType）</p>';return;}let h=`<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`; h+=`<p><strong>目的 MAC:</strong> ${b.slice(0,6).join(':').toUpperCase()}</p>`; h+=`<p><strong>源 MAC:</strong> ${b.slice(6,12).join(':').toUpperCase()}</p>`; const et=parseInt(b[12]+b[13],16); const etName=ETHER_TYPES['0x'+et.toString(16).toUpperCase().padStart(4,'0')]||'未知'; h+=`<p><strong>EtherType:</strong> 0x${et.toString(16).toUpperCase().padStart(4,'0')} (${etName})</p>`; if(b.length>14){const pl=b.slice(14,-4); const fcs=b.slice(-4); h+=`<p><strong>Payload:</strong> ${pl.length} 字节 ${pl.slice(0,8).join(' ')}${pl.length>8?' ...':''}</p>`; h+=`<p><strong>FCS:</strong> ${fcs.join(' ').toUpperCase()}</p>`;} h+=`</div>`; r.innerHTML=h;}
+
+        function formatMAC(){const i=document.getElementById('macInput').value.trim();const r=document.getElementById('macResult');const hex=i.replace(/[:\-.]/g,'').replace(/[\s]/g,'');if(hex.length!==12||!/^[0-9a-fA-F]+$/.test(hex)){r.innerHTML='<p style="color:#dc3545;">请输入有效的 MAC 地址（6 组十六进制数）</p>';return;}const colon=hex.match(/.{2}/g).join(':').toUpperCase();const dash=hex.match(/.{2}/g).join('-').toUpperCase();const dot=hex.match(/.{4}/g).join('.').toUpperCase();r.innerHTML=`<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;font-family:monospace;"><p><strong>冒号分隔:</strong> ${colon}</p><p><strong>短横线:</strong> ${dash}</p><p><strong>Cisco 格式:</strong> ${dot}</p></div>`;}
+
+        function lookupEtherType(){const i=document.getElementById('etherTypeInput').value.trim();const r=document.getElementById('etherTypeResult');const v=parseInt(i.replace(/0x/i,''),16);if(isNaN(v)){r.innerHTML='<p style="color:#dc3545;">请输入有效的 EtherType 值</p>';return;}const name=ETHER_TYPES['0x'+v.toString(16).toUpperCase().padStart(4,'0')]||'未知协议';let h=`<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;"><p><strong>0x${v.toString(16).toUpperCase().padStart(4,'0')}</strong> = ${name}</p><table style="width:100%;margin-top:12px;font-size:0.85rem;"><tr><th>EtherType</th><th>协议</th></tr>`; Object.entries(ETHER_TYPES).forEach(([k,n])=>{h+=`<tr style="${'0x'+v.toString(16).toUpperCase().padStart(4,'0')===k?'font-weight:600;background:rgba(74,155,142,0.1);':''}"><td>${k}</td><td>${n}</td></tr>`;}); h+=`</table></div>`; r.innerHTML=h;}
+
+        function genVLANTag(){const p=parseInt(document.getElementById('pcpInput').value);const d=parseInt(document.getElementById('deiInput').value);const v=parseInt(document.getElementById('vidInput').value);const r=document.getElementById('vlanResult');if(isNaN(p)||p<0||p>7||isNaN(d)||d<0||d>1||isNaN(v)||v<1||v>4094){r.innerHTML='<p style="color:#dc3545;">请输入有效参数：PCP(0-7) DEI(0-1) VID(1-4094)</p>';return;}const tpid=0x8100;const tci=(p<<13)|(d<<12)|v;const tag=(tpid<<16)|tci;const hex='0x'+tag.toString(16).toUpperCase().padStart(8,'0');const bytes=[(tag>>24)&0xFF,(tag>>16)&0xFF,(tag>>8)&0xFF,tag&0xFF].map(b=>b.toString(16).toUpperCase().padStart(2,'0')).join(' ');r.innerHTML=`<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;"><p><strong>VLAN 标签:</strong> <code style="background:rgba(74,155,142,0.15);padding:2px 8px;border-radius:4px;">${hex}</code></p><p><strong>字节序列:</strong> ${bytes}</p><p style="font-size:0.8rem;color:var(--text-3);margin-top:8px;">TPID=0x8100 | PCP=${p} | DEI=${d} | VID=${v}</p></div>`;}
+
+        // Quiz
+        function loadQuizQuestion(){const a=document.getElementById('questionArea');if(!a)return;if(quizState.currentQuestion>=QUIZ_QUESTIONS.length){document.getElementById('quizResults').style.display='block';a.style.display='none';const p=Math.round((quizState.score/QUIZ_QUESTIONS.length)*100);document.getElementById('scoreValue').textContent=quizState.score;document.getElementById('percentage').textContent=p+'%';return;}quizState.answered=false;const q=QUIZ_QUESTIONS[quizState.currentQuestion];let h=`<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion+1} / ${QUIZ_QUESTIONS.length}</div><div style="display:flex;gap:4px;margin-bottom:16px;">`;QUIZ_QUESTIONS.forEach((_,i)=>{h+=`<div style="flex:1;height:4px;border-radius:2px;background:${i<quizState.currentQuestion?'var(--accent)':'var(--border)'};"></div>`;}); h+=`</div><h3 style="margin-bottom:16px;">${q.question}</h3>`;q.options.forEach((o,i)=>{h+=`<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${o}</button>`;}); h+=`<div id="quizFeedback" style="margin-top:12px;"></div>`; a.innerHTML=h; a.style.display='block'; document.getElementById('quizResults').style.display='none';}
+        function answerQuiz(idx){if(quizState.answered)return;quizState.answered=true;const q=QUIZ_QUESTIONS[quizState.currentQuestion];const fb=document.getElementById('quizFeedback');for(let i=0;i<q.options.length;i++){const b=document.getElementById('qopt'+i);if(i===q.correct)b.classList.add('correct');if(i===idx&&i!==q.correct)b.classList.add('wrong');b.classList.add('disabled');}if(idx===q.correct){quizState.score++;fb.innerHTML=`<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;}else{fb.innerHTML=`<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;}setTimeout(()=>{quizState.currentQuestion++;loadQuizQuestion();},2500);}
+        function restartQuiz(){quizState={currentQuestion:0,score:0,answered:false};loadQuizQuestion();}
+        </script>
+        <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true"><ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins><script>(adsbygoogle = window.adsbygoogle || []).push({});</script></aside>
+    </div></div>
+</body>
+</html>

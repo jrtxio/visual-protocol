@@ -3,283 +3,816 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CAN 协议 — Visual Protocol</title>
-    <meta name="description" content="CAN 协议可视化学习：控制器局域网络（ISO 11898）帧结构、总线仲裁与错误处理机制。">
+    <title>CAN 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 CAN 协议学习平台 — 掌握控制器局域网络的核心原理">
+    <meta name="keywords" content="CAN协议, 控制器局域网络, ISO 11898, CAN FD, 车载网络">
+    <meta property="og:title" content="Visual Protocol — CAN 协议学习平台">
+    <meta property="og:description" content="交互式 CAN 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/can/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
-    <script async defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
     <style>
         :root {
-            --accent: #9B7ACC;
-            --accent-bg: #F5F0FF;
-            --bg: #F9F7F4;
-            --surface: #FFFFFF;
-            --text: #1C1917;
-            --text-2: #57534E;
-            --text-3: #A8A29E;
-            --border: #E7E5E4;
+            --primary-gradient-start: #9B7ACC;
+            --primary-gradient-end: #7A5BA8;
+            --client-color: #6A9BCC; --server-color: #788C5D; --bus-color: #FF6B6B;
+            --success-color: #166534; --success-bg: #DCFCE7;
+            --error-color: #991B1B; --error-bg: #FEE2E2;
+            --bg-card-light: var(--surface); --bg-light: var(--bg);
+            --border-light: var(--border);
+            --text-light-main: var(--text); --text-light-secondary: var(--text-2);
+            --shadow-light: var(--shadow);
+            --bg-dark: #171412; --bg-card-dark: #231F1D;
+            --text-dark-main: #E7E5E4; --text-dark-secondary: #A8A29E;
+            --border-dark: #3D3835;
+            --container-max-width: 900px; --border-radius: 12px;
+            --spacing-xxs: 4px; --spacing-xs: 8px; --spacing-sm: 12px;
+            --spacing-md: 16px; --spacing-lg: 24px; --spacing-xl: 32px; --spacing-xxl: 48px;
+            --font-family-heading: "Inter", -apple-system, sans-serif;
+            --font-family-primary: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", sans-serif;
+            --font-size-xs: 0.75rem; --font-size-sm: 0.875rem; --font-size-base: 1rem;
+            --font-size-lg: 1.125rem; --font-size-xl: 1.25rem; --font-size-xxl: 1.5rem; --font-size-xxxl: 2rem;
+            --font-weight-normal: 400; --font-weight-medium: 500; --font-weight-bold: 600; --font-weight-extra-bold: 700;
+            --transition-fast: 0.15s ease; --transition-normal: 0.3s ease; --transition-slow: 0.5s ease;
+        }
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary-gradient-start: #B08FDD; --primary-gradient-end: #C8ABF0;
+                --client-color: #7DB4DD; --server-color: #8FA374;
+                --success-color: #86EFAC; --success-bg: #14532D;
+                --error-color: #FCA5A5; --error-bg: #7F1D1D;
+                --bg-card-light: #231F1D; --bg-light: #171412;
+                --border-light: #3D3835;
+                --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
+            }
+        }
+        body[data-theme="light"] {
+            --primary-gradient-start: #9B7ACC; --primary-gradient-end: #7A5BA8;
+            --client-color: #6A9BCC; --server-color: #788C5D;
+            --bg-card-light: #FFFFFF; --bg-light: #F9F7F4;
+            --border-light: #E7E5E4;
+            --text-light-main: #1C1917; --text-light-secondary: #57534E;
+        }
+        body[data-theme="dark"] {
+            --primary-gradient-start: #B08FDD; --primary-gradient-end: #C8ABF0;
+            --client-color: #7DB4DD; --server-color: #8FA374;
+            --bg-card-light: #231F1D; --bg-light: #171412;
+            --border-light: #3D3835;
+            --text-light-main: #E7E5E4; --text-light-secondary: #A8A29E;
         }
 
-        [data-theme="dark"] {
-            --accent: #B08FDD;
-            --accent-bg: #221A35;
-            --bg: #171412;
-            --surface: #231F1D;
-            --text: #E7E5E4;
-            --text-2: #A8A29E;
-            --text-3: #78716C;
-            --border: #3D3835;
-        }
+        .page-header { padding: 40px 0 20px; text-align: center; }
+        .page-header h1 { font-size: 2em; font-weight: 700; margin-bottom: 6px; }
+        .page-header p { color: var(--text-3); font-size: 1.05em; }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        .nav-tabs {
+            display: flex; justify-content: center; gap: 4px;
+            margin: 24px 0 32px; padding: 4px;
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 100px; flex-wrap: wrap;
         }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            line-height: 1.6;
-            min-height: 100vh;
-            transition: background-color 0.2s, color 0.2s;
+        .tab-button {
+            padding: 10px 20px; background: transparent; color: var(--text-2);
+            border: none; border-radius: 100px; cursor: pointer;
+            font-size: 0.9em; font-weight: 500; font-family: "Inter", -apple-system, sans-serif;
+            transition: all 0.15s; white-space: nowrap;
         }
+        .tab-button:hover { color: var(--text); background: var(--accent-bg); }
+        .tab-button.active { background: var(--accent); color: #FFF; }
 
-        /* Navigation */
-        nav {
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background-color: var(--surface);
-            border-bottom: 1px solid var(--border);
-            padding: 0 24px;
-            height: 56px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            transition: background-color 0.2s, border-color 0.2s;
+        .content-section {
+            display: none; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+            padding: 32px; margin-bottom: 32px;
         }
+        .content-section.active { display: block; }
 
-        .nav-left {
-            display: flex;
-            align-items: center;
-            gap: 24px;
+        .back-button, .theme-toggle, .header { display: none; }
+
+        .modal-overlay {
+            display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+            z-index: 200; align-items: center; justify-content: center;
         }
-
-        .nav-logo {
-            font-weight: 700;
-            font-size: 16px;
-            color: var(--text);
-            text-decoration: none;
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 16px; padding: 32px; max-width: 600px; width: 90%;
+            max-height: 80vh; overflow-y: auto;
         }
+        .modal-close { float: right; background: none; border: none; color: var(--text-3); cursor: pointer; }
 
-        .nav-link {
-            font-size: 14px;
-            color: var(--text-2);
-            text-decoration: none;
-            transition: color 0.15s;
+        .quiz-option {
+            display: block; width: 100%; text-align: left; padding: 14px 18px;
+            border: 1px solid var(--border); border-radius: 8px; background: var(--surface);
+            color: var(--text); cursor: pointer; margin-bottom: 8px; font-size: 0.95em;
+            transition: all 0.15s;
         }
+        .quiz-option:hover { border-color: var(--accent); }
+        .quiz-option.selected { border-color: var(--accent); background: var(--accent-bg); }
+        .quiz-option.correct { border-color: #28a745; background: #d4edda; }
+        .quiz-option.wrong { border-color: #dc3545; background: #f8d7da; }
+        .quiz-option.disabled { cursor: not-allowed; opacity: 0.6; }
 
-        .nav-link:hover {
-            color: var(--text);
+        .tool-card { border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin: 12px 0; background: var(--bg); }
+        .tool-input {
+            width: 100%; padding: 10px 14px; border: 1px solid var(--border);
+            border-radius: 8px; background: var(--surface); color: var(--text);
+            font-family: "SF Mono","Fira Code",monospace;
         }
-
-        .theme-toggle {
-            background: none;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 6px 10px;
-            cursor: pointer;
-            color: var(--text-2);
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.15s, color 0.15s;
+        .tool-input:focus { outline: none; border-color: var(--accent); }
+        .tool-button {
+            padding: 10px 20px; background: var(--accent); color: #FFF;
+            border: none; border-radius: 8px; cursor: pointer; font-weight: 600;
         }
+        .tool-button:hover { opacity: 0.9; }
 
-        .theme-toggle:hover {
-            border-color: var(--text-3);
-            color: var(--text);
+        .content-section table { width: 100%; border-collapse: collapse; }
+        .content-section table th {
+            text-align: left; padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600; border-bottom: 2px solid var(--border);
         }
+        .content-section table td { padding: 12px; border-bottom: 1px solid var(--border); color: var(--text-2); }
 
-        /* Main content */
-        main {
-            max-width: 640px;
-            margin: 0 auto;
-            padding: 64px 24px 96px;
+        /* Bus Topology */
+        .bus-topology {
+            display: flex; flex-direction: column; align-items: center;
+            margin: 32px 0; gap: 0;
         }
-
-        .page-header {
-            text-align: center;
-            margin-bottom: 48px;
+        .ecu-row {
+            display: flex; justify-content: center; gap: 60px; margin-bottom: 0;
         }
+        .ecu-node {
+            width: 120px; height: 80px; border-radius: 12px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-weight: 600; transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15); position: relative;
+        }
+        .ecu-node .ecu-icon { font-size: 1.5rem; margin-bottom: 4px; }
+        .ecu-node .ecu-name { font-size: 0.8rem; margin-bottom: 2px; }
+        .ecu-node .ecu-status { font-size: 0.7rem; opacity: 0.9; }
+        .ecu1 { background: linear-gradient(135deg, #6A9BCC, #4A7BAC); }
+        .ecu2 { background: linear-gradient(135deg, #788C5D, #5C6D47); }
+        .ecu3 { background: linear-gradient(135deg, #CC6A6A, #AC4A4A); }
+        .ecu-connector { width: 2px; height: 20px; background: #b0aea5; margin: 0 auto; }
+        .bus-bar {
+            width: 80%; max-width: 500px; height: 8px;
+            background: linear-gradient(90deg, #FF6B6B, #FF8E8E, #FF6B6B);
+            border-radius: 4px; position: relative;
+            box-shadow: 0 0 12px rgba(255,107,107,0.3);
+        }
+        .bus-bar.active { animation: busPulse 1s infinite; }
 
-        .page-title {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--text);
+        .log {
+            background: #111; color: #0f0; padding: 24px;
+            border-radius: 12px; font-family: 'Courier New', monospace;
+            text-align: left; max-width: 100%; margin: 24px auto;
+            min-height: 150px; max-height: 250px; overflow-y: auto;
+            border: 1px solid #3a3a38; font-size: 0.875rem;
+        }
+        body[data-theme="dark"] .log { background: #000; border-color: #444; }
+        .log-entry { margin-bottom: 4px; line-height: 1.4; }
+        .log-timestamp { color: #aaa; margin-right: 8px; }
+        .log-info { color: #0f0; }
+        .log-warning { color: #FFD700; }
+        .log-error { color: #FF6B6B; }
+
+        .demo-controls {
+            display: flex; gap: 8px; justify-content: center;
+            margin: 24px 0; flex-wrap: wrap;
+        }
+        .demo-btn {
+            padding: 10px 20px; border: 1px solid var(--border); border-radius: 100px;
+            background: var(--surface); color: var(--text-2); cursor: pointer; font-size: 0.88em;
+            font-weight: 500; transition: all 0.15s;
+        }
+        .demo-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .demo-btn.active { background: var(--accent); color: #FFF; border-color: var(--accent); }
+        .demo-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .frame-field-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg); cursor: pointer; transition: all 0.15s;
             margin-bottom: 8px;
         }
-
-        .page-subtitle {
-            font-size: 16px;
-            color: var(--text-3);
-            font-weight: 400;
+        .frame-field-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+        .frame-field-card h4 { color: var(--accent); margin: 0 0 4px; font-size: 1rem; }
+        .frame-field-card p { color: var(--text-2); margin: 0; font-size: 0.85rem; }
+        .frame-field-card .field-meta {
+            display: flex; gap: 12px; margin-top: 8px; font-size: 0.8rem; color: var(--text-3);
         }
 
-        /* Card */
-        .card {
-            background-color: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-            text-align: center;
-            transition: background-color 0.2s, border-color 0.2s;
+        .concept-card {
+            padding: 16px; border: 1px solid var(--border); border-radius: 8px;
+            background: var(--bg);
+        }
+        .concept-card h4 { color: var(--primary-gradient-start); margin: 0 0 8px; font-size: 1rem; }
+        .concept-card p { color: var(--text-2); margin: 0; font-size: 0.875rem; line-height: 1.6; }
+
+        .protocol-stack-layer {
+            color: white; padding: 12px; border-radius: 8px;
+            text-align: center; margin-bottom: 4px;
+            transition: all 0.3s; cursor: default;
+        }
+        .protocol-stack-layer .layer-name { font-weight: 600; font-size: 1rem; }
+        .protocol-stack-layer .layer-desc { font-size: 0.85rem; opacity: 0.9; }
+
+        .results-box {
+            background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+            color: white; padding: 24px; border-radius: 12px;
+            margin: 16px 0; text-align: center;
         }
 
-        .badge {
-            display: inline-block;
-            background-color: var(--accent-bg);
-            color: var(--accent);
-            font-size: 13px;
-            font-weight: 600;
-            padding: 4px 12px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-        }
+        @keyframes pulse { 0%{opacity:1}50%{opacity:0.5}100%{opacity:1} }
+        @keyframes busPulse { 0%{box-shadow:0 0 8px rgba(255,107,107,0.3)}50%{box-shadow:0 0 20px rgba(255,107,107,0.6)}100%{box-shadow:0 0 8px rgba(255,107,107,0.3)} }
+        .ecu-node.pulse { animation: pulse 1s infinite; }
+        .ecu-node.blink { animation: pulse 0.5s infinite; }
 
-        .card-description {
-            font-size: 15px;
-            color: var(--text-2);
-            margin-bottom: 24px;
-            line-height: 1.7;
+        @media (max-width: 768px) {
+            .page-header h1 { font-size: 1.5em; }
+            .content-section { padding: 20px; }
+            .tab-button { padding: 8px 12px; font-size: 0.82em; }
+            .ecu-row { gap: 24px; }
+            .ecu-node { width: 90px; height: 65px; }
         }
-
-        .features-title {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text);
-            margin-bottom: 12px;
-            text-align: left;
-        }
-
-        .features-list {
-            list-style: none;
-            text-align: left;
-        }
-
-        .features-list li {
-            font-size: 14px;
-            color: var(--text-2);
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-        }
-
-        .features-list li:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-
-        .features-list li::before {
-            content: '';
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            background-color: var(--accent);
-            margin-top: 7px;
-            flex-shrink: 0;
-        }
-
-        /* Ad placeholder */
-        .ad-container {
-            margin-top: 48px;
-            text-align: center;
-        }
-
         @media (max-width: 480px) {
-            .page-title {
-                font-size: 26px;
-            }
-
-            .card {
-                padding: 24px;
-            }
-
-            nav {
-                padding: 0 16px;
-            }
-
-            main {
-                padding: 48px 16px 64px;
-            }
+            .tab-button { flex: 1; text-align: center; padding: 8px; font-size: 0.78em; }
+            .ecu-row { gap: 12px; flex-wrap: wrap; }
         }
     </style>
 </head>
 <body>
-    <nav>
-        <div class="nav-left">
-            <a href="../../index.html" class="nav-logo">Visual Protocol</a>
-            <a href="../../index.html" class="nav-link">返回主页</a>
+    <nav class="site-nav">
+        <div class="nav-inner container-wide">
+            <a href="../../index.html" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span>Visual Protocol</span>
+            </a>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-back">返回主页</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
         </div>
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="切换主题"></button>
     </nav>
 
-    <main>
-        <div class="page-header">
-            <h1 class="page-title">CAN 协议</h1>
-            <p class="page-subtitle">控制器局域网络 — ISO 11898</p>
-        </div>
-
-        <div class="card">
-            <span class="badge">开发中</span>
-            <p class="card-description">
-                CAN 协议的可视化学习内容正在制作中。我们将通过交互式图解，帮助你深入理解控制器局域网络的核心原理。
-            </p>
-            <p class="features-title">即将推出的内容</p>
-            <ul class="features-list">
-                <li>经典 CAN 和 CAN FD 帧结构</li>
-                <li>总线仲裁与错误处理机制</li>
-                <li>高可靠性、实时性的通信原理</li>
-                <li>CAN 总线在车载网络中的应用</li>
-            </ul>
-        </div>
-
-        <div class="ad-container">
-            <ins class="adsbygoogle"
-                 style="display:block"
-                 data-ad-client="ca-pub-3215512126020129"
-                 data-ad-slot="7014497615"
-                 data-ad-format="auto"
-                 data-full-width-responsive="true"></ins>
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
             <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <div class="container">
+                <header class="page-header">
+                    <h1>CAN 协议学习</h1>
+                    <p>控制器局域网络 — ISO 11898 — 从总线仲裁到 CAN FD</p>
+                </header>
+
+                <nav class="nav-tabs" role="tablist" aria-label="学习内容导航">
+                    <button class="tab-button active" role="tab" data-tab="basics">基础概念</button>
+                    <button class="tab-button" role="tab" data-tab="frames">帧详解</button>
+                    <button class="tab-button" role="tab" data-tab="demo">交互演示</button>
+                    <button class="tab-button" role="tab" data-tab="tools">实用工具</button>
+                    <button class="tab-button" role="tab" data-tab="quiz">知识测试</button>
+                </nav>
+
+                <!-- ===== Tab 1: 基础概念 ===== -->
+                <section id="basics-tab" class="content-section active" role="tabpanel">
+                    <h2 class="section-title">CAN 协议基础概念</h2>
+                    <p>CAN（Controller Area Network）是 ISO 11898 定义的串行通信协议，为汽车电子提供了高可靠、实时的数据通信基础。</p>
+
+                    <div style="margin:24px 0;padding:24px;background:var(--bg-card-light);border-radius:12px;border:1px solid var(--border-light);">
+                        <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
+                            <div class="concept-card"><h4>🚌 总线拓扑</h4><p>多点连接，所有节点共享同一通信介质。任何节点都可以发送和接收报文，所有消息都是广播形式。总线两端需要终端电阻（120Ω）防止信号反射。</p></div>
+                            <div class="concept-card"><h4>⚡ 仲裁机制</h4><p>CSMA/CD+AMP（载波侦听多路访问/冲突检测+仲裁优先级）。通过"线与"机制实现非破坏性仲裁：ID 值越小的报文优先级越高，发送隐性位(1)的节点检测到显性位(0)则自动退出。</p></div>
+                            <div class="concept-card"><h4>📋 四种帧类型</h4><p>数据帧（携带数据的标准帧）、远程帧（请求数据）、错误帧（检测到错误时发送，含错误标志+错误定界符）、过载帧（请求延迟下一帧的传输）。</p></div>
+                            <div class="concept-card"><h4>🚀 CAN FD</h4><p>Flexible Data-rate，数据段速率最高 8 Mbps（仲裁段保持原速率），数据长度从 8 字节扩展至 64 字节。新增 FDF、BRS、ESI 控制位，向下兼容 CAN 2.0。</p></div>
+                            <div class="concept-card"><h4>📡 CAN XL</h4><p>ISO 11898-1:2024 最新演进，数据段最大 2048 字节，10 Mbps 以上波特率，引入简单 MAC/LLC 子层概念，可与以太网协议栈桥接。尚处产业化早期。</p></div>
+                            <div class="concept-card"><h4>⏱️ 位时序</h4><p>标称位时间分为同步段(SyncSeg)、传播段(PropSeg)、相位缓冲段1(PhaseSeg1)和相位缓冲段2(PhaseSeg2)。采样点通常在 PhaseSeg1 和 PhaseSeg2 之间，位时序参数决定波特率。</p></div>
+                            <div class="concept-card"><h4>🛡️ 错误处理</h4><p>五种错误类型：位错误、填充错误、CRC 错误、格式错误、ACK 错误。节点有三种状态：错误主动(Error Active，TEC<128)、错误被动(Error Passive，TEC≥128)、总线关闭(Bus Off，TEC≥256)。</p></div>
+                            <div class="concept-card"><h4>🚗 应用场景</h4><p>动力系统 CAN（发动机、变速箱）、车身 CAN（车门、车窗、灯光）、底盘 CAN（ABS、ESP）、诊断 CAN（OBD 接口）、CAN FD 用于 ADAS 传感器数据传输。</p></div>
+                        </div>
+
+                        <h4 style="color:var(--primary-gradient-start);margin:24px 0 12px;">协议栈结构</h4>
+                        <p style="font-size:0.875rem;color:var(--text-2);margin-bottom:12px;">CAN 协议遵循简化的四层模型，各层协同确保报文从应用层可靠传输到物理总线。</p>
+                        <div style="display:flex;flex-direction:column;align-items:center;">
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#9B7ACC,#7A5BA8);width:240px;"><div class="layer-name">应用层</div><div class="layer-desc">应用信号 / 编解码</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#5A8AB5,#4A7A9B);width:240px;"><div class="layer-name">网络层</div><div class="layer-desc">报文处理 / 过滤</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#E8A838,#C88818);width:240px;"><div class="layer-name">数据链路层</div><div class="layer-desc">MAC/LLC (帧结构、仲裁、CRC)</div></div>
+                            <div class="protocol-stack-layer" style="background:linear-gradient(135deg,#607D8B,#455A64);width:240px;"><div class="layer-name">物理层</div><div class="layer-desc">物理总线 (双绞线、收发器)</div></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 2: 帧详解 ===== -->
+                <section id="frames-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">📡 CAN 数据帧结构详解</h2>
+                    <p>逐字段解析 CAN 2.0 和 CAN FD 数据帧，点击卡片查看详细信息</p>
+                    <div id="frameFieldsGrid"></div>
+                </section>
+
+                <!-- ===== Tab 3: 交互演示 ===== -->
+                <section id="demo-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🎮 CAN 总线交互演示</h2>
+                    <p>观察 CAN 协议在多节点总线上的完整通信流程</p>
+
+                    <div class="demo-controls">
+                        <button class="demo-btn" onclick="startDemo('arbitration')">⚡ 仲裁演示</button>
+                        <button class="demo-btn" onclick="startDemo('dataframe')">📊 数据帧传输</button>
+                        <button class="demo-btn" onclick="startDemo('error')">⚠️ 错误帧演示</button>
+                        <button class="demo-btn" onclick="startDemo('canfd')">🚀 CAN FD 演示</button>
+                        <button class="demo-btn" onclick="startDemo('compete')">🔍 三节点竞争</button>
+                        <button class="demo-btn" onclick="resetDemo()">🔄 重置</button>
+                    </div>
+
+                    <div class="bus-topology">
+                        <div class="ecu-row">
+                            <div>
+                                <div class="ecu-node ecu1" id="ecu1"><div class="ecu-icon">🖥️</div><div class="ecu-name">ECU 1</div><div class="ecu-status" id="ecu1Status">就绪</div></div>
+                                <div class="ecu-connector"></div>
+                            </div>
+                            <div>
+                                <div class="ecu-node ecu2" id="ecu2"><div class="ecu-icon">🚗</div><div class="ecu-name">ECU 2</div><div class="ecu-status" id="ecu2Status">就绪</div></div>
+                                <div class="ecu-connector"></div>
+                            </div>
+                            <div>
+                                <div class="ecu-node ecu3" id="ecu3"><div class="ecu-icon">⚙️</div><div class="ecu-name">ECU 3</div><div class="ecu-status" id="ecu3Status">就绪</div></div>
+                                <div class="ecu-connector"></div>
+                            </div>
+                        </div>
+                        <div class="bus-bar" id="busBar"></div>
+                        <div style="margin-top:8px;color:var(--text-3);font-size:0.8rem;">CAN 总线 (120Ω 终端电阻)</div>
+                    </div>
+
+                    <div id="commLog" class="log">
+                        <div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">💡 点击上方按钮开始 CAN 总线通信演示...</span></div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 4: 实用工具 ===== -->
+                <section id="tools-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🛠️ CAN 实用工具集</h2>
+                    <p>为 CAN 协议开发和调试提供专业工具支持</p>
+
+                    <div style="display:grid;gap:24px;margin:24px 0;">
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📊 CAN 帧解析器</h3>
+                            <p>解析十六进制格式的 CAN 报文，显示各字段含义</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="canFrameInput" placeholder="输入十六进制报文 (如: 02 01 00 05 01 02 03 04)" style="flex:1;min-width:200px;" aria-label="CAN帧输入">
+                                <button class="tool-button" onclick="parseCANFrame()">解析</button>
+                            </div>
+                            <div id="parseResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔢 ID 优先级分析器</h3>
+                            <p>输入多个 CAN ID，分析仲裁优先级顺序</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="priorityInput" placeholder="输入 CAN ID，逗号分隔 (如: 0x100, 0x200, 0x050)" style="flex:1;min-width:200px;" aria-label="CAN ID输入">
+                                <button class="tool-button" onclick="analyzePriority()">分析</button>
+                            </div>
+                            <div id="priorityResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📋 DLC 查询表</h3>
+                            <p>查询 DLC 值对应的数据字节数（CAN 2.0 和 CAN FD）</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="dlcInput" placeholder="输入 DLC 值 (0-15)" style="flex:1;min-width:200px;" aria-label="DLC输入">
+                                <button class="tool-button" onclick="lookupDLC()">查询</button>
+                            </div>
+                            <div id="dlcResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">⏱️ 波特率计算器</h3>
+                            <p>根据 CAN 时钟频率和位时序参数计算波特率</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="clkInput" placeholder="时钟频率 MHz (如: 80)" style="flex:1;min-width:120px;">
+                                <input type="text" class="tool-input" id="segInput" placeholder="总位时间份数 (如: 16)" style="flex:1;min-width:120px;">
+                                <button class="tool-button" onclick="calcBaudRate()">计算</button>
+                            </div>
+                            <div id="baudResult" style="margin-top:12px;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ===== Tab 5: 知识测试 ===== -->
+                <section id="quiz-tab" class="content-section" role="tabpanel" hidden>
+                    <h2 class="section-title">🧠 CAN 协议知识测试</h2>
+                    <div id="questionArea"></div>
+                    <div id="quizResults" style="display:none;text-align:center;margin-top:32px;">
+                        <div class="results-box">
+                            <h3>🎯 测试完成！</h3>
+                            <div>得分: <span id="scoreValue" style="font-size:2rem;">0</span>/<span id="totalQuestions">12</span></div>
+                            <div>正确率: <span id="percentage" style="font-size:2rem;">0%</span></div>
+                        </div>
+                        <button class="demo-btn" onclick="restartQuiz()" style="margin-top:16px;">🔄 重新测试</button>
+                    </div>
+                </section>
+
+            <script>
+            // ==================== State ====================
+            let currentTab = 'basics';
+            let quizState = { currentQuestion: 0, score: 0, answered: false };
+            let demoActive = false;
+
+            // ==================== CAN Frame Field Data ====================
+            const CAN_FRAME_FIELDS = {
+                'SOF': {
+                    name: '帧起始 (SOF)', bits: '1 bit',
+                    description: '标志帧的开始，固定为 1 个显性位(0)。用于总线上所有节点实现硬同步。',
+                    details: ['固定为显性位(0)','所有节点检测到 SOF 后开始接收','标志一帧报文的开始'],
+                    examples: ['SOF = 0 (显性位)'],
+                    tip: 'SOF 是帧的起点，接收节点通过检测 SOF 的下降沿实现硬同步'
+                },
+                'arbitration': {
+                    name: '仲裁场 (Arbitration Field)', bits: '标准帧 12 bit / 扩展帧 32 bit',
+                    description: '包含报文 ID 和 RTR 位。标准帧使用 11 位 ID（ID0-ID10）+ RTR + IDE + r0。扩展帧使用 11 位基本 ID + SRR + IDE + 18 位扩展 ID + RTR + r1+r0。CAN ID 同时表示消息地址和优先级——ID 值越小优先级越高。',
+                    details: ['标准帧 ID 范围: 0x000 - 0x7FF (11 bit)','扩展帧 ID 范围: 0x00000000 - 0x1FFFFFFF (29 bit)','RTR=0: 数据帧, RTR=1: 远程帧','IDE=0: 标准帧, IDE=1: 扩展帧','仲裁过程中 ID 最小的节点赢得总线'],
+                    examples: ['标准数据帧 ID=0x100: 001 0000 0000 + RTR=0','扩展数据帧 ID=0x100100: 基本ID + SRR + IDE=1 + 扩展ID + RTR=0'],
+                    tip: 'ID 值越小优先级越高！安全气囊报文通常使用 0x000-0x0FF 的低 ID'
+                },
+                'control': {
+                    name: '控制场 (Control Field)', bits: '6 bit',
+                    description: '包含 IDE、r0 保留位和 DLC（数据长度码）。DLC 为 4 位，表示数据场的字节数。CAN FD 中用 FDF 位替代 r0，并新增 BRS 和 ESI 位。',
+                    details: ['DLC (4 bit): 0-8 表示数据字节数 (CAN 2.0)','CAN FD DLC 扩展编码: 支持 12/16/20/24/32/48/64 字节','FDF: 0=CAN 2.0, 1=CAN FD','BRS: 0=不切换速率, 1=数据段使用更高波特率','ESI: 0=错误主动, 1=错误被动'],
+                    examples: ['CAN 2.0: DLC=4 表示 4 字节数据','CAN FD: DLC=9 表示 12 字节数据'],
+                    tip: 'CAN FD 的 DLC 编码在 0-8 与 CAN 2.0 相同，9-15 映射到 12/16/20/24/32/48/64 字节'
+                },
+                'data': {
+                    name: '数据场 (Data Field)', bits: '0-64 字节',
+                    description: '承载实际有效数据。CAN 2.0 支持 0-8 字节，CAN FD 扩展至 64 字节，CAN XL 扩展至 2048 字节。数据内容由应用层定义（如发动机转速、车速、开关状态等）。',
+                    details: ['CAN 2.0: 0-8 字节','CAN FD: 0-64 字节','CAN XL: 0-2048 字节','内容由 DBC 文件或 ARXML 定义信号映射','采用 Intel 格式(小端)或 Motorola 格式(大端)'],
+                    examples: ['发动机转速: [0A 1E] = 2590 rpm','车门状态: [03] = 左前门开'],
+                    tip: '超过 8 字节的数据在 CAN 2.0 中需要 ISO-TP 分帧传输'
+                },
+                'crc': {
+                    name: 'CRC 场 (CRC Field)', bits: '15 bit + 1 bit 定界符',
+                    description: 'CRC（循环冗余校验）用于检测传输错误。发送方根据前面所有字段计算 CRC 值，接收方验证。不匹配则发送错误帧。CAN FD 使用 17 bit 或 21 bit CRC 以适应更长的数据。',
+                    details: ['CAN 2.0: CRC-15 (15 bit 校验 + 1 bit 定界符)','CAN FD ≤16字节: CRC-17 (17 bit)','CAN FD >16字节: CRC-21 (21 bit)','CRC 定界符固定为隐性位(1)','基于位填充后的内容计算'],
+                    examples: ['发送方: 根据仲裁场+控制场+数据场计算 CRC','接收方: 验证 CRC，不匹配则发错误帧'],
+                    tip: 'CRC 是 CAN 高可靠性的关键保障，能检测绝大多数传输错误'
+                },
+                'ack': {
+                    name: 'ACK 场 (ACK Field)', bits: '2 bit',
+                    description: 'ACK 槽(1 bit) + ACK 定界符(1 bit)。发送方在 ACK 槽发送隐性位(1)，正确接收的节点在 ACK 槽写入显性位(0)表示应答。发送方检测到显性位表示至少有一个节点正确接收。',
+                    details: ['ACK 槽: 发送方发隐性位(1)，接收方写显性位(0)','ACK 定界符: 固定隐性位(1)','发送方检测到显性位 = 至少一个节点正确接收','发送方未检测到显性位 = ACK 错误'],
+                    examples: ['正常: 发送方发1，接收方写0，发送方读到0 → ACK成功','异常: 发送方发1，无节点回复0 → ACK错误'],
+                    tip: 'ACK 是 CAN 的应答机制，但它是"至少一个节点收到"而非"所有节点收到"'
+                },
+                'eof': {
+                    name: '帧结束 (EOF)', bits: '7 bit',
+                    description: '7 个连续的隐性位(1)标志帧的结束。接收节点检测到完整的 EOF 后确认帧接收成功。EOF 期间不允许出现显性位，否则触发格式错误。',
+                    details: ['固定 7 个隐性位(1)','检测到完整 EOF 后确认帧接收成功','EOF 期间出现显性位触发格式错误','与帧间空间(ITM)相邻'],
+                    examples: ['EOF: 1 1 1 1 1 1 1 (7 个隐性位)'],
+                    tip: 'EOF 后跟 3 bit 帧间空间(ITM)，然后总线空闲或下一帧开始'
+                }
+            };
+
+            // ==================== Quiz Data ====================
+            const QUIZ_QUESTIONS = [
+                { question: 'CAN 总线使用什么拓扑结构？', options: ['星形拓扑','环形拓扑','多点总线拓扑','点对点拓扑'], correct: 2, explanation: 'CAN 总线采用多点总线拓扑，所有节点通过双绞线连接到同一条总线上，总线两端需要 120Ω 终端电阻。' },
+                { question: 'CAN 仲裁中，哪个 CAN ID 优先级最高？', options: ['0x7FF','0x400','0x100','0x001'], correct: 3, explanation: 'CAN 仲裁中 ID 值越小优先级越高。0x001 是四个选项中值最小的，因此优先级最高。' },
+                { question: '当两个节点同时发送报文时会发生什么？', options: ['两个报文都被丢弃','通过非破坏性仲裁，低 ID 的节点赢得总线','后发送的节点等待','两个报文都成功发送'], correct: 1, explanation: 'CAN 采用非破坏性仲裁机制，多节点同时发送时，ID 值最小的报文赢得总线，失败节点自动在总线空闲后重试。' },
+                { question: 'CAN 2.0 数据帧最大数据载荷是多少字节？', options: ['4 字节','8 字节','16 字节','64 字节'], correct: 1, explanation: 'CAN 2.0 数据帧的数据场为 0-8 字节，DLC（数据长度码）为 4 位，取值范围 0-8。' },
+                { question: 'CAN FD 的最大数据载荷是多少字节？', options: ['8 字节','32 字节','64 字节','128 字节'], correct: 2, explanation: 'CAN FD（Flexible Data-rate）将数据场从 8 字节扩展至最大 64 字节，DLC 使用扩展编码。' },
+                { question: 'CAN FD 中 BRS 位的作用是什么？', options: ['标识帧类型','控制数据段切换到更高波特率','标识错误状态','启用 CRC 校验'], correct: 1, explanation: 'BRS（Bit Rate Switch）位为 1 时，CAN FD 帧的数据段使用比仲裁段更高的波特率传输，最高可达 8 Mbps。' },
+                { question: 'CAN 帧 CRC 场的主要作用是什么？', options: ['标识帧的优先级','检测传输错误','控制数据长度','应答接收'], correct: 1, explanation: 'CRC（循环冗余校验）用于检测帧在传输过程中是否发生错误，发送方计算 CRC 值，接收方验证，不匹配则触发错误帧。' },
+                { question: '当节点错误计数器(TEC)达到 256 时，节点进入什么状态？', options: ['Error Active（错误主动）','Error Passive（错误被动）','Bus Off（总线关闭）','正常状态'], correct: 2, explanation: 'TEC < 128 为 Error Active，TEC ≥ 128 为 Error Passive，TEC ≥ 256 进入 Bus Off 状态，节点被禁止发送。' },
+                { question: 'ACK 场的功能是什么？', options: ['标识帧结束','接收方确认正确接收','标识数据长度','校验帧格式'], correct: 1, explanation: '发送方在 ACK 槽发隐性位，正确接收的节点写入显性位(0)应答。发送方检测到显性位表示至少有一个节点正确接收了帧。' },
+                { question: '标准 CAN 帧和扩展 CAN 帧的 ID 长度分别是多少？', options: ['8 位和 16 位','11 位和 29 位','16 位和 32 位','8 位和 29 位'], correct: 1, explanation: '标准帧使用 11 位标识符（ID0-ID10），扩展帧使用 29 位标识符（11 位基本 ID + 18 位扩展 ID），通过 IDE 位区分。' },
+                { question: '远程帧(Remote Frame)的作用是什么？', options: ['发送数据到目标节点','请求其他节点发送数据','报告总线错误','同步所有节点时钟'], correct: 1, explanation: '远程帧用于请求其他节点发送数据。其 RTR 位为隐性(1)，数据长度为 0，发送方通过 DLC 指定期望接收的数据长度。' },
+                { question: 'CAN XL 的最大数据载荷是多少字节？', options: ['64 字节','256 字节','1024 字节','2048 字节'], correct: 3, explanation: 'CAN XL（ISO 11898-1:2024）将数据段扩展到最大 2048 字节，支持 10 Mbps 以上波特率，可桥接以太网。' }
+            ];
+
+            // ==================== DLC Table ====================
+            const DLC_TABLE = {
+                0:0, 1:1, 2:2, 3:3, 4:4, 5:5, 6:6, 7:7, 8:8,
+                9:12, 10:16, 11:20, 12:24, 13:32, 14:48, 15:64
+            };
+
+            // ==================== Theme & Tab ====================
+            function toggleTheme() {
+                const body = document.body;
+                if (body.hasAttribute('data-theme')) { body.removeAttribute('data-theme'); localStorage.setItem('theme','light'); }
+                else { body.setAttribute('data-theme','dark'); localStorage.setItem('theme','dark'); }
+            }
+            document.addEventListener('DOMContentLoaded', function() {
+                const t = localStorage.getItem('theme') || 'light';
+                if (t === 'dark') document.body.setAttribute('data-theme','dark');
+                else document.body.removeAttribute('data-theme');
+                renderFrameFields();
+                loadQuizQuestion();
+            });
+            function showTab(tabName) {
+                document.querySelectorAll('.content-section').forEach(s => { s.classList.remove('active'); s.hidden = true; });
+                document.querySelectorAll('.tab-button').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+                const sec = document.getElementById(tabName + '-tab');
+                if (sec) { sec.classList.add('active'); sec.hidden = false; }
+                const btn = document.querySelector(`[data-tab="${tabName}"]`);
+                if (btn) { btn.classList.add('active'); btn.setAttribute('aria-selected','true'); }
+                currentTab = tabName;
+            }
+
+            // ==================== Render Frame Fields ====================
+            function renderFrameFields() {
+                const grid = document.getElementById('frameFieldsGrid');
+                if (!grid) return;
+                let html = '';
+                Object.entries(CAN_FRAME_FIELDS).forEach(([key, field]) => {
+                    html += `<div class="frame-field-card" onclick="showFieldModal('${key}')">
+                        <h4>${field.name}</h4>
+                        <p>${field.description.substring(0, 80)}...</p>
+                        <div class="field-meta"><span>📐 ${field.bits}</span><span>📋 点击查看详情</span></div>
+                    </div>`;
+                });
+                grid.innerHTML = html;
+            }
+
+            function showFieldModal(key) {
+                const f = CAN_FRAME_FIELDS[key];
+                if (!f) return;
+                let detailsHtml = f.details.map(d => `<li style="margin-bottom:4px;">${d}</li>`).join('');
+                let examplesHtml = f.examples.map(e => `<li style="margin-bottom:4px;"><code style="background:rgba(155,122,204,0.1);padding:2px 6px;border-radius:4px;">${e}</code></li>`).join('');
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay active';
+                overlay.innerHTML = `<div class="modal">
+                    <button class="modal-close" onclick="this.closest('.modal-overlay').remove()" aria-label="关闭">✕</button>
+                    <h3 style="color:var(--accent);margin-bottom:4px;">${f.name}</h3>
+                    <p style="color:var(--text-3);margin-bottom:16px;font-size:0.85rem;">📐 ${f.bits}</p>
+                    <p style="color:var(--text-2);line-height:1.7;margin-bottom:16px;">${f.description}</p>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">功能详情</h4>
+                    <ul style="margin:0 0 16px 20px;padding:0;font-size:0.9rem;color:var(--text-2);">${detailsHtml}</ul>
+                    <h4 style="color:var(--accent);margin-bottom:8px;">示例</h4>
+                    <ul style="margin:0 0 16px 20px;padding:0;font-size:0.85rem;">${examplesHtml}</ul>
+                    <div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.85rem;color:var(--text-2);">💡 ${f.tip}</div>
+                </div>`;
+                overlay.addEventListener('click', function(e) { if (e.target === overlay) overlay.remove(); });
+                document.body.appendChild(overlay);
+            }
+
+            // ==================== Demo Functions ====================
+            function addLog(msg, type) {
+                const log = document.getElementById('commLog');
+                const now = new Date();
+                const ts = `[${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}:${now.getSeconds().toString().padStart(2,'0')}]`;
+                const cls = type === 'warning' ? 'log-warning' : type === 'error' ? 'log-error' : 'log-info';
+                log.innerHTML += `<div class="log-entry"><span class="log-timestamp">${ts}</span><span class="${cls}">${msg}</span></div>`;
+                log.scrollTop = log.scrollHeight;
+            }
+            function setEcuStatus(id, text) {
+                const el = document.getElementById(id + 'Status');
+                if (el) el.textContent = text;
+            }
+            function resetDemo() {
+                demoActive = false;
+                ['ecu1','ecu2','ecu3'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) { el.classList.remove('pulse','blink'); }
+                    setEcuStatus(id, '就绪');
+                });
+                const bus = document.getElementById('busBar');
+                if (bus) bus.classList.remove('active');
+                const log = document.getElementById('commLog');
+                log.innerHTML = '<div class="log-entry"><span class="log-timestamp">[12:00:00]</span><span class="log-info">🔄 演示已重置，点击按钮开始新的演示</span></div>';
+            }
+
+            function startDemo(type) {
+                if (demoActive) return;
+                demoActive = true;
+                resetDemo();
+                demoActive = true;
+                const bus = document.getElementById('busBar');
+                if (bus) bus.classList.add('active');
+
+                if (type === 'arbitration') demoArbitration();
+                else if (type === 'dataframe') demoDataFrame();
+                else if (type === 'error') demoError();
+                else if (type === 'canfd') demoCanFd();
+                else if (type === 'compete') demoCompete();
+            }
+
+            function demoArbitration() {
+                addLog('⚡ 仲裁演示开始：ECU 1 (ID=0x100) vs ECU 2 (ID=0x200)', 'info');
+                setTimeout(() => {
+                    const e1 = document.getElementById('ecu1'); const e2 = document.getElementById('ecu2');
+                    if (e1) e1.classList.add('pulse'); if (e2) e2.classList.add('pulse');
+                    setEcuStatus('ecu1','发送中...'); setEcuStatus('ecu2','发送中...');
+                    addLog('📤 [ECU 1] ID=0x100 开始发送...','info');
+                    addLog('📤 [ECU 2] ID=0x200 开始发送...','info');
+                }, 500);
+                setTimeout(() => { addLog('⚡ 仲裁位 0: ECU1=0(显性) vs ECU2=1(隐性) → ECU1 赢得此位','warning'); }, 1500);
+                setTimeout(() => { addLog('⚡ 仲裁位 1-10: ECU1 的 ID=0x100 持续保持更低值','warning'); }, 2200);
+                setTimeout(() => {
+                    const e1 = document.getElementById('ecu1'); const e2 = document.getElementById('ecu2');
+                    if (e1) e1.classList.remove('pulse'); if (e2) { e2.classList.remove('pulse'); }
+                    setEcuStatus('ecu1','赢得仲裁'); setEcuStatus('ecu2','退出等待');
+                    addLog('🏆 [ECU 1] ID=0x100 获得总线访问权','info');
+                    addLog('⏳ [ECU 2] ID=0x200 等待总线空闲后重试','info');
+                }, 3000);
+                setTimeout(() => {
+                    addLog('📊 [ECU 1] 发送数据帧: DLC=4, Data=[01 02 03 04]','info');
+                    addLog('✅ [ECU 2, ECU 3] ACK 应答成功','info');
+                    setEcuStatus('ecu1','发送完成'); setEcuStatus('ecu2','接收完成');
+                    demoActive = false;
+                }, 4500);
+            }
+
+            function demoDataFrame() {
+                addLog('📊 数据帧传输演示：ECU 1 发送完整数据帧','info');
+                setTimeout(() => { const e = document.getElementById('ecu1'); if(e) e.classList.add('pulse'); setEcuStatus('ecu1','发送中...'); addLog('📤 SOF: 帧起始位 (显性位 0)','info'); }, 500);
+                setTimeout(() => { addLog('📤 仲裁场: ID=0x100, RTR=0(数据帧), IDE=0(标准帧)','info'); }, 1200);
+                setTimeout(() => { addLog('📤 控制场: DLC=0x04 (4字节数据)','info'); }, 1900);
+                setTimeout(() => { addLog('📤 数据场: [01 02 03 04] — 4 字节有效数据','info'); }, 2600);
+                setTimeout(() => { addLog('📤 CRC 场: 校验值 = 0x5555, CRC 定界符 = 1','info'); }, 3300);
+                setTimeout(() => { addLog('📥 ACK: ECU 2 和 ECU 3 写入显性位(0)确认接收','info'); addLog('📤 EOF: 7 个隐性位，帧传输完成','info'); setEcuStatus('ecu1','发送完成'); const e = document.getElementById('ecu1'); if(e) e.classList.remove('pulse'); demoActive = false; }, 4000);
+            }
+
+            function demoError() {
+                addLog('⚠️ 错误帧演示：ECU 2 检测到 CRC 错误','info');
+                setTimeout(() => { const e = document.getElementById('ecu1'); if(e) e.classList.add('pulse'); setEcuStatus('ecu1','发送中...'); addLog('📤 [ECU 1] 发送数据帧 ID=0x100...','info'); }, 500);
+                setTimeout(() => { addLog('📤 数据场: [01 02 03 04]，CRC 计算中...','info'); }, 1500);
+                setTimeout(() => { const e2 = document.getElementById('ecu2'); if(e2) e2.classList.add('blink'); setEcuStatus('ecu2','CRC 错误!'); addLog('❌ [ECU 2] CRC 校验失败！计算值与接收值不匹配','error'); }, 2500);
+                setTimeout(() => { addLog('⚠️ [ECU 2] 发送错误帧：6 位显性错误标志 + 8 位隐性错误定界符','error'); addLog('⚠️ [ECU 1] 收到错误帧，数据需要重传','warning'); setEcuStatus('ecu1','收到错误帧'); }, 3500);
+                setTimeout(() => { const e1 = document.getElementById('ecu1'); const e2 = document.getElementById('ecu2'); if(e1) e1.classList.remove('pulse'); if(e2) e2.classList.remove('blink'); setEcuStatus('ecu1','等待重传'); setEcuStatus('ecu2','错误已报告'); addLog('📊 [ECU 1] 将在总线空闲后自动重传','info'); demoActive = false; }, 4500);
+            }
+
+            function demoCanFd() {
+                addLog('🚀 CAN FD 演示：ECU 1 发送 CAN FD 数据帧','info');
+                setTimeout(() => { const e = document.getElementById('ecu1'); if(e) e.classList.add('pulse'); setEcuStatus('ecu1','CAN FD 发送中...'); addLog('📤 SOF → 仲裁场: ID=0x200, 仲裁段速率 500kbps','info'); }, 500);
+                setTimeout(() => { addLog('📤 控制场: FDF=1(CAN FD), BRS=1(切换速率), ESI=0, DLC=0x0F(64字节)','info'); }, 1500);
+                setTimeout(() => { addLog('🚀 数据段切换到 2Mbps 高速模式！','warning'); addLog('📤 数据场: [00 01 02 ... 3F] — 64 字节有效数据','info'); }, 2500);
+                setTimeout(() => { addLog('📤 CRC-21: 21 bit 校验码 (适配 64 字节数据)','info'); addLog('🚀 数据段结束，恢复仲裁段速率 500kbps','warning'); }, 3500);
+                setTimeout(() => { addLog('📥 ACK: 接收方确认','info'); addLog('📤 EOF: 帧结束','info'); const e = document.getElementById('ecu1'); if(e) e.classList.remove('pulse'); setEcuStatus('ecu1','FD 发送完成'); demoActive = false; }, 4500);
+            }
+
+            function demoCompete() {
+                addLog('🔍 三节点竞争演示：ECU1(0x100) vs ECU2(0x200) vs ECU3(0x050)','info');
+                setTimeout(() => { ['ecu1','ecu2','ecu3'].forEach(id => { const e = document.getElementById(id); if(e) e.classList.add('pulse'); }); setEcuStatus('ecu1','发送中...'); setEcuStatus('ecu2','发送中...'); setEcuStatus('ecu3','发送中...'); addLog('📤 三个节点同时开始发送！','warning'); }, 500);
+                setTimeout(() => { addLog('⚡ 仲裁位 0: ECU1=0, ECU2=1, ECU3=0 → ECU2 退出(最高位为1)','warning'); }, 1500);
+                setTimeout(() => { addLog('⚡ 仲裁位 1: ECU1=1, ECU3=0 → ECU1 退出','warning'); const e2 = document.getElementById('ecu2'); const e1 = document.getElementById('ecu1'); if(e2) e2.classList.remove('pulse'); if(e1) e1.classList.remove('pulse'); setEcuStatus('ecu2','退出'); setEcuStatus('ecu1','退出'); }, 2200);
+                setTimeout(() => { addLog('🏆 [ECU 3] ID=0x050 赢得仲裁！最低 ID = 最高优先级','info'); setEcuStatus('ecu3','赢得仲裁'); }, 3000);
+                setTimeout(() => { const e3 = document.getElementById('ecu3'); if(e3) e3.classList.remove('pulse'); addLog('📊 [ECU 3] 发送数据帧并完成传输','info'); setEcuStatus('ecu3','发送完成'); demoActive = false; }, 4000);
+            }
+
+            // ==================== Tool Functions ====================
+            function parseCANFrame() {
+                const input = document.getElementById('canFrameInput').value.trim();
+                const result = document.getElementById('parseResult');
+                if (!input) { result.innerHTML = '<p style="color:var(--error-color);">请输入十六进制报文</p>'; return; }
+                const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                if (!bytes || bytes.length < 2) { result.innerHTML = '<p style="color:var(--error-color);">格式错误，请输入有效的十六进制报文</p>'; return; }
+                const firstByte = parseInt(bytes[0], 16);
+                const secondByte = parseInt(bytes[1], 16);
+                const id = ((firstByte & 0x07) << 8) | secondByte;
+                const isExt = (firstByte & 0x80) !== 0;
+                const isRtr = !isExt && (firstByte & 0x40) !== 0;
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                html += `<p><strong>帧类型:</strong> ${isRtr ? '远程帧' : '数据帧'} ${isExt ? '(扩展帧)' : '(标准帧)'}</p>`;
+                html += `<p><strong>CAN ID:</strong> 0x${id.toString(16).toUpperCase().padStart(3,'0')} (${id})</p>`;
+                if (bytes.length > 2) {
+                    const dlc = parseInt(bytes[2], 16) & 0x0F;
+                    html += `<p><strong>DLC:</strong> ${dlc} (数据字节数)</p>`;
+                    if (bytes.length > 3) {
+                        const data = bytes.slice(3, 3 + Math.min(dlc, bytes.length - 3));
+                        html += `<p><strong>数据:</strong> ${data.map(b => '0x' + b.toUpperCase()).join(' ')}</p>`;
+                    }
+                }
+                html += `<p style="color:var(--text-3);font-size:0.8rem;">💡 基于标准帧格式解析（实际格式取决于 CAN 控制器输出格式）</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function analyzePriority() {
+                const input = document.getElementById('priorityInput').value.trim();
+                const result = document.getElementById('priorityResult');
+                if (!input) { result.innerHTML = '<p style="color:var(--error-color);">请输入 CAN ID</p>'; return; }
+                const ids = input.split(/[,，\s]+/).map(s => parseInt(s.trim().replace(/0x/i,''), 16)).filter(n => !isNaN(n));
+                if (ids.length < 2) { result.innerHTML = '<p style="color:var(--error-color);">请输入至少 2 个 CAN ID</p>'; return; }
+                const sorted = [...ids].sort((a, b) => a - b);
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<h4 style="color:var(--accent);margin-bottom:8px;">优先级排序（ID 越小优先级越高）</h4>`;
+                sorted.forEach((id, i) => {
+                    const width = Math.max(10, 100 - (id / 0x7FF) * 80);
+                    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                        <span style="min-width:60px;font-weight:600;color:${i===0?'#28a745':'var(--text)'};">#${i+1}</span>
+                        <span style="min-width:70px;font-family:monospace;">0x${id.toString(16).toUpperCase().padStart(3,'0')}</span>
+                        <div style="width:${width}%;height:20px;background:${i===0?'#28a745':'var(--accent)'};border-radius:4px;"></div>
+                        ${i===0?'<span style="color:#28a745;font-weight:600;">最高优先级</span>':''}
+                    </div>`;
+                });
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function lookupDLC() {
+                const input = document.getElementById('dlcInput').value.trim();
+                const result = document.getElementById('dlcResult');
+                const val = parseInt(input);
+                if (isNaN(val) || val < 0 || val > 15) { result.innerHTML = '<p style="color:var(--error-color);">请输入 0-15 的 DLC 值</p>'; return; }
+                const bytes = DLC_TABLE[val];
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<p><strong>DLC = ${val}</strong> → <strong>${bytes} 字节</strong> 数据</p>`;
+                html += `<table style="width:100%;margin-top:12px;font-size:0.85rem;"><tr><th>DLC</th><th>字节数</th><th>协议</th></tr>`;
+                for (let i = 0; i <= 15; i++) {
+                    const hl = i === val ? 'font-weight:600;background:rgba(155,122,204,0.1);' : '';
+                    html += `<tr style="${hl}"><td>${i}</td><td>${DLC_TABLE[i]}</td><td>${i<=8?'CAN 2.0 / FD':'CAN FD'}</td></tr>`;
+                }
+                html += `</table></div>`;
+                result.innerHTML = html;
+            }
+
+            function calcBaudRate() {
+                const clk = parseFloat(document.getElementById('clkInput').value);
+                const seg = parseInt(document.getElementById('segInput').value);
+                const result = document.getElementById('baudResult');
+                if (isNaN(clk) || isNaN(seg) || clk <= 0 || seg <= 0) { result.innerHTML = '<p style="color:var(--error-color);">请输入有效的参数</p>'; return; }
+                const baud = (clk * 1000000) / seg;
+                let label = baud >= 1000000 ? (baud / 1000000).toFixed(2) + ' Mbps' : (baud / 1000).toFixed(0) + ' kbps';
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;">`;
+                html += `<p><strong>计算公式:</strong> 波特率 = 时钟频率 / 总位时间份数</p>`;
+                html += `<p><strong>波特率:</strong> ${clk} MHz / ${seg} = <strong style="color:var(--accent);font-size:1.2em;">${label}</strong></p>`;
+                html += `<p style="font-size:0.8rem;color:var(--text-3);margin-top:8px;">💡 常用配置: 80MHz/16=500kbps, 80MHz/8=1Mbps, 40MHz/20=2Mbps(CAN FD)</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            // ==================== Quiz Functions ====================
+            function loadQuizQuestion() {
+                const area = document.getElementById('questionArea');
+                if (!area) return;
+                if (quizState.currentQuestion >= QUIZ_QUESTIONS.length) {
+                    document.getElementById('quizResults').style.display = 'block';
+                    area.style.display = 'none';
+                    const pct = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
+                    document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('percentage').textContent = pct + '%';
+                    return;
+                }
+                quizState.answered = false;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                let html = `<div style="margin-bottom:8px;color:var(--text-3);font-size:0.85rem;">问题 ${quizState.currentQuestion + 1} / ${QUIZ_QUESTIONS.length}</div>`;
+                html += `<div style="display:flex;gap:4px;margin-bottom:16px;">`;
+                QUIZ_QUESTIONS.forEach((_, i) => { html += `<div style="flex:1;height:4px;border-radius:2px;background:${i < quizState.currentQuestion ? 'var(--accent)' : 'var(--border)'};"></div>`; });
+                html += `</div>`;
+                html += `<h3 style="margin-bottom:16px;font-size:1.1em;">${q.question}</h3>`;
+                q.options.forEach((opt, i) => {
+                    html += `<button class="quiz-option" onclick="answerQuiz(${i})" id="qopt${i}">${opt}</button>`;
+                });
+                html += `<div id="quizFeedback" style="margin-top:12px;"></div>`;
+                area.innerHTML = html;
+                area.style.display = 'block';
+                document.getElementById('quizResults').style.display = 'none';
+            }
+
+            function answerQuiz(idx) {
+                if (quizState.answered) return;
+                quizState.answered = true;
+                const q = QUIZ_QUESTIONS[quizState.currentQuestion];
+                const feedback = document.getElementById('quizFeedback');
+                for (let i = 0; i < q.options.length; i++) {
+                    const btn = document.getElementById('qopt' + i);
+                    if (i === q.correct) btn.classList.add('correct');
+                    if (i === idx && i !== q.correct) btn.classList.add('wrong');
+                    btn.classList.add('disabled');
+                }
+                if (idx === q.correct) {
+                    quizState.score++;
+                    feedback.innerHTML = `<p style="color:#28a745;font-weight:600;">✅ 正确！${q.explanation}</p>`;
+                } else {
+                    feedback.innerHTML = `<p style="color:#dc3545;font-weight:600;">❌ 错误。${q.explanation}</p>`;
+                }
+                setTimeout(() => { quizState.currentQuestion++; loadQuizQuestion(); }, 2500);
+            }
+
+            function restartQuiz() {
+                quizState = { currentQuestion: 0, score: 0, answered: false };
+                loadQuizQuestion();
+            }
+
+            // Tab button event listeners
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.addEventListener('click', () => showTab(btn.dataset.tab));
+            });
+            </script>
+
+            <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </aside>
         </div>
-    </main>
-
-    <script>
-        function getTheme() {
-            return localStorage.getItem('vp-theme') || 'light';
-        }
-
-        function applyTheme(theme) {
-            document.body.setAttribute('data-theme', theme);
-            var btn = document.querySelector('.theme-toggle');
-            btn.textContent = theme === 'dark' ? '浅色' : '深色';
-        }
-
-        function toggleTheme() {
-            var current = getTheme();
-            var next = current === 'dark' ? 'light' : 'dark';
-            localStorage.setItem('vp-theme', next);
-            applyTheme(next);
-        }
-
-        applyTheme(getTheme());
-    </script>
+    </div>
 </body>
 </html>
