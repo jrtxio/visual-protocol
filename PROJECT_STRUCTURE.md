@@ -1,6 +1,6 @@
 # Visual Protocol - 项目结构说明
 
-## 📁 当前项目结构
+## 当前项目结构
 
 ```
 visual-protocol/
@@ -16,16 +16,19 @@ visual-protocol/
 │   │   │   └── main.css   # 主样式表
 │   │   └── js/            # JavaScript文件
 │   │       └── main.js    # 主JavaScript文件
-│   ├── protocols/         # 协议特定内容
-│   │   ├── uds/           # UDS协议
-│   │   │   └── index.html # UDS协议主页面
-│   │   ├── doip/          # DoIP协议
-│   │   │   └── index.html # DoIP协议占位页面
-│   │   ├── someip/        # SOME/IP协议
-│   │   │   └── index.html # SOME/IP协议占位页面
-│   │   └── can/           # CAN协议
-│   │       └── index.html # CAN协议占位页面
-│   └── components/         # 可复用组件 (预留)
+│   └── protocols/         # 协议特定内容（按推荐学习路径排列）
+│       ├── can/           # CAN 协议 (Step 1, 数据链路层)
+│       │   └── index.html
+│       ├── ethernet/      # Ethernet 协议 (Step 2, 物理/网络层)
+│       │   └── index.html
+│       ├── doip/          # DoIP 协议 (Step 3, 传输层)
+│       │   └── index.html
+│       ├── uds/           # UDS 协议 (Step 4, 应用层)
+│       │   └── index.html
+│       ├── someip/        # SOME/IP 协议 (Step 5, 中间件层)
+│       │   └── index.html
+│       └── dds/           # DDS 协议 (Step 6, 中间件层, 开发中)
+│           └── index.html
 └── docs/                  # GitHub Pages部署目录
     ├── index.html         # 主页面 (复制自src)
     ├── assets/            # 静态资源 (复制自src)
@@ -34,23 +37,27 @@ visual-protocol/
     │   └── js/
     │       └── main.js
     └── protocols/         # 协议内容 (复制自src)
-        ├── uds/
+        ├── can/
+        │   └── index.html
+        ├── ethernet/
         │   └── index.html
         ├── doip/
         │   └── index.html
+        ├── uds/
+        │   └── index.html
         ├── someip/
         │   └── index.html
-        └── can/
+        └── dds/
             └── index.html
 ```
 
-## 🚀 部署说明
+## 部署说明
 
-1. **开发模式**: 
+1. **开发模式**:
    ```bash
    # 启动本地开发服务器
    python -m http.server 8000
-   
+
    # 或使用其他静态文件服务器
    npx serve src
    ```
@@ -59,7 +66,7 @@ visual-protocol/
    ```bash
    # 运行构建脚本
    node build.js
-   
+
    # 构建结果将复制到docs目录
    # 可直接推送到GitHub Pages
    ```
@@ -69,7 +76,7 @@ visual-protocol/
    - 发布目录: `/docs`
    - 自定义域名: (可选)
 
-## 📦 技术栈
+## 技术栈
 
 ### 前端技术
 - **HTML5**: 语义化结构，支持PWA和可访问性
@@ -82,7 +89,7 @@ visual-protocol/
 - **可访问性**: 支持键盘导航和屏幕阅读器
 - **性能优化**: 静态文件，快速加载
 
-## 🎯 开发规范
+## 开发规范
 
 ### 代码风格
 - 使用语义化的HTML结构
@@ -108,7 +115,7 @@ test: 测试相关
 chore: 构建过程或辅助工具的变动
 ```
 
-## 🔧 开发流程
+## 开发流程
 
 1. **功能开发**:
    ```bash
@@ -121,7 +128,7 @@ chore: 构建过程或辅助工具的变动
    ```bash
    # 构建项目
    node build.js
-   
+
    # 提交到Git
    git add .
    git commit -m "feat: 添加新功能描述"
@@ -133,23 +140,25 @@ chore: 构建过程或辅助工具的变动
    - GitHub Pages自动部署
    - 代码质量检查
 
-## 📚 协议支持规划
+## 协议支持
 
 ### 已实现
-- [x] UDS协议 (统一诊断服务, ISO 14229)
+- [x] CAN 协议 (控制器局域网络, ISO 11898) — Step 1, 数据链路层
+- [x] Ethernet 协议 (车载以太网, IEEE 802.3) — Step 2, 物理/网络层
+- [x] DoIP 协议 (基于IP的诊断, ISO 13400) — Step 3, 传输层
+- [x] UDS 协议 (统一诊断服务, ISO 14229) — Step 4, 应用层
+- [x] SOME/IP 协议 (面向服务的中间件, AUTOSAR) — Step 5, 中间件层
 
-### 待开发
-- [ ] DoIP协议 (基于IP的诊断, ISO 13400)
-- [ ] SOME/IP协议 (面向服务的中间件)
-- [ ] CAN协议 (控制器局域网络, ISO 11898)
+### 开发中
+- [ ] DDS 协议 (数据分发服务, OMG DDS) — Step 6, 中间件层
 
-## 🤝 贡献指南
+## 贡献指南
 
 1. Fork项目
 2. 创建功能分支
 3. 开发并测试功能
 4. 提交Pull Request
 
-## 📄 许可证
+## 许可证
 
 本项目采用 Apache 2.0 许可证

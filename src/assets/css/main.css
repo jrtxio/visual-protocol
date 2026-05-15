@@ -354,6 +354,17 @@ body[data-theme="light"] .theme-btn .icon-moon { display: block; }
     margin-bottom: 16px;
 }
 
+.protocol-step {
+    font-family: "Inter", -apple-system, sans-serif;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: var(--accent);
+    color: #FFF;
+}
+
 .protocol-icon {
     display: flex;
     align-items: center;
@@ -421,7 +432,22 @@ body[data-theme="dark"] .protocol-status--active {
     background: var(--bg);
     border-radius: 6px;
     color: var(--text-3);
-    align-self: flex-start;
+}
+
+.protocol-meta {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.protocol-layer {
+    font-size: 0.72em;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 100px;
+    border: 1px solid var(--border);
+    color: var(--text-3);
 }
 
 /* ---- Features ---- */

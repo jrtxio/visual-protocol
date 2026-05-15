@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visual Protocol — 汽车协议学习平台</title>
     <meta name="description" content="交互式汽车协议学习平台 — 通过可视化动画和交互式演示帮助您理解各种汽车通信协议">
-    <meta name="keywords" content="汽车协议, UDS, DoIP, SOME/IP, CAN, 诊断协议, 车载网络">
+    <meta name="keywords" content="汽车协议, UDS, DoIP, SOME/IP, CAN, Ethernet, DDS, 诊断协议, 车载网络, 自动驾驶">
     <meta property="og:title" content="Visual Protocol — 汽车协议学习平台">
     <meta property="og:description" content="交互式汽车协议学习平台 — 通过可视化动画和交互式演示帮助您理解各种汽车通信协议">
     <meta property="og:type" content="website">
@@ -57,9 +57,9 @@
             <header class="hero">
                 <div class="container">
                     <h1 class="hero-title">理解汽车通信协议<br>从未如此直观</h1>
-                    <p class="hero-desc">通过可视化动画和交互式演示，15 分钟极速掌握 UDS、DoIP、CAN、Ethernet、SOME/IP 等汽车通信协议的核心概念。</p>
+                    <p class="hero-desc">通过可视化动画和交互式演示，按推荐路径自底向上掌握 CAN、Ethernet、DoIP、UDS、SOME/IP、DDS 等汽车通信协议。</p>
                     <div class="hero-actions">
-                        <a href="protocols/uds/" class="btn btn-primary">开始学习 UDS</a>
+                        <a href="protocols/can/" class="btn btn-primary">开始学习 CAN</a>
                         <a href="#protocols" class="btn btn-secondary">浏览全部协议</a>
                     </div>
                 </div>
@@ -68,74 +68,93 @@
             <section class="protocols-section" id="protocols">
                 <div class="container">
                     <div class="section-header">
-                        <h2 class="section-title">支持的协议标准</h2>
-                        <p class="section-desc">选择一个协议，开始你的学习之旅</p>
+                        <h2 class="section-title">推荐学习路径</h2>
+                        <p class="section-desc">自底向上 — 先理解基础传输层，再掌握上层应用协议</p>
                     </div>
 
                     <div class="protocol-grid">
-                        <a href="protocols/uds/" class="protocol-card protocol-card--active">
-                            <div class="protocol-card-header">
-                                <div class="protocol-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
-                                </div>
-                                <span class="protocol-status protocol-status--active">已上线</span>
-                            </div>
-                            <h3 class="protocol-name">UDS</h3>
-                            <p class="protocol-fullname">统一诊断服务</p>
-                            <p class="protocol-desc">车辆诊断和 ECU 通信的标准协议，涵盖诊断会话、数据读取、例程控制等核心服务。</p>
-                            <div class="protocol-standard">ISO 14229</div>
-                        </a>
-
                         <a href="protocols/can/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <div class="protocol-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-4"/></svg>
-                                </div>
+                                <span class="protocol-step">Step 1</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">CAN</h3>
                             <p class="protocol-fullname">控制器局域网络</p>
-                            <p class="protocol-desc">经典的车载网络通信协议，高可靠性、实时性的串行总线标准。</p>
-                            <div class="protocol-standard">ISO 11898</div>
+                            <p class="protocol-desc">车载网络的基石。理解 CAN 总线帧结构、仲裁机制和错误处理，为学习所有上层协议打下基础。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">ISO 11898</span>
+                                <span class="protocol-layer">数据链路层</span>
+                            </div>
                         </a>
 
                         <a href="protocols/ethernet/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <div class="protocol-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20v-6"/></svg>
-                                </div>
+                                <span class="protocol-step">Step 2</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">Ethernet</h3>
                             <p class="protocol-fullname">车载以太网</p>
-                            <p class="protocol-desc">车载高速通信网络的基础协议，支持 VLAN、TSN 等关键特性。</p>
-                            <div class="protocol-standard">IEEE 802.3</div>
+                            <p class="protocol-desc">现代车载通信的骨干网络。掌握以太网帧格式、VLAN 和 TSN，理解 DoIP 和 SOME/IP 的承载层。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">IEEE 802.3</span>
+                                <span class="protocol-layer">物理 / 网络层</span>
+                            </div>
                         </a>
 
                         <a href="protocols/doip/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <div class="protocol-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
-                                </div>
+                                <span class="protocol-step">Step 3</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">DoIP</h3>
                             <p class="protocol-fullname">基于 IP 的诊断</p>
-                            <p class="protocol-desc">通过以太网进行车辆高速诊断通信，支持远程诊断和 OTA 更新。</p>
-                            <div class="protocol-standard">ISO 13400</div>
+                            <p class="protocol-desc">基于 Ethernet 的诊断传输协议。学完以太网后自然衔接，理解诊断数据如何通过 IP 网络传输。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">ISO 13400</span>
+                                <span class="protocol-layer">传输层</span>
+                            </div>
+                        </a>
+
+                        <a href="protocols/uds/" class="protocol-card protocol-card--active">
+                            <div class="protocol-card-header">
+                                <span class="protocol-step">Step 4</span>
+                                <span class="protocol-status protocol-status--active">已上线</span>
+                            </div>
+                            <h3 class="protocol-name">UDS</h3>
+                            <p class="protocol-fullname">统一诊断服务</p>
+                            <p class="protocol-desc">诊断服务的核心协议。运行于 DoIP 或 CAN 之上，涵盖诊断会话、数据读取、例程控制等完整服务。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">ISO 14229</span>
+                                <span class="protocol-layer">应用层</span>
+                            </div>
                         </a>
 
                         <a href="protocols/someip/" class="protocol-card protocol-card--active">
                             <div class="protocol-card-header">
-                                <div class="protocol-icon">
-                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
-                                </div>
+                                <span class="protocol-step">Step 5</span>
                                 <span class="protocol-status protocol-status--active">已上线</span>
                             </div>
                             <h3 class="protocol-name">SOME/IP</h3>
                             <p class="protocol-fullname">面向服务的中间件</p>
-                            <p class="protocol-desc">下一代车载以太网通信架构，基于服务发现机制的中间件协议。</p>
-                            <div class="protocol-standard">AUTOSAR</div>
+                            <p class="protocol-desc">AUTOSAR 生态核心。基于以太网的面向服务架构，掌握服务发现、序列化和 RPC 通信机制。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">AUTOSAR</span>
+                                <span class="protocol-layer">中间件层</span>
+                            </div>
+                        </a>
+
+                        <a href="protocols/dds/" class="protocol-card protocol-card--coming">
+                            <div class="protocol-card-header">
+                                <span class="protocol-step">Step 6</span>
+                                <span class="protocol-status protocol-status--coming">开发中</span>
+                            </div>
+                            <h3 class="protocol-name">DDS</h3>
+                            <p class="protocol-fullname">数据分发服务</p>
+                            <p class="protocol-desc">面向自动驾驶和 ADAS 的发布/订阅中间件。与 SOME/IP 互补，是 ROS 2 的底层通信机制。</p>
+                            <div class="protocol-meta">
+                                <span class="protocol-standard">OMG DDS</span>
+                                <span class="protocol-layer">中间件层</span>
+                            </div>
                         </a>
                     </div>
                 </div>
@@ -199,8 +218,8 @@
                 <div class="container">
                     <div class="cta-inner">
                         <h2>准备好开始了吗？</h2>
-                        <p>从 UDS 协议开始，开启你的汽车通信协议学习之旅。</p>
-                        <a href="protocols/uds/" class="btn btn-primary">立即开始</a>
+                        <p>从 CAN 总线开始，按推荐学习路径逐步掌握汽车通信协议体系。</p>
+                        <a href="protocols/can/" class="btn btn-primary">立即开始</a>
                     </div>
                 </div>
             </section>
@@ -210,7 +229,7 @@
                     <div class="footer-inner">
                         <div class="footer-left">
                             <span class="footer-brand">Visual Protocol</span>
-                            <span class="footer-copy">&copy; 2025 &middot; 让汽车通信协议学习更简单</span>
+                            <span class="footer-copy">&copy; 2026 &middot; 让汽车通信协议学习更简单</span>
                         </div>
                         <div class="footer-links">
                             <a href="https://cloud.umami.is/share/8DxQeDATUet96dDV" target="_blank" rel="noopener">访问统计</a>

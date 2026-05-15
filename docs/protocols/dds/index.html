@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDS 协议学习 — Visual Protocol</title>
+    <meta name="description" content="交互式 DDS 协议学习平台 — 掌握数据分发服务的核心原理">
+    <meta name="keywords" content="DDS协议, 数据分发服务, OMG DDS, 发布订阅, ROS 2, 自动驾驶, ADAS">
+    <meta property="og:title" content="Visual Protocol — DDS 协议学习平台">
+    <meta property="og:description" content="交互式 DDS 协议学习平台">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://jrtxio.github.io/visual-protocol/protocols/dds/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>VP</text></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <meta name="google-adsense-account" content="ca-pub-3215512126020129">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3215512126020129" crossorigin="anonymous"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="5c58c769-7710-4db8-a125-3c78f0e076eb"></script>
+    <link rel="stylesheet" href="../../assets/css/main.css">
+    <style>
+        .coming-soon {
+            text-align: center;
+            padding: 80px 24px;
+        }
+        .coming-soon-icon {
+            width: 80px; height: 80px;
+            margin: 0 auto 24px;
+            background: var(--accent-bg);
+            border-radius: 20px;
+            display: flex; align-items: center; justify-content: center;
+            color: var(--accent);
+        }
+        .coming-soon-icon svg { width: 40px; height: 40px; }
+        .coming-soon h1 {
+            font-size: 2em; font-weight: 700; margin-bottom: 8px;
+        }
+        .coming-soon .subtitle {
+            color: var(--text-3); font-size: 1.05em; margin-bottom: 32px;
+        }
+        .coming-badge {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 6px 16px; border-radius: 100px;
+            background: var(--accent-bg); color: var(--accent);
+            font-size: 0.88em; font-weight: 600; margin-bottom: 40px;
+        }
+        .preview-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px; text-align: left; max-width: 800px; margin: 0 auto;
+        }
+        .preview-card {
+            padding: 24px; background: var(--surface);
+            border: 1px solid var(--border); border-radius: var(--radius);
+        }
+        .preview-card h3 {
+            font-size: 1.05em; margin-bottom: 8px; color: var(--accent);
+        }
+        .preview-card p {
+            font-size: 0.9em; color: var(--text-2); line-height: 1.6;
+        }
+        .comparison-table {
+            width: 100%; border-collapse: collapse; margin: 24px 0;
+            text-align: left;
+        }
+        .comparison-table th {
+            padding: 12px; background: var(--accent-bg);
+            color: var(--accent); font-weight: 600;
+            border-bottom: 2px solid var(--border);
+        }
+        .comparison-table td {
+            padding: 12px; border-bottom: 1px solid var(--border);
+            color: var(--text-2); font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <nav class="site-nav">
+        <div class="nav-inner container-wide">
+            <a href="../../index.html" class="nav-logo" aria-label="首页">
+                <svg class="nav-logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+                <span>Visual Protocol</span>
+            </a>
+            <div class="nav-right">
+                <a href="../../index.html" class="nav-back">返回主页</a>
+                <button class="theme-btn" id="themeToggle" aria-label="切换主题">
+                    <svg class="icon-sun" viewBox="0 0 20 20" fill="currentColor"><circle cx="10" cy="10" r="4"/><path d="M10 0v3M10 17v3M0 10h3M17 10h3M2.93 2.93l2.12 2.12M14.95 14.95l2.12 2.12M2.93 17.07l2.12-2.12M14.95 5.05l2.12-2.12"/></svg>
+                    <svg class="icon-moon" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.003 8.003 0 1010.586 10.586z"/></svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-layout">
+        <aside class="ad-sidebar ad-sidebar--left" aria-hidden="true">
+            <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+            <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        </aside>
+
+        <div class="page-body">
+            <div class="container">
+                <div class="coming-soon">
+                    <div class="coming-soon-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/>
+                        </svg>
+                    </div>
+                    <h1>DDS 协议学习</h1>
+                    <p class="subtitle">数据分发服务 — OMG DDS 标准 — 发布/订阅中间件</p>
+                    <div class="coming-badge">开发中</div>
+
+                    <div class="preview-grid">
+                        <div class="preview-card">
+                            <h3>什么是 DDS？</h3>
+                            <p>DDS（Data Distribution Service）是 OMG 组织定义的发布/订阅模式中间件标准。提供去中心化、低延迟、高可靠的数据分发能力，广泛用于自动驾驶、航空航天、工业控制等实时系统。</p>
+                        </div>
+                        <div class="preview-card">
+                            <h3>为什么学 DDS？</h3>
+                            <p>ROS 2 的底层通信采用 DDS 实现。随着自动驾驶和 ADAS 架构演进，DDS 正在从研究领域走向量产车载平台，成为 SOME/IP 的重要互补方案。</p>
+                        </div>
+                        <div class="preview-card">
+                            <h3>DDS vs SOME/IP</h3>
+                            <p>两者同属中间件层但模式不同：SOME/IP 采用请求/响应模式，服务于 AUTOSAR 生态；DDS 采用发布/订阅模式，强调去中心化和 QoS 控制，服务于 ROS 2 生态。</p>
+                        </div>
+                        <div class="preview-card">
+                            <h3>将包含的内容</h3>
+                            <p>基础概念（DCPS 模型、QoS 策略）、IDL 接口定义、RTPS 线协议、发现协议、与 ROS 2 的关系、交互演示、知识测试等完整学习模块。</p>
+                        </div>
+                    </div>
+
+                    <div style="max-width:800px;margin:40px auto 0;text-align:left;">
+                        <h3 style="margin-bottom:16px;color:var(--text);">DDS 与 SOME/IP 对比</h3>
+                        <table class="comparison-table">
+                            <thead>
+                                <tr>
+                                    <th>维度</th>
+                                    <th>SOME/IP</th>
+                                    <th>DDS</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>通信模式</td><td>请求/响应 + 事件通知</td><td>发布/订阅</td></tr>
+                                <tr><td>生态绑定</td><td>AUTOSAR</td><td>OMG / ROS 2</td></tr>
+                                <tr><td>发现机制</td><td>SD (Service Discovery)</td><td>DPDP / SPDP</td></tr>
+                                <tr><td>QoS 控制</td><td>有限</td><td>丰富（22+ 种策略）</td></tr>
+                                <tr><td>典型应用</td><td>车载 ECU 通信</td><td>自动驾驶 / 机器人</td></tr>
+                                <tr><td>传输协议</td><td>UDP/TCP</td><td>UDP (RTPS)</td></tr>
+                                <tr><td>标准组织</td><td>AUTOSAR</td><td>OMG</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top:40px;">
+                        <a href="../../index.html" class="btn btn-secondary">返回主页</a>
+                    </div>
+                </div>
+
+            <aside class="ad-sidebar ad-sidebar--right" aria-hidden="true">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-3215512126020129" data-ad-slot="7014497615" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </aside>
+        </div>
+    </div>
+
+    <script src="../../assets/js/main.js"></script>
+</body>
+</html>

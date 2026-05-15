@@ -2,7 +2,7 @@
 
 ## 项目概述
 
-Visual Protocol 是一个多协议学习平台，旨在通过可视化动画和交互式演示帮助工程师和技术人员学习各种汽车通信协议。初始版本将支持UDS协议，后续将扩展支持DoIP、SOME/IP、CAN、LIN、FlexRay等汽车网络协议。
+Visual Protocol 是一个多协议学习平台，按推荐学习路径（自底向上）帮助工程师和技术人员系统掌握汽车通信协议。通过可视化动画和交互式演示降低学习门槛。
 
 这是一个GitHub Pages项目，采用纯HTML5/CSS3/JavaScript技术栈，无需任何框架依赖。
 
@@ -19,11 +19,13 @@ visual-protocol/
 │       ├── css/          # 样式文件
 │       ├── images/       # 图像资源
 │       └── js/           # JavaScript模块
-├── protocols/             # 协议特定内容目录
-│   ├── uds/              # UDS协议内容
-│   ├── doip/             # DoIP协议内容
-│   ├── someip/           # SOME/IP协议内容
-│   └── can/              # CAN协议内容
+├── protocols/             # 协议特定内容目录（按学习路径排列）
+│   ├── can/              # CAN 协议 (Step 1)
+│   ├── ethernet/         # Ethernet 协议 (Step 2)
+│   ├── doip/             # DoIP 协议 (Step 3)
+│   ├── uds/              # UDS 协议 (Step 4)
+│   ├── someip/           # SOME/IP 协议 (Step 5)
+│   └── dds/              # DDS 协议 (Step 6)
 ├── REQUIREMENTS.md        # 本需求文档
 ├── CLAUDE.md              # Claude开发指导文档
 ├── LICENSE                # Apache 2.0许可证
@@ -140,25 +142,17 @@ visual-protocol/
 
 ## 协议支持规划
 
-### 第一阶段 (MVP - Minimum Viable Product)
-- **UDS协议**: 完整的UDS协议学习内容
-- **基础平台功能**: 导航、搜索、用户界面
+### 推荐学习路径
+按协议栈层级自底向上排列，每个协议标注其所属层级和前置依赖：
 
-### 第二阶段 (扩展1)
-- **DoIP协议**: 以太网上的诊断通信
-- **CAN协议**: 控制器局域网络基础
-
-### 第三阶段 (扩展2)
-- **SOME/IP协议**: 面向服务的中间件
-- **LIN协议**: 局部互联网络
-
-### 第四阶段 (扩展3)
-- **FlexRay协议**: 高速容错通信总线
-- **Ethernet协议**: 车载以太网
-
-### 第五阶段 (扩展4)
-- **MOST协议**: 媒体导向系统传输
-- **Bluetooth协议**: 蓝牙无线通信
+| Step | 协议 | 层级 | 状态 |
+|------|------|------|------|
+| 1 | CAN (ISO 11898) | 数据链路层 | 已上线 |
+| 2 | Ethernet (IEEE 802.3) | 物理/网络层 | 已上线 |
+| 3 | DoIP (ISO 13400) | 传输层 | 已上线 |
+| 4 | UDS (ISO 14229) | 应用层 | 已上线 |
+| 5 | SOME/IP (AUTOSAR) | 中间件层 | 已上线 |
+| 6 | DDS (OMG DDS) | 中间件层 | 开发中 |
 
 ## 交互与动画
 
