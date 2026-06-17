@@ -1,5 +1,7 @@
 # Visual Protocol
 
+[![Language](https://img.shields.io/badge/language-HTML%2FCSS%2FJS-E34F26)] [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+
 [English](README.md) | [中文](README.zh-CN.md)
 
 Interactive automotive protocol learning platform. Learn car communication protocols through visual animations and interactive demos, following a recommended bottom-up learning path.
