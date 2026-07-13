@@ -1,9 +1,10 @@
 # Visual Protocol
 
-[![Language](https://img.shields.io/badge/language-HTML%2FCSS%2FJS-E34F26)] [![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)  [![English](https://img.shields.io/badge/lang-English-blue)](README.md) [![中文](https://img.shields.io/badge/lang-中文-red)](README.zh-CN.md)
-
-
 Interactive automotive protocol learning platform. Learn car communication protocols through visual animations and interactive demos, following a recommended bottom-up learning path.
+
+![HTML](https://img.shields.io/badge/HTML-E34F26?logo=html5&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
+**English** · [中文](README.zh-CN.md)
 
 ## Supported Protocols
 
@@ -40,7 +41,7 @@ Each protocol learning page includes:
 ## Quick Start
 
 ```bash
-git clone https://github.com/jrtxio/visual-protocol.git
+git clone https://github.com/turinglambdaai/visual-protocol.git
 cd visual-protocol
 npm install
 npm start          # Start dev server with live reload
@@ -77,4 +78,4 @@ src/
 
 ## License
 
-This project is licensed under the [Apache License 2.0](LICENSE).
+Licensed under the [Apache License 2.0](LICENSE).

@@ -1,8 +1,10 @@
 # Visual Protocol
 
-[English](README.md) | [中文](README.zh-CN.md)
-
 交互式汽车协议学习平台。通过可视化动画和交互式演示，按推荐学习路径自底向上掌握汽车通信协议。
+
+![HTML](https://img.shields.io/badge/HTML-E34F26?logo=html5&logoColor=white) [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](LICENSE)
+
+[English](README.md) · **中文**
 
 ## 支持的协议
 
@@ -39,7 +41,7 @@
 ## 快速开始
 
 ```bash
-git clone https://github.com/jrtxio/visual-protocol.git
+git clone https://github.com/turinglambdaai/visual-protocol.git
 cd visual-protocol
 npm install
 npm start          # 启动开发服务器（带热重载）
@@ -76,4 +78,4 @@ src/
 
 ## 许可证
 
-本项目基于 [Apache License 2.0](LICENSE) 许可。
+基于 [Apache License 2.0](LICENSE) 开源。
