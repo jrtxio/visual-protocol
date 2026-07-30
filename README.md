@@ -40,9 +40,16 @@ Each protocol learning page includes:
 
 ## Quick Start
 
+### 1. Clone
+
 ```bash
 git clone https://github.com/turinglambdaai/visual-protocol.git
 cd visual-protocol
+```
+
+### 2. Install & run
+
+```bash
 npm install
 npm start          # Start dev server with live reload
 ```
@@ -63,17 +70,17 @@ npm run build      # Copies src/ to docs/ for GitHub Pages
 
 ```
 src/
-  index.html              # Landing page
-  assets/
-    css/main.css          # Global styles
-    js/main.js            # Shared scripts
-  protocols/
-    can/index.html        # CAN protocol
-    ethernet/index.html   # Ethernet protocol
-    doip/index.html       # DoIP protocol
-    uds/index.html        # UDS protocol
-    someip/index.html     # SOME/IP protocol
-    dds/index.html        # DDS protocol
+├── index.html              # Landing page
+├── assets/
+│   ├── css/main.css        # Global styles
+│   └── js/main.js          # Shared scripts
+└── protocols/
+    ├── can/index.html      # CAN protocol
+    ├── ethernet/index.html # Ethernet protocol
+    ├── doip/index.html     # DoIP protocol
+    ├── uds/index.html      # UDS protocol
+    ├── someip/index.html   # SOME/IP protocol
+    └── dds/index.html      # DDS protocol
 ```
 
 ## License

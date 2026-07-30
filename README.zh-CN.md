@@ -40,9 +40,16 @@
 
 ## 快速开始
 
+### 1. 克隆仓库
+
 ```bash
 git clone https://github.com/turinglambdaai/visual-protocol.git
 cd visual-protocol
+```
+
+### 2. 安装并运行
+
+```bash
 npm install
 npm start          # 启动开发服务器（带热重载）
 ```
@@ -63,17 +70,17 @@ npm run build      # 将 src/ 复制到 docs/ 用于 GitHub Pages 部署
 
 ```
 src/
-  index.html              # 主页
-  assets/
-    css/main.css          # 全局样式
-    js/main.js            # 公共脚本
-  protocols/
-    can/index.html        # CAN 协议
-    ethernet/index.html   # Ethernet 协议
-    doip/index.html       # DoIP 协议
-    uds/index.html        # UDS 协议
-    someip/index.html     # SOME/IP 协议
-    dds/index.html        # DDS 协议
+├── index.html              # 主页
+├── assets/
+│   ├── css/main.css        # 全局样式
+│   └── js/main.js          # 公共脚本
+└── protocols/
+    ├── can/index.html      # CAN 协议
+    ├── ethernet/index.html # Ethernet 协议
+    ├── doip/index.html     # DoIP 协议
+    ├── uds/index.html      # UDS 协议
+    ├── someip/index.html   # SOME/IP 协议
+    └── dds/index.html      # DDS 协议
 ```
 
 ## 许可证
