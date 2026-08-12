@@ -67,7 +67,7 @@ visual-protocol/
 
 ### 开发环境设置
 ```bash
-git clone https://github.com/jrtxio/visual-protocol.git
+git clone https://github.com/turinglambdaai/visual-protocol.git
 cd visual-protocol
 npm install
 ```
@@ -134,7 +134,7 @@ npm run build
 
 ### GitHub Pages
 - 源：`main` 分支，`/docs` 文件夹
-- 访问地址：https://jrtxio.github.io/visual-protocol
+- 访问地址：https://turinglambdaai.github.io/visual-protocol
 
 ### GitHub Actions
 - 自动构建和部署工作流
