@@ -149,7 +149,8 @@
                         <div class="concept-card"><h4>🔌 车载以太网概述</h4><p>传统以太网使用四对双绞线，车载以太网通过单对非屏蔽双绞线（Single Pair Ethernet）实现轻量化布线。支持 PoDL（Power over Data Line，数据线供电），满足汽车 EMC、延迟和可靠性要求。</p></div>
                         <div class="concept-card"><h4>📡 物理层标准</h4><p>100BASE-T1 (100Mbps) 主流域内通信；1000BASE-T1 (1Gbps) 高带宽域控间通信和 ADAS；10BASE-T1S (10Mbps) 边缘节点传感器接入；2.5/5/10GBASE-T1 下一代高带宽场景。</p></div>
                         <div class="concept-card"><h4>🖼️ 帧结构</h4><p>IEEE 802.3 以太网帧：前导码(7B) + SFD(1B) + 目的MAC(6B) + 源MAC(6B) + EtherType(2B) + 数据(46-1500B) + FCS(4B)。最小帧 64 字节，最大 1518 字节。</p></div>
-                        <div class="concept-card"><h4>🏷️ VLAN (802.1Q)</h4><p>4 字节 VLAN 标签插入在源 MAC 之后：TPID(0x8100) + PCP(3bit,QoS优先级) + DEI(1bit,可丢弃) + VID(12bit,最多 4094 个 VLAN)。实现流量隔离和优先级调度。</p></div>
+                        <div class="concept-card"><h4>🏷️ VLAN (802.1Q)</h4><p>4 字节 VLAN 标签插入在源 MAC 之后：TPID(0x8100) + PCP(3bit,QoS优先级) + DEI(1bit,可丢弃) + VID(12bit,最多 4094 个 VLAN)。VID 划出隔离的广播域，PCP 把优先级直接写进帧里，流量隔离和优先级调度一个标签同时解决。</p></div>
+                        <div class="concept-card"><h4>🚦 为什么车载要划 VLAN</h4><p>几十个 ECU 挂在同一个二层网络里，ARP、SOME/IP-SD 多播这类广播/多播流量会打扰所有节点——广播域越大，无效负载越多。按功能域（动力/底盘/智驾/座舱）划分 VLAN 后，广播只在本域内传播。交换机端口分两类：Access 口属于一个 VLAN（用 PVID 给无标签帧打标），接终端；Trunk 口透传多个 VLAN 的带标签帧，接交换机间链路。跨域调用靠路由，而不是靠广播洪泛。</p></div>
                         <div class="concept-card"><h4>🌐 TCP/IP 协议栈</h4><p>应用层(SOME/IP/DoIP) → 传输层(TCP/UDP, SoAd) → 网络层(IPv4/IPv6, TcpIp) → 数据链路层(Ethernet MAC, EthIf) → 物理层(100BASE-T1, EthTrcv)。AUTOSAR 中各层由对应 BSW 模块实现。</p></div>
                         <div class="concept-card"><h4>🔀 交换拓扑</h4><p>车载以太网采用点对点连接+交换机转发，与 CAN 总线拓扑不同。ECU 通过以太网交换机互联，交换机根据 MAC 地址表转发帧，支持 VLAN 隔离不同域的流量。</p></div>
                         <div class="concept-card"><h4>⏱️ TSN 时间敏感网络</h4><p>IEEE 802.1AS (gPTP 时钟同步，精度 &lt;1μs) + IEEE 802.1Qbv (时间调度流量，通过 TAS 划分时隙)。三种流量：ST(硬实时)、RT(软实时)、BE(尽力而为)。</p></div>
