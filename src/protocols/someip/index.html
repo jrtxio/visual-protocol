@@ -297,11 +297,11 @@
                         <h3 style="color:var(--primary-gradient-start);margin-bottom:16px;">核心概念详解</h3>
                         <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">
                             <div class="concept-card"><h4>🏗️ 面向服务架构 (SOA)</h4><p>车载通信从传统的信号导向（每个信号广播给所有节点）转向服务导向（按需请求/订阅）。服务提供者和消费者解耦，支持动态发现和灵活部署，是软件定义汽车的基础。</p></div>
-                            <div class="concept-card"><h4>📦 序列化协议</h4><p>将结构化数据（整数、字符串、结构体、数组、枚举等）序列化为二进制格式在网络上传输。SOME/IP TLV（Type-Length-Value）格式支持嵌套数据结构，与 Protobuf 类似但专为车载设计。</p></div>
+                            <div class="concept-card"><h4>📦 序列化协议</h4><p>将结构化数据（整数、字符串、结构体、数组、枚举等）序列化为二进制格式在网络上传输。默认是"位置式"序列化：按字段定义顺序深度优先落字节，中间不插任何标记；AUTOSAR 另定义了可选的 TLV 变体（Tag 内含 Wire Type 与 Data ID），供需要按编号寻址、长期演进的接口使用，二者不可混谈。</p></div>
                             <div class="concept-card"><h4>📞 RPC 远程调用</h4><p>三种通信模式：Request/Response（请求-响应，同步调用）、Fire & Forget（只发不回，REQUEST_NO_RETURN）、Notification（事件通知，无需响应）。支持方法调用和事件推送。</p></div>
                             <div class="concept-card"><h4>🔍 服务发现 (SD)</h4><p>动态发现网络中可用的服务实例。提供者发送 OfferService 宣告服务，消费者发送 FindService 查找服务，通过 SubscribeEventGroup 订阅事件组。基于 UDP 多播在端口 30490 上运行。</p></div>
                             <div class="concept-card"><h4>📢 发布/订阅 (Pub/Sub)</h4><p>事件驱动的通信模式。消费者通过 SD 订阅 EventGroup，提供者在事件触发时向所有订阅者发送 Notification。支持选择性通知（仅值变化时发送）和周期性通知。</p></div>
-                            <div class="concept-card"><h4>📋 消息类型</h4><p>REQUEST (0x01): 请求消息 | NOTIFICATION (0x02): 事件通知 | REQUEST_NO_RETURN (0x03): 无需响应 | RESPONSE (0x80): 响应消息 | ERROR (0x81): 错误响应 | TP_* (0x20-0x23): 分段传输。</p></div>
+                            <div class="concept-card"><h4>📋 消息类型</h4><p>REQUEST (0x00): 请求消息 | REQUEST_NO_RETURN (0x01): 无需响应 | NOTIFICATION (0x02): 事件通知 | RESPONSE (0x80): 响应消息 | ERROR (0x81): 错误响应。TP 分段报文 = 原类型按位或 TP 标志 0x20（如 TP_REQUEST 0x20、TP_RESPONSE 0xA0）。注意 REQUEST 是 0x00 而非 0x01——网上流传的 0x01/0x02/0x03 是错误表。</p></div>
                             <div class="concept-card"><h4>📊 vs CAN 信号</h4><p>CAN 是面向信号的广播：所有信号始终发送到所有节点，接收方自行过滤。SOME/IP 是面向服务的按需通信：消费者只接收订阅的服务和事件，带宽利用率更高，支持复杂的数据类型。</p></div>
                             <div class="concept-card"><h4>🔌 AUTOSAR 集成</h4><p>SOME/IP 是 AUTOSAR Adaptive Platform (AP) 的标准通信协议，也支持在 AUTOSAR Classic Platform (CP) 中通过 SOME/IP Transformer 使用。与 ara::com API 集成，是 SOA 车载架构的核心通信中间件。</p></div>
                         </div>
@@ -323,6 +323,31 @@
                     <h2 class="section-title">📡 SOME/IP 报文结构详解</h2>
                     <p>SOME/IP 消息由 16 字节固定头部 + 可变负载组成，点击卡片查看详细字段</p>
                     <div id="messageTypesGrid"></div>
+
+                    <h3 style="color:var(--accent);margin:32px 0 8px;">🔍 SOME/IP-SD 报文结构</h3>
+                    <p style="font-size:0.875rem;color:var(--text-2);line-height:1.7;">SD 报文本身就是一条 SOME/IP 报文，但字段被规范钉死：Message ID 恒为 <strong>0xFFFF8100</strong>（Service ID 0xFFFF、Event ID 0x0100），Client ID 与 Session ID 恒为 0x0000，Message Type 为 NOTIFICATION(0x02)。剥掉 16 字节公共头后，SD 自己的 Payload 依次是：<strong>4 字节 SD 头</strong>（Flags 1B + Reserved 3B，Flags 的 bit7 是 Reboot Flag、bit6 是 Unicast Flag）→ <strong>4 字节 Entries 总长</strong> + 若干条 <strong>16 字节 Entry</strong> → <strong>4 字节 Options 总长</strong> + 变长 Option。Entry 分 Service Entry 与 EventGroup Entry 两类：前 12 字节完全相同（公共前缀），尾部 4 字节 Service Entry 装 Minor Version、EventGroup Entry 装 Reserved+Counter+Eventgroup ID——可在「实用工具」页用 SD 解析器亲手拆一条。</p>
+
+                    <h3 style="color:var(--accent);margin:32px 0 8px;">🧩 Payload 序列化演示</h3>
+                    <p style="font-size:0.875rem;color:var(--text-2);line-height:1.7;">头部之外的业务数据按<strong>位置式</strong>规则落字节：字段按接口定义顺序深度优先排列，中间不插任何标记；数值默认大端（网络字节序）；动态字符串自带长度域——UTF-8 字符串以 3 字节 BOM 开头、<code style="font-family:monospace;">\0</code> 结尾，长度域计的是从 BOM 到终止符的总字节数；默认 8 位对齐即不填充。拿一个车辆状态接口实际编一次：</p>
+                    <div class="tool-card">
+                        <div style="display:flex;gap:12px;flex-wrap:wrap;margin:8px 0;align-items:center;">
+                            <label style="font-size:0.85rem;color:var(--text-2);">gear (uint8)
+                                <input type="number" id="serGear" class="tool-input" value="3" min="0" max="15" style="width:70px;margin-left:6px;">
+                            </label>
+                            <label style="font-size:0.85rem;color:var(--text-2);">speed (float32 km/h)
+                                <input type="number" id="serSpeed" class="tool-input" value="64.5" step="0.1" style="width:100px;margin-left:6px;">
+                            </label>
+                            <label style="font-size:0.85rem;color:var(--text-2);">vin (动态字符串)
+                                <input type="text" id="serVin" class="tool-input" value="LSV" maxlength="17" style="width:150px;margin-left:6px;">
+                            </label>
+                            <label style="font-size:0.85rem;color:var(--text-2);">odo (uint32 m)
+                                <input type="number" id="serOdo" class="tool-input" value="88301" style="width:110px;margin-left:6px;">
+                            </label>
+                            <label style="font-size:0.85rem;color:var(--text-2);display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" id="serLE"> Payload 小端</label>
+                            <button class="tool-button" onclick="serializeDemo()">序列化</button>
+                        </div>
+                        <div id="serResult" style="margin-top:12px;"></div>
+                    </div>
                 </section>
 
                 <!-- ===== Tab 3: 交互演示 ===== -->
@@ -368,7 +393,7 @@
                     <div style="display:grid;gap:24px;margin:24px 0;">
                         <div class="tool-card">
                             <h3 style="color:var(--accent);">📊 SOME/IP 消息解析器</h3>
-                            <p>解析十六进制格式的 SOME/IP 消息，显示头部各字段</p>
+                            <p>解析十六进制格式的 SOME/IP 消息，显示头部各字段（SOME/IP 头部按网络字节序/大端读取）</p>
                             <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
                                 <input type="text" class="tool-input" id="someipMsgInput" placeholder="输入十六进制 (如: 12 34 00 01 00 00 00 10 00 01 00 01 01 01 01 00 ...)" style="flex:1;min-width:200px;" aria-label="SOME/IP消息输入">
                                 <button class="tool-button" onclick="parseSomeipMessage()">解析</button>
@@ -398,12 +423,32 @@
 
                         <div class="tool-card">
                             <h3 style="color:var(--accent);">🔍 SD Entry 分析器</h3>
-                            <p>解析 SOME/IP SD Entry 十六进制数据</p>
+                            <p>解析 SOME/IP SD Entry 十六进制数据（固定 16 字节，支持 Service Entry 与 EventGroup Entry）</p>
                             <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
-                                <input type="text" class="tool-input" id="sdEntryInput" placeholder="SD Entry 十六进制 (如: 01 00 00 00 12 34 56 78 00 01 01 00 00 03 ...)" style="flex:1;min-width:200px;" aria-label="SD Entry输入">
+                                <input type="text" class="tool-input" id="sdEntryInput" placeholder="SD Entry 十六进制 (如: 01 00 00 10 12 34 00 01 01 00 00 0F 00 00 00 01)" style="flex:1;min-width:200px;" aria-label="SD Entry输入">
                                 <button class="tool-button" onclick="parseSdEntry()">解析</button>
                             </div>
                             <div id="sdEntryResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">📡 SOME/IP-SD 报文解析器</h3>
+                            <p>解析 SD Payload（从 16 字节 SOME/IP 头之后的 Flags 字节开始）：Flags → Entries 总长 → Entry 数组 → Options 总长</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="sdMsgInput" placeholder="SD Payload (如: C0 00 00 00 00 00 00 10 01 00 00 10 12 34 00 01 01 00 00 0F 00 00 00 01 00 00 00 00)" style="flex:1;min-width:200px;" aria-label="SD Payload输入">
+                                <button class="tool-button" onclick="parseSdMessage()">解析</button>
+                            </div>
+                            <div id="sdMsgResult" style="margin-top:12px;"></div>
+                        </div>
+
+                        <div class="tool-card">
+                            <h3 style="color:var(--accent);">🔀 字节序演示器</h3>
+                            <p>SOME/IP 头部强制大端（网络字节序），Payload 大小端由接口双方约定。看同一个 32 位值两种落字节顺序的差异：</p>
+                            <div style="display:flex;gap:8px;margin:12px 0;flex-wrap:wrap;">
+                                <input type="text" class="tool-input" id="endianInput" value="0x12345678" style="flex:1;min-width:200px;" aria-label="32位十六进制值">
+                                <button class="tool-button" onclick="showEndian()">演示</button>
+                            </div>
+                            <div id="endianResult" style="margin-top:12px;"></div>
                         </div>
                     </div>
                 </section>
@@ -430,15 +475,16 @@
 
             // ==================== SOME/IP Data ====================
             const SOMEIP_MSG_TYPES = {
-                '0x01': { name: 'REQUEST', category: '请求', description: '请求消息，发送方期望收到对应的 RESPONSE 消息。用于 RPC 方法调用，承载方法 ID 和参数数据。', direction: 'Consumer → Provider' },
+                '0x00': { name: 'REQUEST', category: '请求', description: '请求消息，发送方期望收到对应的 RESPONSE 消息。用于 RPC 方法调用，承载方法 ID 和参数数据。', direction: 'Consumer → Provider' },
+                '0x01': { name: 'REQUEST_NO_RETURN', category: '请求', description: 'Fire & Forget 请求消息，发送方不期望收到响应。用于不需要确认的操作，如设置某个参数。', direction: 'Consumer → Provider' },
                 '0x02': { name: 'NOTIFICATION', category: '事件', description: '事件通知消息，提供者主动发送给订阅了该事件的消费者。无需响应，用于 Pub/Sub 模式中的事件推送。', direction: 'Provider → Consumer(s)' },
-                '0x03': { name: 'REQUEST_NO_RETURN', category: '请求', description: 'Fire & Forget 请求消息，发送方不期望收到响应。用于不需要确认的操作，如设置某个参数。', direction: 'Consumer → Provider' },
                 '0x80': { name: 'RESPONSE', category: '响应', description: '对 REQUEST 消息的响应。Request ID 与对应的 REQUEST 一致，Return Code 表示操作结果。', direction: 'Provider → Consumer' },
                 '0x81': { name: 'ERROR', category: '响应', description: '错误响应消息。当服务端处理 REQUEST 失败时返回，包含错误返回码说明失败原因。', direction: 'Provider → Consumer' },
-                '0x20': { name: 'TP_REQUEST', category: '分段', description: '分段传输的请求消息。当负载超过传输协议最大长度时，使用 TP 类型将大消息拆分为多个段传输。', direction: 'Consumer → Provider' },
-                '0x21': { name: 'TP_RESPONSE', category: '分段', description: '分段传输的响应消息。与 TP_REQUEST 类似，用于承载超过单个报文限制的响应数据。', direction: 'Provider → Consumer' },
-                '0x22': { name: 'TP_NOTIFICATION', category: '分段', description: '分段传输的事件通知消息。用于大数据量的事件推送场景。', direction: 'Provider → Consumer(s)' },
-                '0x23': { name: 'TP_ERROR', category: '分段', description: '分段传输的错误响应消息。', direction: 'Provider → Consumer' }
+                '0x20': { name: 'TP_REQUEST', category: '分段', description: '分段传输的请求消息（0x00 置 TP 标志位 0x20）。当负载超过传输层最大长度时，使用 SOME/IP-TP 将大消息拆分为多个段传输。', direction: 'Consumer → Provider' },
+                '0x21': { name: 'TP_REQUEST_NO_RETURN', category: '分段', description: '分段传输的 Fire & Forget 请求消息（0x01 置 TP 标志位 0x20）。', direction: 'Consumer → Provider' },
+                '0x22': { name: 'TP_NOTIFICATION', category: '分段', description: '分段传输的事件通知消息（0x02 置 TP 标志位 0x20）。用于大数据量的事件推送场景。', direction: 'Provider → Consumer(s)' },
+                '0xA0': { name: 'TP_RESPONSE', category: '分段', description: '分段传输的响应消息（0x80 置 TP 标志位 0x20），用于承载超过单个报文限制的响应数据。', direction: 'Provider → Consumer' },
+                '0xA1': { name: 'TP_ERROR', category: '分段', description: '分段传输的错误响应消息（0x81 置 TP 标志位 0x20）。', direction: 'Provider → Consumer' }
             };
 
             const SOMEIP_RETURN_CODES = {
@@ -458,14 +504,14 @@
             const SOMEIP_HEADER_FIELDS = {
                 'Message ID': {
                     name: 'Message ID (消息标识)', bytes: '4',
-                    description: '唯一标识一条消息。由 Service ID（2 字节）和 Method/Event ID（2 字节）组成。Service ID 标识服务实例，Method ID 标识服务中的方法或事件。',
-                    details: ['Service ID 范围: 0x0000-0xFFFF (由 AUTOSAR 分配)','Method ID: 0x0000-0x7FFF 为方法，0x8000-0xFFFF 为事件','Service ID + Method ID 组合在通信关系内唯一','Event ID = Service ID + EventGroup 内偏移'],
-                    tip: 'Service ID 通常由 OEM 或 AUTOSAR 预分配，如 0x1234 可能代表 "导航服务"'
+                    description: '唯一标识一条消息。由 Service ID（2 字节）和 Method/Event ID（2 字节）组成。Service ID 标识服务，Method ID 标识服务中的方法或事件。',
+                    details: ['Service ID 范围: 0x0000-0xFFFF (由 OEM/供应商分配，0xFFFF 保留给 SD)','Method ID: 低 16 位 bit15=0，即 0x0000-0x7FFF 为方法','Event ID: 低 16 位 bit15=1，即 0x8000-0xFFFF 为事件（相当于在编号上置一个 Bit Flag，方法与事件可各用一套编号）','Service ID + Method/Event ID 组合在通信关系内唯一；EventGroup 是 SD 订阅的单位，与 Event ID 编号无加法关系'],
+                    tip: 'Service ID 通常由 OEM 或供应商在接口设计时分配，如 0x1234 可能代表 "导航服务"'
                 },
                 'Length': {
                     name: 'Length (长度)', bytes: '4',
                     description: '从 Request ID 开始到消息末尾的总字节数。不包含 Message ID 和 Length 字段自身的 8 字节。最小值为 8（仅包含头部剩余字段，无负载）。',
-                    details: ['最小值: 8 字节 (仅头部剩余字段)','包含 Request ID(4B) + Protocol Ver(1B) + Interface Ver(1B) + Msg Type(1B) + Return Code(1B) + Payload','最大值取决于传输层 (UDP 约 1400B, TCP 无限制)','TP 模式下: 额外包含 Offset(4B) + Reserved(4B)'],
+                    details: ['最小值: 8 字节 (仅头部剩余字段)','包含 Request ID(4B) + Protocol Ver(1B) + Interface Ver(1B) + Msg Type(1B) + Return Code(1B) + Payload','最大值取决于传输层 (UDP 约 1400B, TCP 无限制)','TP 模式下: 额外包含 4 字节 TP 头 (Offset 3B，以 16 字节为单位 + 末字节含 1 位分段标志)'],
                     tip: 'Length 不包含自身和 Message ID，这是 SOME/IP 与许多其他协议不同的地方'
                 },
                 'Request ID': {
@@ -488,8 +534,8 @@
                 },
                 'Message Type': {
                     name: 'Message Type (消息类型)', bytes: '1',
-                    description: '标识消息的通信模式。REQUEST(0x01) 期望响应，NOTIFICATION(0x02) 无需响应，REQUEST_NO_RETURN(0x03) 不需要响应，RESPONSE(0x80) 是正常响应，ERROR(0x81) 是错误响应。',
-                    details: ['0x01 REQUEST: 请求→响应','0x02 NOTIFICATION: 事件通知','0x03 REQUEST_NO_RETURN: Fire & Forget','0x80 RESPONSE: 正常响应','0x81 ERROR: 错误响应','0x20-0x23 TP_*: 分段传输'],
+                    description: '标识消息的通信模式。REQUEST(0x00) 期望响应，REQUEST_NO_RETURN(0x01) 不需要响应，NOTIFICATION(0x02) 事件通知，RESPONSE(0x80) 是正常响应，ERROR(0x81) 是错误响应。',
+                    details: ['0x00 REQUEST: 请求→响应','0x01 REQUEST_NO_RETURN: Fire & Forget','0x02 NOTIFICATION: 事件通知','0x80 RESPONSE: 正常响应','0x81 ERROR: 错误响应','TP_*: 原类型按位或 0x20（0x20/0x21/0x22/0xA0/0xA1）'],
                     tip: 'MessageType 决定了消息的处理方式，是 SOME/IP 通信模型的核心'
                 },
                 'Return Code': {
@@ -505,7 +551,7 @@
                 { question: 'SOME/IP 的全称是什么？', options: ['Simple Object Messaging over IP','Scalable service-Oriented MiddlewarE over IP','Secure Onboard Messaging and Ethernet Protocol','Service Oriented Multi-channel Ethernet IP'], correct: 1, explanation: 'SOME/IP 全称 Scalable service-Oriented MiddlewarE over IP，是 AUTOSAR 定义的面向服务的可扩展中间件协议。' },
                 { question: 'SOME/IP 头部的固定长度是多少字节？', options: ['8 字节','12 字节','16 字节','32 字节'], correct: 2, explanation: 'SOME/IP 头部固定 16 字节：Message ID(4B) + Length(4B) + Request ID(4B) + Protocol Version(1B) + Interface Version(1B) + Message Type(1B) + Return Code(1B)。' },
                 { question: 'SOME/IP 服务发现 (SD) 使用哪个 UDP 端口？', options: ['13400','30490','15765','8080'], correct: 1, explanation: 'SOME/IP SD 使用 UDP 端口 30490 进行多播通信。端口 13400 是 DoIP 的端口。' },
-                { question: 'REQUEST 消息的消息类型代码是？', options: ['0x00','0x01','0x02','0x80'], correct: 1, explanation: 'REQUEST 的消息类型代码是 0x01。NOTIFICATION 是 0x02，RESPONSE 是 0x80。' },
+                { question: 'REQUEST 消息的消息类型代码是？', options: ['0x00','0x01','0x02','0x80'], correct: 0, explanation: 'REQUEST 的消息类型代码是 0x00（PRS_SOMEIP_00701）。0x01 是 REQUEST_NO_RETURN，0x02 是 NOTIFICATION，0x80 是 RESPONSE。网上流传的 "REQUEST=0x01" 是错误表。' },
                 { question: '以下哪个不是 SOME/IP 支持的通信模式？', options: ['Request/Response','Fire & Forget','Notification','Token Ring'], correct: 3, explanation: 'SOME/IP 支持 Request/Response、Fire & Forget (REQUEST_NO_RETURN) 和 Notification 三种通信模式。Token Ring 是网络拓扑类型。' },
                 { question: 'Message ID 由哪两部分组成？', options: ['Client ID + Session ID','Service ID + Method/Event ID','Source IP + Dest IP','Source Port + Dest Port'], correct: 1, explanation: 'Message ID 由 Service ID（2 字节）和 Method/Event ID（2 字节）组成，唯一标识一条消息。Client ID + Session ID 组成的是 Request ID。' },
                 { question: '返回码 E_UNKNOWN_SERVICE 的含义是什么？', options: ['操作成功','通用错误','请求的服务 ID 不存在','消息格式错误'], correct: 2, explanation: 'E_UNKNOWN_SERVICE (0x02) 表示请求的 Service ID 在提供者端不存在，可能是服务未启动或 ID 配置错误。' },
@@ -513,7 +559,8 @@
                 { question: 'SOME/IP TP (分段传输) 的主要用途是什么？', options: ['加密传输','传输超过单个报文限制的大消息','错误恢复','流量控制'], correct: 1, explanation: 'TP (Transport Protocol) 用于将超过传输层最大长度限制的消息拆分为多个段传输，如超过 UDP 单包限制的大数据。' },
                 { question: 'OfferService SD Entry 的作用是什么？', options: ['请求某个服务','宣告提供某个服务','订阅事件组','报告错误'], correct: 1, explanation: 'OfferService 是服务提供者向网络宣告自己可提供某个服务，消费者收到后可以开始使用该服务或订阅其事件。' },
                 { question: 'SOME/IP 与 CAN 信号通信的核心区别是什么？', options: ['SOME/IP 速度更慢','CAN 支持服务发现','SOME/IP 是面向服务的按需通信','CAN 支持更复杂的数据类型'], correct: 2, explanation: 'CAN 是面向信号的广播模式（所有信号始终发送），SOME/IP 是面向服务的按需通信（只接收订阅的服务和事件）。' },
-                { question: 'Request ID 中的 Session ID 的用途是什么？', options: ['标识服务类型','匹配请求和响应','标识网络地址','标识协议版本'], correct: 1, explanation: 'Session ID 用于匹配 REQUEST 和对应的 RESPONSE，Response 必须回传与 Request 相同的 Request ID。' }
+                { question: 'Request ID 中的 Session ID 的用途是什么？', options: ['标识服务类型','匹配请求和响应','标识网络地址','标识协议版本'], correct: 1, explanation: 'Session ID 用于匹配 REQUEST 和对应的 RESPONSE，Response 必须回传与 Request 相同的 Request ID。' },
+                { question: 'SOME/IP-TP 分段报文的 TP 标志位值是？', options: ['0x10','0x20','0x40','0x80'], correct: 1, explanation: 'TP 报文 = 原消息类型按位或 0x20。如 REQUEST(0x00) → TP_REQUEST(0x20)，RESPONSE(0x80) → TP_RESPONSE(0xA0)，ERROR(0x81) → TP_ERROR(0xA1)。' }
             ];
 
             // ==================== Theme & Tab ====================
@@ -652,8 +699,8 @@
                     addLog('📤 [Provider] 发送 OfferService SD 消息','info');
                     addLog('   → Service ID: 0x1234 (导航服务)','info');
                     addLog('   → Instance ID: 0x0001','info');
-                    addLog('   → Major Version: 1, TTL: 3','info');
-                    addLog('   → UDP 多播至 224.0.0.1:30490','info');
+                    addLog('   → Major Version: 1, TTL: 3s (演示值；规范默认 0xFFFFFF 秒)','info');
+                    addLog('   → UDP 多播至 239.255.255.250:30490 (SD 默认多播地址)','info');
                 }, 500);
                 setTimeout(() => {
                     addLog('📡 SD 消息在以太网中多播传播...','info');
@@ -683,7 +730,7 @@
                     addLog('📤 [Consumer] 发送 SubscribeEventGroup SD 消息','info');
                     addLog('   → Service ID: 0x1234','info');
                     addLog('   → EventGroup ID: 0x8001 (位置事件组)','info');
-                    addLog('   → Major Version: 1, TTL: 3','info');
+                    addLog('   → Major Version: 1, TTL: 3s (演示值；规范默认 0xFFFFFF 秒)','info');
                 }, 500);
                 setTimeout(() => {
                     const p = document.getElementById('provider');
@@ -693,7 +740,7 @@
                 }, 1500);
                 setTimeout(() => {
                     addLog('📤 [Provider] 发送 SubscribeEventGroup ACK','info');
-                    addLog('   → 订阅确认，TTL: 3','info');
+                    addLog('   → 订阅确认，TTL: 3s (演示值)','info');
                     setStatus('provider', '订阅已确认');
                 }, 2500);
                 setTimeout(() => {
@@ -819,10 +866,10 @@
                 const result = document.getElementById('parseResult');
                 if (!input) { result.innerHTML = '<p style="color:#dc3545;">请输入十六进制报文</p>'; return; }
                 const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
-                if (!bytes || bytes.length < 8) { result.innerHTML = '<p style="color:#dc3545;">格式错误，至少需要 16 字节 (32 个十六进制字符)</p>'; return; }
+                if (!bytes || bytes.length < 16) { result.innerHTML = '<p style="color:#dc3545;">格式错误，至少需要 16 字节 (32 个十六进制字符)</p>'; return; }
                 const serviceId = (parseInt(bytes[0],16)<<8)|parseInt(bytes[1],16);
                 const methodId = (parseInt(bytes[2],16)<<8)|parseInt(bytes[3],16);
-                const length = (parseInt(bytes[4],16)<<24)|(parseInt(bytes[5],16)<<16)|(parseInt(bytes[6],16)<<8)|parseInt(bytes[7],16);
+                const length = ((parseInt(bytes[4],16)<<24)|(parseInt(bytes[5],16)<<16)|(parseInt(bytes[6],16)<<8)|parseInt(bytes[7],16)) >>> 0;
                 const clientId = (parseInt(bytes[8],16)<<8)|parseInt(bytes[9],16);
                 const sessionId = (parseInt(bytes[10],16)<<8)|parseInt(bytes[11],16);
                 const protoVer = parseInt(bytes[12],16);
@@ -888,37 +935,121 @@
                 const result = document.getElementById('sdEntryResult');
                 if (!input) { result.innerHTML = '<p style="color:#dc3545;">请输入 SD Entry 十六进制</p>'; return; }
                 const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
-                if (!bytes || bytes.length < 4) { result.innerHTML = '<p style="color:#dc3545;">格式错误，至少需要 4 字节</p>'; return; }
-                const type = parseInt(bytes[0], 16);
-                const idx1st = parseInt(bytes[1], 16);
-                const idx2nd = parseInt(bytes[2], 16);
-                const numOfOpts = parseInt(bytes[3], 16);
-                let typeStr = '未知';
-                if (type === 0x00) typeStr = 'FindService';
-                else if (type === 0x01) typeStr = 'OfferService';
-                else if (type === 0x06) typeStr = 'SubscribeEventGroup';
+                if (!bytes || bytes.length < 16) { result.innerHTML = '<p style="color:#dc3545;">格式错误，SD Entry 固定 16 字节 (32 个十六进制字符)</p>'; return; }
+                const u8 = i => parseInt(bytes[i],16);
+                const u16 = i => (u8(i) << 8) | u8(i+1);
+                const type = u8(0);
+                const ENTRY_TYPES = {
+                    '0x00': 'FindService',
+                    '0x01': 'OfferService（TTL=0 时为 StopOfferService）',
+                    '0x06': 'SubscribeEventgroup（提供者回复 TTL>0 为 ACK，TTL=0 为 Nack）',
+                    '0x07': 'StopSubscribeEventgroup'
+                };
+                const typeKey = '0x' + type.toString(16).toUpperCase().padStart(2,'0');
+                const isEventgroup = (type === 0x06 || type === 0x07);
                 let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
-                html += `<p><strong>Entry Type:</strong> 0x${type.toString(16).toUpperCase().padStart(2,'0')} — ${typeStr}</p>`;
-                html += `<p><strong>Index 1st Option:</strong> ${idx1st}</p>`;
-                html += `<p><strong>Index 2nd Option:</strong> ${idx2nd}</p>`;
-                html += `<p><strong># Options:</strong> ${(numOfOpts >> 4) & 0x0F} / ${(numOfOpts) & 0x0F}</p>`;
-                if (bytes.length >= 12) {
-                    const svcId = (parseInt(bytes[4],16)<<8)|parseInt(bytes[5],16);
-                    const instId = (parseInt(bytes[6],16)<<8)|parseInt(bytes[7],16);
-                    const majorVer = (parseInt(bytes[8],16) >> 4) & 0x0F;
-                    const ttl = ((parseInt(bytes[8],16) & 0x0F) << 16) | (parseInt(bytes[9],16) << 8) | parseInt(bytes[10],16);
-                    html += `<p><strong>Service ID:</strong> 0x${svcId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
-                    html += `<p><strong>Instance ID:</strong> 0x${instId.toString(16).toUpperCase().padStart(4,'0')}</p>`;
-                    html += `<p><strong>Major Version:</strong> ${majorVer}</p>`;
-                    html += `<p><strong>TTL:</strong> ${ttl} ${ttl === 0 ? '(停止/取消)' : '秒'}</p>`;
-                }
-                if (bytes.length >= 16 && (type === 0x01 || type === 0x00)) {
-                    const minorVer = (parseInt(bytes[12],16)<<24)|(parseInt(bytes[13],16)<<16)|(parseInt(bytes[14],16)<<8)|parseInt(bytes[15],16);
+                html += `<p><strong>Entry Type:</strong> ${typeKey} — ${ENTRY_TYPES[typeKey] || '未知类型（0x00/0x01/0x06/0x07）'}</p>`;
+                html += `<p><strong>Index 1st Option:</strong> ${u8(1)} ｜ <strong>Index 2nd Option:</strong> ${u8(2)}</p>`;
+                html += `<p><strong># Options:</strong> Num1=${(u8(3) >> 4) & 0x0F} / Num2=${u8(3) & 0x0F}（高半字节为第 1 组数量）</p>`;
+                html += `<p><strong>Service ID:</strong> 0x${u16(4).toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                html += `<p><strong>Instance ID:</strong> 0x${u16(6).toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                html += `<p><strong>Major Version:</strong> ${u8(8)}</p>`;
+                const ttl = ((u8(9) << 16) | (u8(10) << 8) | u8(11)) >>> 0;
+                html += `<p><strong>TTL:</strong> ${ttl} ${ttl === 0 ? '（下线/取消订阅）' : '秒'}</p>`;
+                if (isEventgroup) {
+                    html += `<p><strong>Reserved:</strong> ${u8(12)} ｜ <strong>Counter:</strong> ${u8(13)}</p>`;
+                    html += `<p><strong>Eventgroup ID:</strong> 0x${u16(14).toString(16).toUpperCase().padStart(4,'0')}</p>`;
+                } else {
+                    const minorVer = (((u8(12) << 24) | (u8(13) << 16) | (u8(14) << 8) | u8(15))) >>> 0;
                     html += `<p><strong>Minor Version:</strong> ${minorVer}</p>`;
                 }
-                html += `<p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 TTL=0 表示停止提供或取消订阅</p>`;
+                html += `<p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 Entry 固定 16 字节：前 12 字节两类通用（公共前缀），尾部 4 字节 Service Entry 装 Minor Version、EventGroup Entry 装 Reserved+Counter+Eventgroup ID；TTL 单位秒，0 表示下线/取消</p>`;
                 html += `</div>`;
                 result.innerHTML = html;
+            }
+
+            // ==================== Serialization / SD Message / Endianness ====================
+            function serializeDemo() {
+                const result = document.getElementById('serResult');
+                const gear = (parseInt(document.getElementById('serGear').value, 10) || 0) & 0xFF;
+                const speed = parseFloat(document.getElementById('serSpeed').value) || 0;
+                const vin = document.getElementById('serVin').value || '';
+                const odo = parseInt(document.getElementById('serOdo').value, 10) || 0;
+                const le = document.getElementById('serLE').checked;
+                const intBytes = (v, w) => {
+                    const be = [];
+                    for (let i = w - 1; i >= 0; i--) be.push((v >>> (8 * i)) & 0xFF);
+                    return le ? be.slice().reverse() : be;
+                };
+                const dv = new DataView(new ArrayBuffer(4));
+                dv.setFloat32(0, speed, le);
+                const speedBytes = Array.from(new Uint8Array(dv.buffer));
+                const utf8 = Array.from(new TextEncoder().encode(vin));
+                const strLen = 3 + utf8.length + 1;
+                const vinLenBytes = intBytes(strLen, 4);
+                const vinBody = [0xEF, 0xBB, 0xBF].concat(utf8, [0x00]);
+                const all = [].concat(intBytes(gear, 1), speedBytes, vinLenBytes, vinBody, intBytes(odo, 4));
+                const hex = a => a.map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+                const seg = (name, bytes, color, note) => `<div style="margin-bottom:6px;"><span style="display:inline-block;min-width:150px;font-weight:600;color:${color};">${name}</span> <code style="font-family:monospace;background:var(--accent-bg);padding:2px 8px;border-radius:4px;">${hex(bytes)}</code> <span style="font-size:0.8rem;color:var(--text-3);">${note}</span></div>`;
+                const endianNote = le ? '小端' : '大端（网络字节序）';
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                html += seg('gear: uint8', intBytes(gear, 1), '#788C5D', '1 字节，紧贴下一字段，无对齐填充');
+                html += seg('speed: float32', speedBytes, '#E8A838', `IEEE 754，${endianNote}`);
+                html += seg('vin 长度域: uint32', vinLenBytes, '#6A9BCC', `BOM(3) + 内容(${utf8.length}) + \\0(1) = ${strLen} 字节，${endianNote}`);
+                html += seg('vin 内容', vinBody, '#6A9BCC', '3 字节 BOM (EF BB BF) + UTF-8 内容 + \\0 终止符');
+                html += seg('odo: uint32', intBytes(odo, 4), '#9B7ACC', `4 字节，${endianNote}`);
+                html += `<p style="margin-top:10px;"><strong>Payload 共 ${all.length} 字节:</strong></p><code style="font-family:monospace;background:var(--accent-bg);padding:2px 8px;border-radius:4px;display:block;word-break:break-all;">${hex(all)}</code>`;
+                if (le) html += `<p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 注意长度域也一起翻了字节序——大小端是整个 Payload 一致的约定，通信双方必须协商一致；头部则永远是大端。</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function parseSdMessage() {
+                const input = document.getElementById('sdMsgInput').value.trim();
+                const result = document.getElementById('sdMsgResult');
+                if (!input) { result.innerHTML = '<p style="color:#dc3545;">请输入 SD Payload 十六进制（从 Flags 字节开始）</p>'; return; }
+                const bytes = input.replace(/0x/gi,'').replace(/[\s,]/g,'').match(/.{2}/g);
+                if (!bytes || bytes.length < 8) { result.innerHTML = '<p style="color:#dc3545;">至少需要 8 字节（Flags + Reserved + Entries 长度域）</p>'; return; }
+                const u8 = i => parseInt(bytes[i], 16);
+                const u32 = i => (((u8(i) << 24) | (u8(i+1) << 16) | (u8(i+2) << 8) | u8(i+3)) >>> 0);
+                const flags = u8(0);
+                const entriesLen = u32(4);
+                const entryCount = Math.floor(entriesLen / 16);
+                const ENTRY_NAMES = { 0x00: 'FindService', 0x01: 'OfferService', 0x06: 'SubscribeEventgroup', 0x07: 'StopSubscribeEventgroup' };
+                let html = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">`;
+                html += `<p><strong>Flags:</strong> 0x${flags.toString(16).toUpperCase().padStart(2,'0')} — Reboot Flag: ${flags & 0x80 ? '1（发送方刚重启，Session ID 可能为随机值）' : '0'} ｜ Unicast Flag: ${flags & 0x40 ? '1（支持单播应答）' : '0'}</p>`;
+                html += `<p><strong>Entries 总长:</strong> ${entriesLen} 字节 = ${entriesLen % 16 === 0 ? entryCount + ' 条 Entry（每条固定 16 字节）' : '非 16 的倍数，报文异常'}</p>`;
+                let pos = 8;
+                for (let i = 0; i < entryCount && pos + 16 <= bytes.length; i++) {
+                    const t = u8(pos);
+                    const svc = ((u8(pos+4) << 8) | u8(pos+5)).toString(16).toUpperCase().padStart(4, '0');
+                    const ttl = ((u8(pos+9) << 16) | (u8(pos+10) << 8) | u8(pos+11)) >>> 0;
+                    html += `<p style="margin-left:16px;">Entry ${i+1}: 0x${t.toString(16).toUpperCase().padStart(2,'0')} ${ENTRY_NAMES[t] || '未知类型'} — Service 0x${svc}，TTL ${ttl}s${ttl === 0 ? '（下线/取消）' : ''}</p>`;
+                    pos += 16;
+                }
+                if (pos + 4 <= bytes.length) {
+                    html += `<p><strong>Options 总长:</strong> ${u32(pos)} 字节（Option 为变长结构，此处不逐一展开）</p>`;
+                }
+                html += `<p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 SD 报文的 SOME/IP 头是定死的：Message ID 0xFFFF8100、Client/Session ID 0x0000、Message Type 0x02、两个 Version 0x01、Return Code 0x00</p>`;
+                html += `</div>`;
+                result.innerHTML = html;
+            }
+
+            function showEndian() {
+                const input = document.getElementById('endianInput').value.trim();
+                const result = document.getElementById('endianResult');
+                let v = parseInt(input.replace(/0x/i,''), 16);
+                if (isNaN(v) || v < 0 || v > 0xFFFFFFFF) { result.innerHTML = '<p style="color:#dc3545;">请输入 32 位十六进制值 (0x00000000 - 0xFFFFFFFF)</p>'; return; }
+                v = v >>> 0;
+                const be = [(v >>> 24) & 0xFF, (v >>> 16) & 0xFF, (v >>> 8) & 0xFF, v & 0xFF];
+                const le = be.slice().reverse();
+                const hex = a => a.map(b => b.toString(16).toUpperCase().padStart(2, '0')).join(' ');
+                result.innerHTML = `<div style="padding:12px;background:var(--accent-bg);border-radius:8px;font-size:0.9rem;">
+                    <p><strong>值:</strong> 0x${v.toString(16).toUpperCase().padStart(8,'0')}（十进制 ${v}）</p>
+                    <p><strong>大端 Big-Endian（网络字节序）:</strong> <code style="font-family:monospace;background:var(--accent-bg);padding:2px 6px;border-radius:4px;">${hex(be)}</code> —— 高字节在前，SOME/IP 头部与 TCP/IP 协议头均如此落字节</p>
+                    <p><strong>小端 Little-Endian（x86/主流 MCU 内存）:</strong> <code style="font-family:monospace;background:var(--accent-bg);padding:2px 6px;border-radius:4px;">${hex(le)}</code> —— 低字节在前，同一个值在小端机内存里的布局</p>
+                    <p style="font-size:0.85rem;color:var(--text-3);margin-top:8px;">💡 同一串字节按大端读和小端读会得到完全不同的数值。主流 CPU 是小端的，跨机通信必须统一约定——SOME/IP 的选择是头部强制大端、Payload 由接口约定。</p>
+                </div>`;
             }
 
             // ==================== Quiz Functions ====================
@@ -930,6 +1061,7 @@
                     area.style.display = 'none';
                     const pct = Math.round((quizState.score / QUIZ_QUESTIONS.length) * 100);
                     document.getElementById('scoreValue').textContent = quizState.score;
+                    document.getElementById('totalQuestions').textContent = QUIZ_QUESTIONS.length;
                     document.getElementById('percentage').textContent = pct + '%';
                     return;
                 }
